@@ -2,24 +2,25 @@ import numpy as np
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
+# all take as input a numpy array with shape (1, #units)
 
 def identity(x):
     return x
 
 def identity_prime(x):
-    return 1
+    return np.ones(x.shape)
 
 def relu(x):
     return np.maximum(0, x)
 
 def relu_prime(x):
-    return 0 if x < 0 else 1
+    return np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
 
 def leaky_relu(x): 
-    return x if x >= 0 else 0.01 * x
+    return np.where(x >= 0, x, 0.01 * x)
 
 def leaky_relu_prime(x): 
-    return 1 if x >= 0 else 0.01
+    return np.where(x >= 0, 1, 0.01)
 
 def logistic(x):
     return 1 / (1 + np.exp(-x))
@@ -32,7 +33,8 @@ def tanh(x):
     return np.tanh(x)
 
 def tanh_prime(x):
-    return 1 - np.tanh(x)**2
+    t = tanh(x)
+    return 1 - t**2
 
 def softplus(x):
     return np.log(1 + np.exp(x))
@@ -41,19 +43,14 @@ def softplus_prime(x):
     return 1 / (1 + np.exp(-x))
 
 def softmax(x):
-    return np.exp(x) / sum(np.exp(x))
+    e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
+    return e / np.sum(e, axis=1)
 
 def softmax_prime(x):
     # TODO: 
-    return
-
-def logloss(x):
-    # TODO:
-    return
-
-def logloss_prime(x):
-    # TODO:
-    return
+    # https://www.haio.ir/app/uploads/2021/12/Neural-Networks-from-Scratch-in-Python-by-Harrison-Kinsley-Daniel-Kukiela-z-lib.org_.pdf
+    # Chapter 9, page 46
+    return 
 
 ACTIVATIONS = {
     'identity': identity,
@@ -70,64 +67,44 @@ ACTIVATIONS_DERIVATIVES = {
     'leaky_relu': leaky_relu_prime,
     'logistic': logistic_prime,
     'tanh': tanh_prime,
-     'softplus': softplus_prime
+    'softplus': softplus_prime
 }
 
-#-----LOSSES-----
+#-----LOSSES FOR BACKPROP-----
 # loss functions and their derivatives
+# all take as input a numpy array with shape (1, #units_output)
 
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2)) # TODO: mean is needed? yes needed 
+    return np.mean(np.power(y_true - y_pred, 2))
 
 def mse_prime(y_true, y_pred):
-    return 2 * (y_pred - y_true) / y_true.size
+    return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
 
-def rmse(y_true, y_pred): 
-    return np.sqrt(mse(y_true, y_pred))
+# link above, somewhere
+def logloss(x):
+    # TODO:
+    return
 
-def rmse_prime(y_true, y_pred): # TODO: check if right
-    return (1 / (2 * rmse(y_true, y_pred))) * mse_prime(y_true, y_pred)
-
-def ee(y_true, y_pred):
-    return np.linalg.norm(y_true - y_pred, 2)
-    # same as 
-    # np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
-
-def ee_prime(y_true, y_pred): # TODO: check if right
-    return (y_true - y_pred) / ee(y_true, y_pred)
+def logloss_prime(x):
+    # TODO:
+    return
 
 LOSSES = {
-    'mse': mse,
-    'rmse': rmse,
-    'mee': ee
+    'mse': mse
 }
 
 LOSSES_DERIVATIVES = {
-    'mse': mse_prime,
-    'rmse': rmse_prime,
-    'mee': ee_prime
+    'mse': mse_prime
 }
 
-#-----LEARNING RATE-----
-def fixed(learning_rate):
-    return lambda x: learning_rate
-    
-def linear_decay(tau, starting_learning_rate):
-    final_learning_rate = starting_learning_rate * 0.1
+#-----LOSSES TO EVALUATE PERFORMANCE-----
+# all take as input numpy arrays with shape (#samples, #tagets_per_sample)
 
-    def fun(epoch):
-        alpha = epoch / tau
-        learning_rate = (1 - alpha) * starting_learning_rate + alpha * final_learning_rate
-        
-        if epoch == 0:
-            return starting_learning_rate
-        
-        if (learning_rate < final_learning_rate or epoch >= tau):
-            return final_learning_rate
-        else:
-            return learning_rate
+def mse_score(y_true, y_pred):
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=1))
 
-    return fun
+def mee_score(y_true, y_pred):
+    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
 #-----OTHERS-----
 def unison_shuffle(x, y):
@@ -142,7 +119,7 @@ def unison_shuffle(x, y):
 def f_pred(pred):
     flattened_pred = np.empty(len(pred))
     for i in range(len(pred)):
-        if pred[i][0][0] > 0:
+        if pred[i][0] > 0:
             flattened_pred[i] = 1
         else:
             flattened_pred[i] = -1
