@@ -75,10 +75,16 @@ ACTIVATIONS_DERIVATIVES = {
 # all take as input a numpy array with shape (1, #units_output)
 
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2))
+    return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: to follow Micheli np.sum(np.power(y_true - y_pred, 2)) / 2 => half_se
 
-def mse_prime(y_true, y_pred):
+def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_se_prime
     return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
+
+def ee(y_true, y_pred):
+    return np.sqrt(np.dot(y_true - y_pred, y_true - y_pred)) # np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
+
+def ee_prime(y, z):
+    return (y - z) / np.sqrt(np.dot(y - z, y - z))
 
 # link above, somewhere
 def logloss(x):
@@ -99,11 +105,25 @@ LOSSES_DERIVATIVES = {
 
 #-----LOSSES TO EVALUATE PERFORMANCE-----
 # all take as input numpy arrays with shape (#samples, #tagets_per_sample)
-
+# REVIEW: we could use the ones of scikit learn?
+#         No because scikit learn computes the mean two times (to compare different tasks), 
+#         in the slides it is computed once...
 def mse_score(y_true, y_pred):
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
     return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=1))
 
 def mee_score(y_true, y_pred):
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
     return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
 #-----OTHERS-----
