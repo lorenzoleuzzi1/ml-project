@@ -61,4 +61,13 @@ def test_errors():
     from sklearn.metrics import mean_squared_error
     print(mean_squared_error(pred, true)) # (((1-2)^2+(1-1)^2)/2 + ((3-5)^2+(1-2)^2)/2 )/2 = (1/2 + 5/2)/2 = 3/2 = 1.5
 
-test_errors()
+def test_losses():
+    pred = np.array([[1, 1]])
+    true = np.array([[2, 1]])
+    print(mse(true, pred))
+    print(mse_prime(true, pred))
+    print("----")
+    print(ee(true, pred))
+    print(ee_prime(true, pred))
+
+test_losses()

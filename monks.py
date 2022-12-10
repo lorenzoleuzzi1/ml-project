@@ -31,7 +31,7 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-net = Network(activation_out='tanh', epochs= 300, batch_size=32, learning_rate_schedule = "linear_decay", learning_rate_init=0.1, tau=200, lambd=0.01, alpha=0.5)
+net = Network(activation_out='tanh', epochs= 300, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.1, tau=200, lambd=0.01, alpha=0.5)
 net.fit(X_train, y_train, X_test, y_test)
 
 pred = net.predict(X_test)

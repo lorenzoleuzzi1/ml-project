@@ -48,7 +48,7 @@ net = Network(
     activation_hidden='tanh',
     lambd=0.0001,
     batch_size=1,
-    learning_rate_schedule='fixed',
+    learning_rate='fixed',
     learning_rate_init=0.001,
     alpha=0.9
     )

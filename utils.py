@@ -74,17 +74,22 @@ ACTIVATIONS_DERIVATIVES = {
 # loss functions and their derivatives
 # all take as input a numpy array with shape (1, #units_output)
 
+# returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: to follow Micheli np.sum(np.power(y_true - y_pred, 2)) / 2 => half_se
+    return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: to follow Micheli np.sum(np.power(y_true - y_pred, 2)) / 2 => half_sse
 
-def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_se_prime
+# returns a numpy array with shape (1, #units_output)
+def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_sse_prime
     return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
 
-def ee(y_true, y_pred):
-    return np.sqrt(np.dot(y_true - y_pred, y_true - y_pred)) # np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
+# returns a scalar
+def ee(y_true, y_pred): # TODO: is equivalent to mse?
+    return np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
 
-def ee_prime(y, z):
-    return (y - z) / np.sqrt(np.dot(y - z, y - z))
+# returns a numpy array with shape (1, #units_output)
+def ee_prime(y_true, y_pred):
+    e = ee(y_true=y_true, y_pred=y_pred)
+    return (y_pred - y_true) / e
 
 # link above, somewhere
 def logloss(x):

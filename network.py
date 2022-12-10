@@ -13,7 +13,7 @@ class Network:
         hidden_layer_sizes=[3], 
         loss='mse', 
         epochs=200,
-        learning_rate_schedule = "fixed",
+        learning_rate = "fixed",
         learning_rate_init=0.001,
         tau=100,
         batch_size=1, 
@@ -45,13 +45,15 @@ class Network:
             raise ValueError("epochs must be > 0, got %s. " % epochs)
         self.epochs = epochs
         learning_rate_schedules = ["fixed", "linear_decay"]
-        if learning_rate_schedule not in learning_rate_schedules:
+        if learning_rate not in learning_rate_schedules:
             raise ValueError("Unrecognized learning_rate_schedule '%s'. "
-            "Supported learning rate schedules are %s." % (learning_rate_schedule, learning_rate_schedules))
-        self.learning_rate_schedule = learning_rate_schedule
+            "Supported learning rate schedules are %s." % (learning_rate, learning_rate_schedules))
+        self.learning_rate = learning_rate
         if learning_rate_init <= 0.0:
             raise ValueError("learning_rate_init must be > 0, got %s. " % learning_rate_init)
         self.learning_rate_init = learning_rate_init
+        self.learning_rate_curr = learning_rate_init
+        self.learning_rate_fin = learning_rate_init * 0.1 # TODO: 0.1??????????????????
         if tau <= 0 or tau > self.epochs:
             raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
@@ -92,20 +94,24 @@ class Network:
         return result.reshape(result.shape[0], result.shape[2]) # come back to 2 dim array
 
     def update_learning_rate(self, epoch):
-        if self.learning_rate_schedule == "fixed":
-            self.learning_rate = self.learning_rate_init
-        else: # linear decay
-            final_learning_rate = self.learning_rate_init * 0.1
-            alpha = epoch / self.tau
-            learning_rate = (1 - alpha) * self.learning_rate_init + alpha * final_learning_rate
-            
+        if self.learning_rate == "fixed":
+            self.learning_rate_curr = self.learning_rate_init
+        
+        if self.learning_rate == "linear_decay":
             if epoch == 0:
-                self.learning_rate = self.learning_rate_init
+                self.learning_rate_curr = self.learning_rate_init
+                return 
+            if epoch >= self.tau:
+                self.learning_rate_curr = self.learning_rate_fin
+                return
             
-            if (learning_rate < final_learning_rate or epoch >= self.tau):
-                self.learning_rate = final_learning_rate
+            theta = epoch / self.tau
+            lr = (1 - theta) * self.learning_rate_init + theta * self.learning_rate_fin
+            
+            if (lr < self.learning_rate_fin):
+                self.learning_rate_curr = self.learning_rate_fin
             else:
-                self.learning_rate = learning_rate
+                self.learning_rate_curr = lr
 
     def fit(self, x_train, y_train, x_val, y_val):
         # sample dimension first
@@ -122,25 +128,28 @@ class Network:
 
         # Add input layer
         self.add(Layer(
-            x_train.shape[2], 
-            self.hidden_layer_sizes[0], 
-            self.activation_hidden, 
-            self.activation_hidden_prime
+            first=True,
+            input_size=x_train.shape[2], 
+            output_size=self.hidden_layer_sizes[0], 
+            activation=self.activation_hidden, 
+            activation_prime=self.activation_hidden_prime
             ))
         # Add hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
-                self.hidden_layer_sizes[i], 
-                self.hidden_layer_sizes[i+1], 
-                self.activation_hidden, 
-                self.activation_hidden_prime
+                first=False,
+                input_size=self.hidden_layer_sizes[i], 
+                output_size=self.hidden_layer_sizes[i+1], 
+                activation=self.activation_hidden, 
+                activation_prime=self.activation_hidden_prime
             ))
         # Add output layer
         self.add(Layer(
-            self.hidden_layer_sizes[-1], 
-            y_train.shape[1], 
-            self.activation_out, 
-            self.activation_out_prime
+            first=False,
+            input_size=self.hidden_layer_sizes[-1], 
+            output_size=y_train.shape[2], 
+            activation=self.activation_out, 
+            activation_prime=self.activation_out_prime
         ))
 
         #shuffle the whole training set 
@@ -197,10 +206,10 @@ class Network:
                         output = layer.forward_propagation(output)
                       
                     # compute loss (for display)
-                    train_error += self.loss(y, output)               
+                    train_error += self.loss(y_true=y, y_pred=output)
                     
                     # backward propagation
-                    error = self.loss_prime(y, output)                    
+                    error = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         error, delta_w, delta_b = layer.backward_propagation(error)
                         #accumulate deltas
@@ -209,10 +218,9 @@ class Network:
                 
                 #new learning rate
                 self.update_learning_rate(epoch)
-                #learning_rate = self.learning_rate_fun(epoch)     
                 # update (for every batch)
                 for layer in self.layers:
-                    layer.update(deltas_weights[layer.id], deltas_bias[layer.id], self.learning_rate, 
+                    layer.update(deltas_weights[layer.id], deltas_bias[layer.id], self.learning_rate_curr, 
                         self.batch_size, self.alpha, self.lambd)                  
                     #reset the deltas accumulators
                     deltas_weights[layer.id].fill(0)
@@ -221,8 +229,8 @@ class Network:
             #-----validation-----
             predict_val = self.predict(x_val)
             # TODO: da sistemare insieme alla parametrizzazione della misura di prestazione (per la regressione f_pred non serve)
-            predict_val = f_pred(predict_val)
-            val_error = self.loss(y_val, predict_val)
+            #predict_val = f_pred(predict_val) # REVIEW: is it needed? surely not for regression
+            val_error = self.loss(y_true=y_val, y_pred=predict_val)
             
             #-----early stopping-----
             if epoch >= 10:              
@@ -237,6 +245,7 @@ class Network:
                 else:
                     stopping = 20
             
+            # REVIEW: is the loss already an average?
             # calculate average error on all samples
             train_error /= samples
 
