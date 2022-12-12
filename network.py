@@ -1,6 +1,7 @@
 # TODO: import less as possible
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score
 from math import ceil, isclose
 #from utils import unison_shuffle
 from utils import *
@@ -121,6 +122,7 @@ class Network:
 
         all_train_errors = []
         all_val_errors = []
+        val_accuracy = []
 
         #####
         # loop max-epoch times
@@ -180,6 +182,8 @@ class Network:
             predict_val = f_pred(predict_val)
             val_error = self.loss(y_val, predict_val)
             
+            val_accuracy.append(accuracy_score(y_true=y_val, y_pred=predict_val))
+            
             #-----early stopping-----
             if epoch >= 10:              
                 #if we've already converged (validation error near 0)
@@ -205,11 +209,8 @@ class Network:
     
             
         #show the loss plots
-        plt.plot(all_train_errors, color="blue")
-        plt.plot(all_val_errors, color="green")
-        plt.show()
+        #plt.plot(all_train_errors, color="blue")
+        #plt.plot(all_val_errors, color="green")
+        #plt.show()
 
-        return all_train_errors, all_val_errors
-# TODO: 
-    # return (tr_x=tr_x, tr_y=tr_y, val_x=val_x, val_y=val_y, epochs=epochs, batch_size=batch_size, **kwargs)
-    # return tr_error_value, tr_metric_value, val_error_value, val_metric_value
+        return all_train_errors, all_val_errors, val_accuracy
