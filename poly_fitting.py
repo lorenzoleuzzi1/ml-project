@@ -41,7 +41,7 @@ X_train, X_test, y_train, y_test = train_test_split(
     test_size=0.33, 
     random_state=42)
 
-# fit our net and get predictions for training points
+# fit our net and get predictions for test points
 net = Network(
     hidden_layer_sizes=[3, 3],
     activation_out='identity',
@@ -57,6 +57,7 @@ y_pred = net.predict(X_test)
 mse = mse_score(y_test, y_pred)
 mee = mee_score(y_test, y_pred)
 
+# fit scikit-learn net and get predictions for test points
 scikit_net = MLPRegressor(
     hidden_layer_sizes=(3, 3),
     activation='tanh', # for hidden layers

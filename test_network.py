@@ -4,13 +4,13 @@ from network import Network
 
 ###### TESTED RUN TIME ERRORS ONLY ######
 
-###### ACTIVATION FUNCTION TESTS ######
-
 grid = ParameterGrid([
     {
         'activation_out': ['identity', 'relu', 'leaky_relu', 'logistic', 'tanh', 'softplus'],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[3], [3, 3]]
+        'hidden_layer_sizes': [[3], [3, 3]],
+        'learning_rate': ['fixed', 'linear_decay'],
+        'batch_size': [1, 2]
     }
 ])
 

@@ -53,7 +53,7 @@ class Network:
             raise ValueError("learning_rate_init must be > 0, got %s. " % learning_rate_init)
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
-        self.learning_rate_fin = learning_rate_init * 0.1 # TODO: 0.1??????????????????
+        self.learning_rate_fin = learning_rate_init * 0.1 # REVIEW: parametrize?
         if tau <= 0 or tau > self.epochs:
             raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
@@ -245,7 +245,6 @@ class Network:
                 else:
                     stopping = 20
             
-            # REVIEW: is the loss already an average?
             # calculate average error on all samples
             train_error /= samples
 
