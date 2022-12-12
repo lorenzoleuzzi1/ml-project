@@ -22,7 +22,8 @@ class Network:
         batch_size=1, 
         lambd=0.01, 
         alpha=0.5,
-        toll=0.0005
+        toll=0.0005,
+        epochs_val_score = 1
         ):
 
         self.layers = []
@@ -44,6 +45,7 @@ class Network:
         self.lambd = lambd
         self.alpha = alpha
         self.toll = toll
+        self.epochs_val_score = epochs_val_score # get validation score every epochs_val_score epochs
         # self.deltas_weights = None
         # self.deltas_bias = None
 
@@ -124,6 +126,7 @@ class Network:
 
         all_train_errors = []
         all_val_errors = []
+        tr_accuracy = []
         val_accuracy = []
 
         #####
@@ -179,12 +182,18 @@ class Network:
                     deltas_weights[layer.id].fill(0)
                     deltas_bias[layer.id].fill(0)
             
-            #-----validation-----
-            predict_val = self.predict(x_val)
-            predict_val = f_pred(predict_val)
-            val_error = self.loss(y_val, predict_val)
+            predict_tr = self.predict(x_train)
+            predict_tr = f_pred(predict_tr)
+            #TODO: reshaper y_train
+            tr_accuracy.append(accuracy_score(y_true=y_train, y_pred=predict_tr))
             
-            val_accuracy.append(accuracy_score(y_true=y_val, y_pred=predict_val))
+            #-----validation-----
+            if (epoch % self.epochs_val_score) == 0:
+                predict_val = self.predict(x_val)
+                predict_val = f_pred(predict_val)
+                val_error = self.loss(y_val, predict_val)
+            
+                val_accuracy.append(accuracy_score(y_true=y_val, y_pred=predict_val))
             
             #-----early stopping-----
             if epoch >= 10:              
@@ -215,4 +224,4 @@ class Network:
         #plt.plot(all_val_errors, color="green")
         #plt.show()
 
-        return all_train_errors, all_val_errors, val_accuracy
+        return all_train_errors, all_val_errors, val_accuracy, tr_accuracy

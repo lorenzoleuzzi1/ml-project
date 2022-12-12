@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from math import floor
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
@@ -167,17 +168,22 @@ def error_plot(tr_error, val_error):
     plt.savefig(fig_name)
 
 
-def accuracy_plot(accuracy):
-    epochs = len(accuracy)
-    epoch_vector = np.linspace(1, epochs, epochs)
+def accuracy_plot(tr_accuracy, val_accuracy):
+    tr_epochs = len(tr_accuracy)
+    val_epochs = len(val_accuracy)
+    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
+    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
+    
     plt.figure()
-    plt.plot(epoch_vector, accuracy, "r",
-             linewidth=1.5)
-    #plt.legend()
+    plt.plot(tr_epoch_vector, tr_accuracy, "b",
+             label="Trainig accuracy", linewidth=1.5)
+    plt.plot(val_epoch_vector, val_accuracy, "r--",
+             label="Validation accuracy", linewidth=1.5)
+    plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("accuracy")
     plt.grid()
-    plt.title("Validation accuracy on monks 1 dataset")
+    plt.title("Training and validation accuracy on monks 1 dataset")
     fig_name = "ml-project-AccuracyPlot"
     plt.savefig(fig_name)
     
