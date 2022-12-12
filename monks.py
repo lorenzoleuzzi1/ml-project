@@ -3,9 +3,9 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 from network import Network
-from utils import linear_decay
+from utils import linear_decay, error_plot, accuracy_plot
 from cross_validation import *
-from plot import *
+
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'

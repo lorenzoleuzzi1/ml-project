@@ -33,6 +33,16 @@ class Layer():
         #self.weights += self.delta_w_old - lambd * self.weights #per me
         
         self.bias -= learning_rate * delta_bias
+        
+    def update2(self, delta_weights, delta_bias, learning_rate, batch_size, alpha, lambd):
+        delta_weights /= batch_size
+        #delta_bias /= batch_size
+        
+        #self.bias -= learning_rate * delta_bias
+        
+        dw = - learning_rate * delta_weights + alpha * self.delta_w_old
+        self.weights +=  dw
+        self.delta_w_old  = dw
 
     # returns output for a given input
     def forward_propagation(self, input_data):

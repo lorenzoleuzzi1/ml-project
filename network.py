@@ -21,7 +21,8 @@ class Network:
         learning_rate_fun = fixed(0.1),
         batch_size=1, 
         lambd=0.01, 
-        alpha=0.5
+        alpha=0.5,
+        toll=0.0005
         ):
 
         self.layers = []
@@ -42,6 +43,7 @@ class Network:
         self.batch_size = batch_size
         self.lambd = lambd
         self.alpha = alpha
+        self.toll = toll
         # self.deltas_weights = None
         # self.deltas_bias = None
 
@@ -171,7 +173,7 @@ class Network:
                 learning_rate = self.learning_rate_fun(epoch)     
                 # update (for every batch)
                 for layer in self.layers:
-                    layer.update(deltas_weights[layer.id], deltas_bias[layer.id], learning_rate, 
+                    layer.update2(deltas_weights[layer.id], deltas_bias[layer.id], learning_rate, 
                         self.batch_size, self.alpha, self.lambd)                  
                     #reset the deltas accumulators
                     deltas_weights[layer.id].fill(0)
@@ -187,7 +189,7 @@ class Network:
             #-----early stopping-----
             if epoch >= 10:              
                 #if we've already converged (validation error near 0)
-                if val_error <= 0.0005:
+                if val_error <= self.toll:
                     stopping = 0               
                 #if no more significant error decreasing (less than 0.1%) or we are not converging 
                 #val_error - all_val_errors[-1] < val_error/100
