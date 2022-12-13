@@ -1,38 +1,43 @@
 import numpy as np
 
-# inherit from base class Layer
-
-
 class Layer():
-    # input_size = number of input neurons
-    # output_size = number of output neurons
-    id_count = 0
 
     def __init__(self, input_size, output_size, activation, activation_prime):
         self.input = None
         self.output = None
-        self.weights = np.random.rand(input_size, output_size) - 0.5
-        self.bias = np.random.rand(1, output_size) - 0.5
+        # random init ok. if we want different case for different activation (img w init)
+        self.weights = np.random.uniform(-0.7, 0.7,(input_size, output_size))
+        self.bias = np.zeros(shape = (1, output_size))
         self.activation = activation
         self.activation_prime = activation_prime
-        self.delta_w_old = np.zeros(shape = (input_size, output_size)) #previous weights used for the momentum
-        self.id = Layer.id_count
-        Layer.id_count += 1       
+        self.deltas_weights = np.zeros(shape = (input_size, output_size))
+        self.deltas_bias = np.zeros(shape = (1, output_size))
+        self.deltas_weights_prev = np.zeros(shape = (input_size, output_size)) #previous weights used for the momentum   
 
     def set_weights(self, w, b):
         self.wights = w
         self.bias = b
 
-    def update(self, delta_weights, delta_bias, learning_rate, batch_size, alpha, lambd):
-        delta_weights /= batch_size
-        delta_bias /= batch_size
+    # def update(self, delta_weightsX, delta_biasX, learning_rate, batch_size, alpha, lambd, nesterov):
+    def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
 
-        dw = - learning_rate * delta_weights + alpha * self.delta_w_old  # momentum
-        self.weights += (1 - 2 * lambd) * dw # weight decay with penality term
-        self.delta_w_old  = dw
-        #self.weights += self.delta_w_old - lambd * self.weights #per me
-        
-        self.bias -= learning_rate * delta_bias
+        self.deltas_weights /= batch_size
+        self.deltas_bias /= batch_size
+ 
+        dw =  alpha * self.deltas_weights_prev - learning_rate * self.deltas_weights # classic momentum
+        if nesterov:
+            self.weights = self.weights + alpha * dw - learning_rate * self.deltas_weights #nesterov and update
+        else:
+            self.weights = self.weights + dw #nesterov
+
+        self.weights -= lambd * self.weights #weight decay Tickonov
+        self.deltas_weights_prev  = dw
+
+        self.bias -= learning_rate * self.deltas_bias
+
+        self.deltas_weights.fill(0)
+        self.deltas_bias.fill(0)
+
 
     # returns output for a given input
     def forward_propagation(self, input_data):
@@ -47,5 +52,8 @@ class Layer():
         sum_w_delta = np.dot(delta, self.weights.T)
         weights_error = np.dot(self.input.T, delta)  # dE/dW
         # dBias = delta
+        #accumalte deltas
+        self.deltas_weights += weights_error
+        self.deltas_bias += delta
 
-        return sum_w_delta, weights_error, delta
+        return sum_w_delta
