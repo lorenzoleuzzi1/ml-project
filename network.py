@@ -1,9 +1,10 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from math import ceil, isclose
+from math import floor, ceil, isclose
 from utils import *
 from layer import *
+from sklearn.metrics import mean_squared_error
 
 class Network:
     def __init__(
@@ -18,7 +19,8 @@ class Network:
         tau=100,
         batch_size=1, 
         lambd=0.0001,
-        alpha=0.9
+        alpha=0.9,
+        verbose=True
         ):
 
         self.layers = []
@@ -57,8 +59,8 @@ class Network:
         if tau <= 0 or tau > self.epochs:
             raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
-        if batch_size < 1:
-            raise ValueError("batch_size must be >=1, got %s." % batch_size)
+        if batch_size <= 0:
+            raise ValueError("batch_size must be > 0, got %s." % batch_size)
         self.batch_size = batch_size
         if lambd < 0.0:
             raise ValueError("lambd must be >= 0, got %s." % lambd)
@@ -66,6 +68,7 @@ class Network:
         if alpha > 1 or alpha < 0:
             raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
+        self.verbose = verbose
 
 
     # add layer to network
@@ -74,7 +77,7 @@ class Network:
 
     # predict output for given input
     def predict(self, input_data):
-        # TODO: maybe not strictly needed?
+        # TODO: ATTENZIONE!!! Se invocata sul training set che è già stato ridimensionato è sbagliato!
         input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
 
         # sample dimension first
@@ -156,7 +159,10 @@ class Network:
         x_train, y_train = unison_shuffle(x_train, y_train)
 
         #divide training set into batches
-        n_batches = ceil(x_train.shape[0] / self.batch_size)
+        if isinstance(self.batch_size, int):
+            n_batches = ceil(x_train.shape[0] / self.batch_size)
+        else: # assuming it is a float
+            n_batches = floor(1 / self.batch_size)
         x_train_batched = np.array_split(x_train, n_batches)
         y_train_batched = np.array_split(y_train, n_batches)
         # x_train = [x_train[i:i + batch_size] for i in range(0, len(x_train), batch_size)]
@@ -221,16 +227,16 @@ class Network:
                 # update (for every batch)
                 for layer in self.layers:
                     layer.update(deltas_weights[layer.id], deltas_bias[layer.id], self.learning_rate_curr, 
-                        self.batch_size, self.alpha, self.lambd)                  
+                        x_batch.shape[0], self.alpha, self.lambd)                  
                     #reset the deltas accumulators
                     deltas_weights[layer.id].fill(0)
                     deltas_bias[layer.id].fill(0)
             
             #-----validation-----
             predict_val = self.predict(x_val)
-            # TODO: da sistemare insieme alla parametrizzazione della misura di prestazione (per la regressione f_pred non serve)
-            #predict_val = f_pred(predict_val) # REVIEW: is it needed? surely not for regression
-            val_error = self.loss(y_true=y_val, y_pred=predict_val)
+            if len(y_val.shape)==1:
+                y_val = y_val.reshape(y_val.shape[0], 1)
+            val_error = mean_squared_error(y_true=y_val, y_pred=predict_val)
             
             #-----early stopping-----
             if epoch >= 10:              
@@ -239,20 +245,20 @@ class Network:
                     stopping = 0               
                 #if no more significant error decreasing (less than 0.1%) or we are not converging 
                 #val_error - all_val_errors[-1] < val_error/100
-                print(val_error, all_val_errors[-1])
+                # if self.verbose: print('prev val error=%f curr val error=%f'%(val_error, all_val_errors[-1]))
                 if (isclose(val_error, all_val_errors[-1]) or val_error > all_val_errors[-1]): 
                     stopping -= 1 #decrease the 'patience'
                 else:
                     stopping = 20
             
             # calculate average error on all samples
-            train_error /= samples
+            train_error /= samples # REVIEW: need to compute it now on all the samples? (not done now in SGD)
 
             all_train_errors.append(train_error)
             all_val_errors.append(val_error)
-            print('epoch %d/%d   train error=%f val error=%f' % (epoch+1, self.epochs, train_error, val_error))
+            if self.verbose:
+                print('epoch %d/%d   train error=%f val error=%f' % (epoch+1, self.epochs, train_error, val_error))
 
-            print(stopping)
             if stopping <= 0: break
     
             
