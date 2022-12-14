@@ -8,14 +8,15 @@ class Layer():
     # output_size = number of output neurons
     id_count = 0
 
-    def __init__(self, first, input_size, output_size, activation, activation_prime):
+    def __init__(self, first, fan_in, fan_out, weights_init, activation, activation_prime):
         self.input = None
         self.output = None
-        self.weights = np.random.rand(input_size, output_size) - 0.5
-        self.bias = np.random.rand(1, output_size) - 0.5
+        self.fan_in = fan_in
+        self.fan_out = fan_out
         self.activation = activation
         self.activation_prime = activation_prime
-        self.delta_w_old = np.zeros(shape = (input_size, output_size)) #previous weights used for the momentum
+        self.weights_init(weights_init)
+        self.delta_w_old = np.zeros(shape = (fan_in, fan_out)) #previous weights used for the momentum
         if first: # TODO: do this better
             Layer.id_count = 0
         self.id = Layer.id_count
@@ -24,6 +25,43 @@ class Layer():
     def set_weights(self, w, b):
         self.wights = w
         self.bias = b
+
+    def weights_init(self, method):
+        ''' 
+        TODO: 
+        GlorotBengio method
+        https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
+
+        scikit learn usa GlorotBengioNorm per "identity", "tanh", "relu" e "softmax".
+        Per leaky_relu and softplus sono okay? Credo di sì dal momento che la 
+        derivata di softplus derivative è simile a quella di tanh.
+        Questa initizializzazione viene fatto per evitare la saturazione 
+        (avviene quando la derivata della funzione di attivazione è vicina a 0).
+        Per linear, relu, leaky_relu questo metodo funziona comunque?
+        Ad ogni modo dobbiamo evitare 0, valori troppo alti (quando lo sono? > 1?), 
+        pesi tutti uguali (quando con i seguenti approcci queste condizioni non sono soddisfatte?)
+        '''
+        if method == 'GlorotBengioNorm':
+            factor = 6.0
+            if self.activation == "logistic":
+                factor = 2.0 # TODO: why?
+            bound = np.sqrt(factor / (self.fan_in + self.fan_out))
+            self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
+            self.bias = np.random.uniform(-bound, bound, (1, self.fan_out))
+        elif method == 'GlorotBengioStd':
+            bound = 1 / np.sqrt(self.fan_in)
+            self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
+            self.bias = np.zeros((1, self.fan_out))
+        elif method == 'Micheli': # TODO: good for standardized data, not for output layer, not if fan_in too large (how large?)
+            bound = 0.7 * (2 / self.fan_in)
+            self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
+            self.bias = np.random.uniform(-0.1, 0.1, (1, self.fan_out))
+        elif method == 'normal':
+            self.weights = np.random.normal(size=(self.fan_in, self.fan_out))
+            self.bias = np.random.normal(size=(1, self.fan_out))
+        elif method == 'our':
+            self.weights = np.random.rand(self.fan_in, self.fan_out) - 0.5
+            self.bias = np.random.rand(1, self.fan_out) - 0.5
 
     def update(self, delta_weights, delta_bias, learning_rate, batch_size, alpha, lambd):
         delta_weights /= batch_size

@@ -129,28 +129,31 @@ class Network:
         else:
             y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1])
 
-        # Add input layer
+        # Add first hidden layer
         self.add(Layer(
             first=True,
-            input_size=x_train.shape[2], 
-            output_size=self.hidden_layer_sizes[0], 
+            fan_in=x_train.shape[2], 
+            fan_out=self.hidden_layer_sizes[0], 
+            weights_init="GlorotBengioNorm", 
             activation=self.activation_hidden, 
             activation_prime=self.activation_hidden_prime
             ))
-        # Add hidden layers
+        # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
                 first=False,
-                input_size=self.hidden_layer_sizes[i], 
-                output_size=self.hidden_layer_sizes[i+1], 
+                fan_in=self.hidden_layer_sizes[i], 
+                fan_out=self.hidden_layer_sizes[i+1], 
+                weights_init="GlorotBengioNorm", 
                 activation=self.activation_hidden, 
                 activation_prime=self.activation_hidden_prime
             ))
         # Add output layer
         self.add(Layer(
             first=False,
-            input_size=self.hidden_layer_sizes[-1], 
-            output_size=y_train.shape[2], 
+            fan_in=self.hidden_layer_sizes[-1], 
+            fan_out=y_train.shape[2], 
+            weights_init="GlorotBengioNorm", 
             activation=self.activation_out, 
             activation_prime=self.activation_out_prime
         ))
