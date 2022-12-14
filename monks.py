@@ -51,7 +51,7 @@ error_plot(all_train_errors, all_val_errors)
 accuracy_plot(tr_accuracy, val_accuracy)"""
 
 # cross validation
-avg_tr_error, avg_val_error, avg_tr_accuracy, avg_val_accuracy, pred = cross_validation(X_train, y_train, X_test, k=5, epochs=300)
+avg_tr_error, avg_val_error, avg_tr_accuracy, avg_val_accuracy, accuracy, pred = cross_validation(X_train, y_train, X_test, k=5, epochs=300)
 
 error_plot(avg_tr_error, avg_val_error)
 accuracy_plot(avg_tr_accuracy, avg_val_accuracy)
