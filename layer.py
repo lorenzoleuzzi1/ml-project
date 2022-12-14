@@ -8,7 +8,7 @@ class Layer():
     # output_size = number of output neurons
     id_count = 0
 
-    def __init__(self, input_size, output_size, activation, activation_prime):
+    def __init__(self, first, input_size, output_size, activation, activation_prime):
         self.input = None
         self.output = None
         self.weights = np.random.rand(input_size, output_size) - 0.5
@@ -16,6 +16,8 @@ class Layer():
         self.activation = activation
         self.activation_prime = activation_prime
         self.delta_w_old = np.zeros(shape = (input_size, output_size)) #previous weights used for the momentum
+        if first: # TODO: do this better
+            Layer.id_count = 0
         self.id = Layer.id_count
         Layer.id_count += 1       
 

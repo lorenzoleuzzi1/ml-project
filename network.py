@@ -81,25 +81,28 @@ class Network:
 
         # Add input layer
         self.add(Layer(
-            x_train.shape[2], 
-            self.hidden_layer_sizes[0], 
-            self.activation_hidden, 
-            self.activation_hidden_prime
+            first=True,
+            input_size=x_train.shape[2], 
+            output_size=self.hidden_layer_sizes[0], 
+            activation=self.activation_hidden, 
+            activation_prime=self.activation_hidden_prime
             ))
         # Add hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
-                self.hidden_layer_sizes[i], 
-                self.hidden_layer_sizes[i+1], 
-                self.activation_hidden, 
-                self.activation_hidden_prime
+                first=False,
+                input_size=self.hidden_layer_sizes[i], 
+                output_size=self.hidden_layer_sizes[i+1], 
+                activation=self.activation_hidden, 
+                activation_prime=self.activation_hidden_prime
             ))
         # Add output layer
         self.add(Layer(
-            self.hidden_layer_sizes[-1], 
-            y_train.shape[1], 
-            self.activation_out, 
-            self.activation_out_prime
+            first=False,
+            input_size=self.hidden_layer_sizes[-1], 
+            output_size=y_train.shape[1], 
+            activation=self.activation_out, 
+            activation_prime=self.activation_out_prime
         ))
 
 
@@ -202,7 +205,7 @@ class Network:
                     stopping = 0               
                 #if no more significant error decreasing (less than 0.1%) or we are not converging 
                 #val_error - all_val_errors[-1] < val_error/100
-                print(val_error, all_val_errors[-1])
+                #print(val_error, all_val_errors[-1])
                 if (isclose(val_error, all_val_errors[-1]) or val_error > all_val_errors[-1]): 
                     stopping -= 1 #decrease the 'patience'
                 else:
@@ -215,13 +218,7 @@ class Network:
             all_val_errors.append(val_error)
             print('epoch %d/%d   train error=%f val error=%f' % (epoch+1, self.epochs, train_error, val_error))
 
-            print(stopping)
+            #print(stopping)
             if stopping <= 0: break
-    
-            
-        #show the loss plots
-        #plt.plot(all_train_errors, color="blue")
-        #plt.plot(all_val_errors, color="green")
-        #plt.show()
 
-        return all_train_errors, all_val_errors, val_accuracy, tr_accuracy
+        return all_train_errors, all_val_errors, tr_accuracy, val_accuracy

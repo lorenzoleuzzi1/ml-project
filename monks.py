@@ -43,15 +43,18 @@ def flatten_pred(pred):
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-net = Network(activation_out='tanh', epochs= 300, batch_size=32, learning_rate_fun=linear_decay(200, 0.1))
-all_train_errors, all_val_errors, val_accuracy, tr_accuracy = net.fit(X_train, y_train, X_test, y_test)
+"""net = Network(activation_out='tanh', epochs= 300, batch_size=32, learning_rate_fun=linear_decay(200, 0.1))
+all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train, X_test, y_test)
 pred = net.predict(X_test)
 
 error_plot(all_train_errors, all_val_errors)
-accuracy_plot(tr_accuracy, val_accuracy)
+accuracy_plot(tr_accuracy, val_accuracy)"""
 
 # cross validation
-#tr_error, val_error, tr_error_fold, val_error_fold, pred = cross_validation(X_train, y_train, X_test, k=25, epochs=300)
+avg_tr_error, avg_val_error, avg_tr_accuracy, avg_val_accuracy, pred = cross_validation(X_train, y_train, X_test, k=5, epochs=300)
+
+error_plot(avg_tr_error, avg_val_error)
+accuracy_plot(avg_tr_accuracy, avg_val_accuracy)
 
 for p, y in zip(pred, y_test):
     print("pred: {} expected: {}".format(p,y))
