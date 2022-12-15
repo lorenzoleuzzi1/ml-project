@@ -40,6 +40,11 @@ class Layer():
         Per linear, relu, leaky_relu questo metodo funziona comunque?
         Ad ogni modo dobbiamo evitare 0, valori troppo alti (quando lo sono? > 1?), 
         pesi tutti uguali (quando con i seguenti approcci queste condizioni non sono soddisfatte?)
+        Io userei He per relu/leaky relu e GlorotBengioNorm negli altri casi.
+        TODO: cercare con identity cosa si usa!
+        Qui
+        https://link.springer.com/article/10.1007/s12065-022-00795-y
+        con linear Xavier (alcuni usano questo nome per riferirsi a GlorotBengioNorm, altri a GlorotBengio) funziona meglio.
         '''
         if method == 'GlorotBengioNorm':
             factor = 6.0
@@ -47,11 +52,14 @@ class Layer():
                 factor = 2.0 # TODO: why?
             bound = np.sqrt(factor / (self.fan_in + self.fan_out))
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
-            self.bias = np.random.uniform(-bound, bound, (1, self.fan_out))
-        elif method == 'GlorotBengioStd':
+            self.bias = np.random.uniform(-bound, bound, (1, self.fan_out)) # TODO: maybe 0?
+        elif method == 'GlorotBengio':
             bound = 1 / np.sqrt(self.fan_in)
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))
+        elif method == 'He': # for relu / leaky https://arxiv.org/abs/1502.01852
+            self.weights = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(self.fan_in, self.fan_out)) # TODO: simile a sopra?
+            self.bias = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(1, self.fan_out)) # TODO: maybe 0?
         elif method == 'Micheli': # TODO: good for standardized data, not for output layer, not if fan_in too large (how large?)
             bound = 0.7 * (2 / self.fan_in)
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
