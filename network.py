@@ -1,9 +1,10 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from math import ceil, isclose
+from math import floor, ceil, isclose
 from utils import *
 from layer import *
+from sklearn.metrics import mean_squared_error
 
 class Network:
     def __init__(
@@ -14,15 +15,16 @@ class Network:
         loss='mse', 
         evaluation_metric = accuracy,
         epochs=200,
-        learning_rate_schedule = "fixed",
+        learning_rate = "fixed",
         learning_rate_init=0.001,
         tau=100,
         batch_size=1, 
         lambd=0.0001,
         alpha=0.9,
+        verbose=True,
         nesterov = False,
         early_stopping_patience = 20,
-        validation_split = 20 #%
+        validation_split = 20
         ):
 
         self.layers = []
@@ -52,18 +54,20 @@ class Network:
         
         self.epochs = epochs
         learning_rate_schedules = ["fixed", "linear_decay"]
-        if learning_rate_schedule not in learning_rate_schedules:
+        if learning_rate not in learning_rate_schedules:
             raise ValueError("Unrecognized learning_rate_schedule '%s'. "
-            "Supported learning rate schedules are %s." % (learning_rate_schedule, learning_rate_schedules))
-        self.learning_rate_schedule = learning_rate_schedule
+            "Supported learning rate schedules are %s." % (learning_rate, learning_rate_schedules))
+        self.learning_rate = learning_rate
         if learning_rate_init <= 0.0:
             raise ValueError("learning_rate_init must be > 0, got %s. " % learning_rate_init)
         self.learning_rate_init = learning_rate_init
+        self.learning_rate_curr = learning_rate_init
+        self.learning_rate_fin = learning_rate_init * 0.1 # REVIEW: parametrize?
         if tau <= 0 or tau > self.epochs:
             raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
-        if batch_size < 1:
-            raise ValueError("batch_size must be >=1, got %s." % batch_size)
+        if batch_size <= 0:
+            raise ValueError("batch_size must be > 0, got %s." % batch_size)
         self.batch_size = batch_size
         if lambd < 0.0:
             raise ValueError("lambd must be >= 0, got %s." % lambd)
@@ -71,6 +75,7 @@ class Network:
         if alpha > 1 or alpha < 0:
             raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
+        self.verbose = verbose
 
         self.nesterov = nesterov
         self.early_stopping_patience = early_stopping_patience
@@ -83,7 +88,7 @@ class Network:
 
     # predict output for given input
     def predict(self, input_data):
-        # TODO: maybe not strictly needed?
+        # TODO: ATTENZIONE!!! Se invocata sul training set che è già stato ridimensionato è sbagliato!
         input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
 
         # sample dimension first
@@ -103,20 +108,24 @@ class Network:
         return result.reshape(result.shape[0], result.shape[2]) # come back to 2 dim array
 
     def update_learning_rate(self, epoch):
-        if self.learning_rate_schedule == "fixed":
-            self.learning_rate = self.learning_rate_init
-        else: # linear decay
-            final_learning_rate = self.learning_rate_init * 0.1
-            alpha = epoch / self.tau
-            learning_rate = (1 - alpha) * self.learning_rate_init + alpha * final_learning_rate
-            
+        if self.learning_rate == "fixed":
+            self.learning_rate_curr = self.learning_rate_init
+        
+        if self.learning_rate == "linear_decay":
             if epoch == 0:
-                self.learning_rate = self.learning_rate_init
+                self.learning_rate_curr = self.learning_rate_init
+                return 
+            if epoch >= self.tau:
+                self.learning_rate_curr = self.learning_rate_fin
+                return
             
-            if (learning_rate < final_learning_rate or epoch >= self.tau):
-                self.learning_rate = final_learning_rate
+            theta = epoch / self.tau
+            lr = (1 - theta) * self.learning_rate_init + theta * self.learning_rate_fin
+            
+            if (lr < self.learning_rate_fin):
+                self.learning_rate_curr = self.learning_rate_fin
             else:
-                self.learning_rate = learning_rate
+                self.learning_rate_curr = lr
 
     def fit(self, x_train, y_train):
         #shuffle the whole training set 
@@ -139,31 +148,40 @@ class Network:
         else:
             y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1])
 
-        # Add input layer
+        # Add first hidden layer
         self.add(Layer(
-            x_train.shape[2], 
-            self.hidden_layer_sizes[0], 
-            self.activation_hidden, 
-            self.activation_hidden_prime
+            first=True,
+            fan_in=x_train.shape[2], 
+            fan_out=self.hidden_layer_sizes[0], 
+            weights_init="GlorotBengioNorm", 
+            activation=self.activation_hidden, 
+            activation_prime=self.activation_hidden_prime
             ))
-        # Add hidden layers
+        # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
-                self.hidden_layer_sizes[i], 
-                self.hidden_layer_sizes[i+1], 
-                self.activation_hidden, 
-                self.activation_hidden_prime
+                first=False,
+                fan_in=self.hidden_layer_sizes[i], 
+                fan_out=self.hidden_layer_sizes[i+1], 
+                weights_init="GlorotBengioNorm", 
+                activation=self.activation_hidden, 
+                activation_prime=self.activation_hidden_prime
             ))
         # Add output layer
         self.add(Layer(
-            self.hidden_layer_sizes[-1], 
-            y_train.shape[1], 
-            self.activation_out, 
-            self.activation_out_prime
+            first=False,
+            fan_in=self.hidden_layer_sizes[-1], 
+            fan_out=y_train.shape[2], 
+            weights_init="GlorotBengioNorm", 
+            activation=self.activation_out, 
+            activation_prime=self.activation_out_prime
         ))
 
         #divide training set into batches
-        n_batches = ceil(x_train.shape[0] / self.batch_size)
+        if isinstance(self.batch_size, int):
+            n_batches = ceil(x_train.shape[0] / self.batch_size)
+        else: # assuming it is a float
+            n_batches = floor(1 / self.batch_size)
         x_train_batched = np.array_split(x_train, n_batches)
         y_train_batched = np.array_split(y_train, n_batches)
 
@@ -201,10 +219,10 @@ class Network:
                         output = layer.forward_propagation(output)
                       
                     # compute loss (for display)
-                    train_error += self.loss(y, output)               
+                    train_error += self.loss(y_true=y, y_pred=output)
                     
                     # backward propagation
-                    error = self.loss_prime(y, output)                    
+                    error = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         error = layer.backward_propagation(error)
                 
@@ -212,13 +230,13 @@ class Network:
                 self.update_learning_rate(epoch)  
                 # update (for every batch)
                 for layer in self.layers:
-                    layer.update(self.learning_rate, self.batch_size, self.alpha, self.lambd, self.nesterov) 
+                    layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
             #-----validation-----
             predict_val = self.predict(x_val)
-            # TODO: da sistemare insieme alla parametrizzazione della misura di prestazione (per la regressione f_pred non serve)
-            predict_val = f_pred(predict_val)
-            val_error = self.loss(y_val, predict_val)
+            if len(y_val.shape)==1:
+                y_val = y_val.reshape(y_val.shape[0], 1)
+            val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
             evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
             
              #-----early stopping-----
@@ -239,10 +257,10 @@ class Network:
             all_train_errors.append(train_error)
             all_val_errors.append(val_error)
             all_evalution_scores.append(evaluation_score)
-            print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
+            if self.verbose:
+              print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
                 % (epoch+1, self.epochs, train_error, val_error, evaluation_score))
 
-            print(stopping)
             if stopping <= 0: break
     
             

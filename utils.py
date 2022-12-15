@@ -75,11 +75,22 @@ ACTIVATIONS_DERIVATIVES = {
 # loss functions and their derivatives
 # all take as input a numpy array with shape (1, #units_output)
 
+# returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2))
+    return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: to follow Micheli np.sum(np.power(y_true - y_pred, 2)) / 2 => half_sse
 
-def mse_prime(y_true, y_pred):
+# returns a numpy array with shape (1, #units_output)
+def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_sse_prime
     return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
+
+# returns a scalar
+def ee(y_true, y_pred): # TODO: is equivalent to mse?
+    return np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
+
+# returns a numpy array with shape (1, #units_output)
+def ee_prime(y_true, y_pred):
+    e = ee(y_true=y_true, y_pred=y_pred)
+    return (y_pred - y_true) / e
 
 # link above, somewhere
 def logloss(x):
@@ -100,11 +111,26 @@ LOSSES_DERIVATIVES = {
 
 #-----LOSSES TO EVALUATE PERFORMANCE-----
 # all take as input numpy arrays with shape (#samples, #tagets_per_sample)
-
 def mse_score(y_true, y_pred):
-    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=1))
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    n_targets = 1
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
+    else:
+        n_targets = y_pred.shape[1]
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=1)/n_targets)
 
+# REVIEW: as in the slides here it does not divide by the number of components (in mse_score instead the division is done)
 def mee_score(y_true, y_pred):
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
     return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
 def accuracy(y_true, y_pred):
