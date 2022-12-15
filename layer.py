@@ -50,6 +50,7 @@ class Layer():
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))
         elif method == 'He': # for relu / leaky https://arxiv.org/abs/1502.01852
+            # TODO: uniform o normal?
             self.weights = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(self.fan_in, self.fan_out)) # TODO: simile a sopra?
             self.bias = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(1, self.fan_out)) # TODO: maybe 0?
         elif method == 'Micheli': # TODO: good for standardized data, not for output layer, not if fan_in too large (how large?)
@@ -63,7 +64,7 @@ class Layer():
             self.weights = np.random.rand(self.fan_in, self.fan_out) - 0.5
             self.bias = np.random.rand(1, self.fan_out) - 0.5
 
-    def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
+    """def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
 
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size
@@ -75,6 +76,25 @@ class Layer():
             self.weights = self.weights + dw #nesterov
 
         self.weights -= lambd * self.weights #weight decay Tickonov
+        self.deltas_weights_prev  = dw
+
+        self.bias -= learning_rate * self.deltas_bias
+
+        self.deltas_weights.fill(0)
+        self.deltas_bias.fill(0)"""
+    def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
+        # TODO: ricontrollare
+        self.deltas_weights /= batch_size
+        self.deltas_bias /= batch_size
+ 
+        dw =  alpha * self.deltas_weights_prev - learning_rate * self.deltas_weights # classic momentum
+        self.weights -= lambd*self.weights
+        if nesterov:
+            self.weights += alpha * dw - learning_rate * self.deltas_weights #nesterov and update
+        else:
+            self.weights += dw
+
+        #self.weights -= lambd * self.weights #weight decay Tickonov
         self.deltas_weights_prev  = dw
 
         self.bias -= learning_rate * self.deltas_bias

@@ -268,7 +268,7 @@ class Network:
                 else:            
                     #if no more significant error decreasing (less than 0.1%) or we are not converging 
                     #all_val_errors[-1] - val_error < val_error/1000 or (removed because small validation)
-                    if (all_val_errors[-1] - val_error < val_error/1000 or val_error > all_val_errors[-1]): 
+                    if (all_val_errors[-1] - val_error < val_error/1000 or val_error > all_val_errors[-1]): # TODO: alzare la percentuale
                         stopping -= 1 #decrease the 'patience'
                     else:
                         stopping = self.early_stopping_patience
