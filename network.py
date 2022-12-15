@@ -13,6 +13,7 @@ class Network:
         activation_hidden='tanh', 
         hidden_layer_sizes=[3], 
         loss='mse', 
+        evaluation_metric = accuracy,
         epochs=200,
         learning_rate = "fixed",
         learning_rate_init=0.001,
@@ -20,7 +21,10 @@ class Network:
         batch_size=1, 
         lambd=0.0001,
         alpha=0.9,
-        verbose=True
+        verbose=True,
+        nesterov = False,
+        early_stopping_patience = 20,
+        validation_split = 20
         ):
 
         self.layers = []
@@ -45,6 +49,9 @@ class Network:
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         if epochs <= 0:
             raise ValueError("epochs must be > 0, got %s. " % epochs)
+        
+        self.evalutaion_metric = evaluation_metric #TODO: check
+        
         self.epochs = epochs
         learning_rate_schedules = ["fixed", "linear_decay"]
         if learning_rate not in learning_rate_schedules:
@@ -69,6 +76,10 @@ class Network:
             raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
         self.verbose = verbose
+
+        self.nesterov = nesterov
+        self.early_stopping_patience = early_stopping_patience
+        self.validation_split = validation_split
 
 
     # add layer to network
@@ -116,10 +127,18 @@ class Network:
             else:
                 self.learning_rate_curr = lr
 
-    def fit(self, x_train, y_train, x_val, y_val):
-        # sample dimension first
-        samples = len(x_train)   
+    def fit(self, x_train, y_train):
+        #shuffle the whole training set 
+        x_train, y_train = unison_shuffle(x_train, y_train)
 
+        #split training set for validation
+        validation_size = int(len(x_train)/100 * self.validation_split)
+        x_val = x_train[:validation_size]
+        y_val = y_train[:validation_size]      
+        x_train = x_train[validation_size:]
+        y_train = y_train[validation_size:]
+        
+        samples = len(x_train)   
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
 
@@ -158,9 +177,6 @@ class Network:
             activation_prime=self.activation_out_prime
         ))
 
-        #shuffle the whole training set 
-        x_train, y_train = unison_shuffle(x_train, y_train)
-
         #divide training set into batches
         if isinstance(self.batch_size, int):
             n_batches = ceil(x_train.shape[0] / self.batch_size)
@@ -168,21 +184,14 @@ class Network:
             n_batches = floor(1 / self.batch_size)
         x_train_batched = np.array_split(x_train, n_batches)
         y_train_batched = np.array_split(y_train, n_batches)
-        # x_train = [x_train[i:i + batch_size] for i in range(0, len(x_train), batch_size)]
-        # y_train = [y_train[i:i + batch_size] for i in range(0, len(y_train), batch_size)]
-
-        #delta accumulators inizialization
-        deltas_weights = []
-        deltas_bias = []
-
-        for layer in self.layers:
-            deltas_weights.append(np.zeros(shape = layer.weights.shape))
-            deltas_bias.append(np.zeros(shape = layer.bias.shape))
 
         all_train_errors = []
         all_val_errors = []
+        all_evalution_scores = []
 
-        #####
+        stopping = self.early_stopping_patience 
+
+        #-----training loop-----
         # loop max-epoch times
         #   for each bacth       
         #       for each item in the batch
@@ -191,14 +200,9 @@ class Network:
         #       end for
         #   adjust weights and bias deltas using accumulated deltas
         # end loop
-        ######
-        stopping = 1000 #param?
-
-        # training loop
         for epoch in range(self.epochs):         
             train_error = 0
-            if(self.batch_size == 1):
-                x_train_batched, y_train_batched = unison_shuffle(x_train_batched, y_train_batched)
+            x_train_batched, y_train_batched = unison_shuffle(x_train_batched, y_train_batched)
 
             # for every batches in the set loop  
             for x_batch, y_batch in zip(x_train_batched, y_train_batched):                                      
@@ -220,60 +224,55 @@ class Network:
                     # backward propagation
                     error = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
-                        error, delta_w, delta_b = layer.backward_propagation(error)
-                        #accumulate deltas
-                        deltas_weights[layer.id] += delta_w
-                        deltas_bias[layer.id] += delta_b
+                        error = layer.backward_propagation(error)
                 
                 #new learning rate
-                self.update_learning_rate(epoch)
+                self.update_learning_rate(epoch)  
                 # update (for every batch)
                 for layer in self.layers:
-                    layer.update(deltas_weights[layer.id], deltas_bias[layer.id], self.learning_rate_curr, 
-                        x_batch.shape[0], self.alpha, self.lambd)                  
-                    #reset the deltas accumulators
-                    deltas_weights[layer.id].fill(0)
-                    deltas_bias[layer.id].fill(0)
+                    layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
             #-----validation-----
             predict_val = self.predict(x_val)
             if len(y_val.shape)==1:
                 y_val = y_val.reshape(y_val.shape[0], 1)
-            val_error = mean_squared_error(y_true=y_val, y_pred=predict_val)
+            val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
+            evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
             
-            #-----early stopping-----
+             #-----early stopping-----
             if epoch >= 10:              
                 #if we've already converged (validation error near 0)
                 if val_error <= 0.0005:
-                    stopping = 0               
-                #if no more significant error decreasing (less than 0.1%) or we are not converging 
-                #val_error - all_val_errors[-1] < val_error/100
-                # if self.verbose: print('prev val error=%f curr val error=%f'%(val_error, all_val_errors[-1]))
-                if (isclose(val_error, all_val_errors[-1]) or val_error > all_val_errors[-1]): 
-                    stopping -= 1 #decrease the 'patience'
-                else:
-                    stopping = 20
+                    stopping = 0  
+                else:            
+                    #if no more significant error decreasing (less than 0.1%) or we are not converging 
+                    #all_val_errors[-1] - val_error < val_error/1000 or (removed because small validation)
+                    if (all_val_errors[-1] - val_error < val_error/1000 or val_error > all_val_errors[-1]): 
+                        stopping -= 1 #decrease the 'patience'
+                    else:
+                        stopping = self.early_stopping_patience
             
-            # calculate average error on all samples
-            train_error /= samples # REVIEW: need to compute it now on all the samples? (not done now in SGD)
-
+            
+            train_error /= samples #average on all samples
             all_train_errors.append(train_error)
             all_val_errors.append(val_error)
+            all_evalution_scores.append(evaluation_score)
             if self.verbose:
-                print('epoch %d/%d   train error=%f val error=%f' % (epoch+1, self.epochs, train_error, val_error))
+              print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
+                % (epoch+1, self.epochs, train_error, val_error, evaluation_score))
 
             if stopping <= 0: break
     
             
-        #show the loss plots
-        plt.plot(all_train_errors, color="blue")
-        plt.plot(all_val_errors, color="green")
+        #show stats
+        plt.plot(all_train_errors, label="training", color="blue")
+        plt.plot(all_val_errors, label= "validation", color="green")
+        plt.plot(all_evalution_scores, label="score",color="red")
+        plt.legend(loc="upper right")
         plt.show()
 
-        return all_train_errors, all_val_errors
-# TODO: 
-    # return (tr_x=tr_x, tr_y=tr_y, val_x=val_x, val_y=val_y, epochs=epochs, batch_size=batch_size, **kwargs)
-    # return tr_error_value, tr_metric_value, val_error_value, val_metric_value
+        return all_train_errors, all_val_errors, all_evalution_scores
+    
     def save(self, path):
         file = open(path, 'wb')
         pickle.dump(self, file)
