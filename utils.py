@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from math import floor
 from sklearn.metrics import accuracy_score
 
 #-----ACTIVATIONS----- 
@@ -48,10 +50,19 @@ def softmax(x):
     return e / np.sum(e, axis=1)
 
 def softmax_prime(x):
+    f = softmax(x) 
     # TODO: 
     # https://www.haio.ir/app/uploads/2021/12/Neural-Networks-from-Scratch-in-Python-by-Harrison-Kinsley-Daniel-Kukiela-z-lib.org_.pdf
     # Chapter 9, page 46
-    return 
+    return f * (1 - f)
+
+def logloss(x):
+    # TODO:
+    return
+
+def logloss_prime(x):
+    # TODO:
+    return
 
 ACTIVATIONS = {
     'identity': identity,
@@ -155,3 +166,51 @@ def flatten_pred(pred):
         else:
             flattened_pred[i] = -1
     return flattened_pred
+
+# utility temporary function
+def flatten_pred(pred):
+    flattened_pred = np.empty(len(pred))
+    for i in range(len(pred)):
+        if pred[i][0][0] > 0:
+            flattened_pred[i] = 1
+        else:
+            flattened_pred[i] = -1
+    return flattened_pred
+
+#-----PLOT-----
+def error_plot(tr_error, val_error):
+    epochs = len(tr_error)
+    epoch_vector = np.linspace(1, epochs, epochs)
+    plt.figure()
+    plt.plot(epoch_vector, tr_error, "b",
+             label="Training error", linewidth=1.5)
+    plt.plot(epoch_vector, val_error, "r--",
+             label="Validation error", linewidth=1.5)
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("error")
+    plt.grid()
+    plt.title("Training and validation error on monks 1 dataset")
+    fig_name = "ml-project-ErrorPlot"
+    plt.savefig(fig_name)
+
+
+def accuracy_plot(tr_accuracy, val_accuracy):
+    tr_epochs = len(tr_accuracy)
+    val_epochs = len(val_accuracy)
+    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
+    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
+    
+    plt.figure()
+    plt.plot(tr_epoch_vector, tr_accuracy, "b",
+             label="Trainig accuracy", linewidth=1.5)
+    plt.plot(val_epoch_vector, val_accuracy, "r--",
+             label="Validation accuracy", linewidth=1.5)
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("accuracy")
+    plt.grid()
+    plt.title("Training and validation accuracy on monks 1 dataset")
+    fig_name = "ml-project-AccuracyPlot"
+    plt.savefig(fig_name)
+    

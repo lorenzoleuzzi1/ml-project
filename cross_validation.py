@@ -1,100 +1,108 @@
 import numpy as np
-
-import monks
-import plot
+from sklearn.metrics import accuracy_score
+from sklearn.utils import shuffle
 from network import Network
-from layer import Layer
-from utils import tanh, tanh_prime, mse, mse_prime
+from utils import linear_decay, error_plot, accuracy_plot, flatten_pred
 
+# TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
 
-def main_cv(dataset, k, epochs, learning_rate, batch_size):
-    """[tr_error, tr_metric, val_error, val_metric, tr_error_fold, tr_metric_fold, val_error_fold,
-        val_metric_fold] = cross_validation(dataset, k, epochs, learning_rate, batch_size)"""
-    [tr_error, val_error, tr_error_fold, val_error_fold] = cross_validation(dataset, k, epochs, learning_rate, batch_size)
+def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
+    if k <= 1:
+        print('Number of folds k must be more than 1')
+        exit()
 
-    # average of errors and metrics ( k == number of folds )
-    tr_error /= k
-    #tr_metric /= k
-    val_error /= k
-    #val_metric /= k
+    X_train, y_train = shuffle(X_train, y_train) # random reorganize the order of the data
+    
+    # TODO: divisione in fold con StratifiedKFold (posso usarlo?)
+    
+    number_used_data = len(X_train) - (len(X_train) % k) # numbers of data and target used in cross validation
+    data = []
+    targets = []
+    for i in range(number_used_data):
+        data.append(X_train[i])
+        targets.append(y_train[i])
+        
+    # convert to numpy object        
+    data = np.array(data, dtype=np.int64) 
+    targets = np.array(targets, dtype=np.int64)
+    
+    # split dataset into k fold:   
+    data_folds = np.array(np.array_split(data, k), dtype=object) # list of folds containing the data (numpy tensor)
+    target_folds = np.array(np.array_split(targets, k), dtype=object) # list of folds containing the targets (numpy matrix)
+    
+    # init error and accuracy vector:    
+    tr_error_fold = []
+    val_error_fold = []
+    tr_accuracy_fold = []
+    val_accuracy_fold = []
+    accuracy_fold = []
 
-    # results i.e. average and std deviation of error and metric
-    # training
-    avg_tr_error = np.mean(tr_error_fold)  # average
-    dev_tr_error = np.std(tr_error_fold)  # standard deviation
-    #avg_tr_metric = np.mean(tr_metric_fold)
-    #dev_tr_metric = np.std(tr_metric_fold)
-
-    # validation
-    avg_val_error = np.mean(val_error_fold)
-    dev_val_error = np.std(val_error_fold)
-    #avg_val_metric = np.mean(val_metric_fold)
-    #dev_val_metric = np.std(val_metric_fold)
-
-    plot.plot_cv()
-
-
-def cross_validation(dataset, k, epochs, learning_rate, batch_size):
-
-    if dataset in ('monks-1.train', 'monks-2.train', 'monks-3.train'):
-        data, targets = monks.read_monk(path=dataset)
-    else:
-        raise ValueError("Dataset not found")
-
-    # split dataset into k fold
-    # list of folds containing the data
-    data_folds = np.array(np.array_split(data, k), dtype=object)
-    # list of folds containing the targets
-    target_folds = np.array(np.array_split(targets, k), dtype=object)
-
-    # cross validation
+    # --------------cross validation--------------
     for i in range(k):
         # create validation set and training set
-        tr_data, tr_targets, val_data, val_targets = create_sets(
-            data_folds, target_folds, i)
+        tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, i)
 
-        # network
-        net = Network()
-        net.add(Layer(2, 3, tanh, tanh_prime))
-        net.add(Layer(3, 1, tanh, tanh_prime))
+        net = Network(activation_out='tanh', epochs=300, batch_size=32, learning_rate_fun=linear_decay(200, 0.1))
+        
+        # --------------train--------------
+        # return error and accuracy values for each epoch 
+        tr_error, val_error, tr_accuracy, val_accuracy = net.fit(tr_data, tr_targets, val_data, val_targets)        
+        
+        # reshape
+        for i in range(epochs - len(tr_error)):
+            tr_error.append(0)
+            val_error.append(0)
+            tr_accuracy.append(0)
+        for i in range(epochs - len(val_accuracy)):
+            val_accuracy.append(0)   
+        # convert to numpy object
+        tr_error = np.array(tr_error)
+        val_error = np.array(val_error)
+        tr_accuracy = np.array(tr_accuracy)
+        val_accuracy = np.array(val_accuracy)   
 
-        # train
-        net.use(mse, mse_prime)
-        # TODO: qua non ritorna niente -> ma ho bisogno output per calcolare
-        # [tr_error_value, tr_metric_value, val_error_value, val_metric_value]
-        [tr_error_value, val_error_value] = net.fit(tr_data, tr_targets, epochs=100,
-            learning_rate=0.1, batch_size=2)  # error and metric values for each epoch
+        # update errors and accuracy: 
+        tr_error_fold.append(tr_error)        
+        val_error_fold.append(val_error)
+        tr_accuracy_fold.append(tr_accuracy)      
+        val_accuracy_fold.append(val_accuracy) 
+          
+        # --------------test--------------
+        pred = net.predict(val_data)
+        flattened_pred = flatten_pred(pred)
+        accuracy = accuracy_score(y_true=val_targets, y_pred=flattened_pred)
+        accuracy_fold.append(accuracy) # update accuracy
+    #---------------------------------------------
+        
+    # convert to numpy object
+    tr_error_fold = np.array(tr_error_fold, dtype=object)
+    val_error_fold = np.array(val_error_fold, dtype=object)
+    tr_accuracy_fold = np.array(tr_accuracy_fold, dtype=object)
+    val_accuracy_fold = np.array(val_accuracy_fold, dtype=object)
+    accuracy_fold = np.array(accuracy_fold, dtype=object)
+    
+    # --------------results--------------
+    # i.e. average and std deviation of error and accuracy for each epoch
+    avg_tr_error, dev_tr_error = mean_std_dev(tr_error_fold)
+    avg_val_error, dev_val_error = mean_std_dev(val_error_fold)
+    avg_tr_accuracy, dev_tr_accuracy = mean_std_dev(tr_accuracy_fold)
+    avg_val_accuracy, dev_val_accuracy = mean_std_dev(val_accuracy_fold)
+    
+    # plot results
+    error_plot(avg_tr_error, avg_val_error)
+    accuracy_plot(avg_tr_accuracy, avg_val_accuracy)
+    
+    # predict and accuracy
+    pred_on_test_data = net.predict(X_test)
+    
+    for p, y in zip(pred_on_test_data, y_test):
+        print("pred: {} expected: {}".format(p[0],y))
 
-        # test
-        out = net.predict(val_data)
-
-        # update errors end metrics
-        # sum of error values for each epoch
-        tr_error = np.ones(epochs)  # init
-        tr_error += tr_error_value
-        #tr_metric = np.ones(epochs)
-        #tr_metric += tr_metric_value
-        val_error = np.ones(epochs)
-        val_error += val_error_value
-        #val_metric = np.ones(epochs)
-        #val_metric += val_metric_value
-
-        # list of error in fold the fold -> to plot
-        tr_error_fold = []  # init
-        tr_error_fold.append(tr_error_value) # TODO: tr_error_value[-1] forse?
-        #tr_metric_fold = []
-        #tr_metric_fold.append(tr_metric_value) # performance of the model on the training set
-        val_error_fold = []
-        val_error_fold.append(val_error_value)
-        #val_metric_fold = []
-        #val_metric_fold.append(val_metric_value)
-
-    return tr_error, val_error, tr_error_fold, val_error_fold
-    # tr_error, tr_metric, val_error, val_metric, tr_error_fold, tr_metric_fold, val_error_fold, val_metric_fold
-
+    flattened_pred_on_test_data = flatten_pred(pred_on_test_data)
+    print("accuracy: {}%".format(accuracy_score(y_true=y_test, y_pred=flattened_pred_on_test_data) * 100))
 
 def create_sets(data_folds, target_folds, val_idx):
-
+    """create k set of folds"""
     # validation fold
     val_data = data_folds[val_idx]
     val_data = np.array(val_data, dtype=np.float32)
@@ -116,15 +124,40 @@ def create_sets(data_folds, target_folds, val_idx):
 
     for fold in data_folds[start:]:
         if idx != val_idx:
-            tr_data = np.concatenate(tr_data, fold)
+            tr_data = np.concatenate((tr_data, fold)) # concatenate matrices
         idx += 1
     tr_data = np.array(tr_data, dtype=np.float32)
 
     idx = start
     for fold in target_folds[start:]:
         if idx != val_idx:
-            tr_targets = np.concatenate(tr_targets, fold)
+            tr_targets = np.concatenate((tr_targets, fold))
         idx += 1
     tr_targets = np.array(tr_targets, dtype=np.float32)
 
     return tr_data, tr_targets, val_data, val_targets
+
+def mean_std_dev(data_fold):
+    """return average and std deviation for each epoch"""
+    k = data_fold.shape[0]
+    epochs = data_fold.shape[1]
+    mean = [] # init
+    std_dev = []
+    
+    for j in range(epochs):
+        mu = 0
+        N = 0
+        for i in range(k):
+            mu += data_fold[i][j]
+            if data_fold[i][j] != 0: N +=1
+        if N == 0: break
+        else:
+            mu = mu / N
+            mean.append(mu)
+            sigma = 0
+            for i in range(k):
+                sigma += np.power((data_fold[i][j] - mu), 2)
+            sigma = np.power((sigma / N), 0.5)
+            std_dev.append(sigma)
+    
+    return mean, std_dev

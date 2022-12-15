@@ -1,7 +1,10 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score #TODO: uniformare
+#from utils import unison_shuffle
 from math import floor, ceil, isclose
+
 from utils import *
 from layer import *
 from sklearn.metrics import mean_squared_error
@@ -25,6 +28,8 @@ class Network:
         nesterov = False,
         early_stopping_patience = 20,
         validation_split = 20
+        tol=0.0005,
+        epochs_val_score = 4 # test the network on validation every (epochs_val_score) epochs
         ):
 
         self.layers = []
@@ -80,6 +85,10 @@ class Network:
         self.nesterov = nesterov
         self.early_stopping_patience = early_stopping_patience
         self.validation_split = validation_split
+        
+        self.tol = tol
+        self.epochs_val_score = epochs_val_score # get validation score every epochs_val_score epochs
+
 
 
     # add layer to network
@@ -187,9 +196,12 @@ class Network:
 
         all_train_errors = []
         all_val_errors = []
+        tr_accuracy = [] # TODO: TOGLIERE?
+        val_accuracy = []
         all_evalution_scores = []
 
         stopping = self.early_stopping_patience 
+
 
         #-----training loop-----
         # loop max-epoch times
@@ -232,17 +244,23 @@ class Network:
                 for layer in self.layers:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
+            predict_tr = self.predict(x_train)
+            predict_tr = f_pred(predict_tr)
+            #TODO: reshaper y_train
+            tr_accuracy.append(accuracy_score(y_true=y_train, y_pred=predict_tr))
+            
             #-----validation-----
-            predict_val = self.predict(x_val)
-            if len(y_val.shape)==1:
+            if (epoch % self.epochs_val_score) == 0:
+              predict_val = self.predict(x_val)
+              if len(y_val.shape)==1:
                 y_val = y_val.reshape(y_val.shape[0], 1)
-            val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
-            evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
+              val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
+              evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
             
              #-----early stopping-----
             if epoch >= 10:              
                 #if we've already converged (validation error near 0)
-                if val_error <= 0.0005:
+                if val_error <= self.tol:
                     stopping = 0  
                 else:            
                     #if no more significant error decreasing (less than 0.1%) or we are not converging 
@@ -272,8 +290,10 @@ class Network:
         plt.show()
 
         return all_train_errors, all_val_errors, all_evalution_scores
+        # all_evalution_scores i.e. tr_accuracy, val_accuracy
     
     def save(self, path):
         file = open(path, 'wb')
         pickle.dump(self, file)
         file.close()
+
