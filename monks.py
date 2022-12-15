@@ -32,12 +32,13 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
 
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
+print(len(X_train))
 
 # cross validation
 cross_validation(X_train, y_train, X_test, y_test, k=7, epochs=300)
 
-"""net = Network(activation_out='tanh', epochs= 300, batch_size=32, learning_rate_fun=linear_decay(200, 0.1))
-all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train, X_test, y_test)
+"""net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train)
 pred = net.predict(X_test)
 
 error_plot(all_train_errors, all_val_errors)

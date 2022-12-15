@@ -1,27 +1,29 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from math import floor
+from sklearn.metrics import accuracy_score
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
+# all take as input a numpy array with shape (1, #units)
 
 def identity(x):
     return x
 
 def identity_prime(x):
-    return 1
+    return np.ones(x.shape)
 
 def relu(x):
     return np.maximum(0, x)
 
 def relu_prime(x):
-    return 0 if x < 0 else 1
+    return np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
 
 def leaky_relu(x): 
-    return x if x >= 0 else 0.01 * x
+    return np.where(x >= 0, x, 0.01 * x)
 
 def leaky_relu_prime(x): 
-    return 1 if x >= 0 else 0.01
+    return np.where(x >= 0, 1, 0.01)
 
 def logistic(x):
     return 1 / (1 + np.exp(-x))
@@ -34,7 +36,8 @@ def tanh(x):
     return np.tanh(x)
 
 def tanh_prime(x):
-    return 1 - np.tanh(x)**2
+    t = tanh(x)
+    return 1 - t**2
 
 def softplus(x):
     return np.log(1 + np.exp(x))
@@ -43,10 +46,14 @@ def softplus_prime(x):
     return 1 / (1 + np.exp(-x))
 
 def softmax(x):
-    return np.exp(x) / sum(np.exp(x))
+    e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
+    return e / np.sum(e, axis=1)
 
 def softmax_prime(x):
     f = softmax(x) 
+    # TODO: 
+    # https://www.haio.ir/app/uploads/2021/12/Neural-Networks-from-Scratch-in-Python-by-Harrison-Kinsley-Daniel-Kukiela-z-lib.org_.pdf
+    # Chapter 9, page 46
     return f * (1 - f)
 
 def logloss(x):
@@ -72,64 +79,74 @@ ACTIVATIONS_DERIVATIVES = {
     'leaky_relu': leaky_relu_prime,
     'logistic': logistic_prime,
     'tanh': tanh_prime,
-     'softplus': softplus_prime
+    'softplus': softplus_prime
 }
 
-#-----LOSSES-----
+#-----LOSSES FOR BACKPROP-----
 # loss functions and their derivatives
+# all take as input a numpy array with shape (1, #units_output)
 
+# returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2)) # TODO: mean is needed? yes needed 
+    return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: to follow Micheli np.sum(np.power(y_true - y_pred, 2)) / 2 => half_sse
 
-def mse_prime(y_true, y_pred):
-    return 2 * (y_pred - y_true) / y_true.size
+# returns a numpy array with shape (1, #units_output)
+def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_sse_prime
+    return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
 
-def rmse(y_true, y_pred): 
-    return np.sqrt(mse(y_true, y_pred))
+# returns a scalar
+def ee(y_true, y_pred): # TODO: is equivalent to mse?
+    return np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
 
-def rmse_prime(y_true, y_pred): # TODO: check if right
-    return (1 / (2 * rmse(y_true, y_pred))) * mse_prime(y_true, y_pred)
+# returns a numpy array with shape (1, #units_output)
+def ee_prime(y_true, y_pred):
+    e = ee(y_true=y_true, y_pred=y_pred)
+    return (y_pred - y_true) / e
 
-def ee(y_true, y_pred):
-    return np.linalg.norm(y_true - y_pred, 2)
-    # same as 
-    # np.sqrt(np.sum(np.power(y_true - y_pred, 2)))
+# link above, somewhere
+def logloss(x):
+    # TODO:
+    return
 
-def ee_prime(y_true, y_pred): # TODO: check if right
-    return (y_true - y_pred) / ee(y_true, y_pred)
+def logloss_prime(x):
+    # TODO:
+    return
 
 LOSSES = {
-    'mse': mse,
-    'rmse': rmse,
-    'mee': ee
+    'mse': mse
 }
 
 LOSSES_DERIVATIVES = {
-    'mse': mse_prime,
-    'rmse': rmse_prime,
-    'mee': ee_prime
+    'mse': mse_prime
 }
 
-#-----LEARNING RATE-----
-def fixed(learning_rate):
-    return lambda x: learning_rate
-    
-def linear_decay(tau, starting_learning_rate):
-    final_learning_rate = starting_learning_rate * 0.1
+#-----LOSSES TO EVALUATE PERFORMANCE-----
+# all take as input numpy arrays with shape (#samples, #tagets_per_sample)
+def mse_score(y_true, y_pred):
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    n_targets = 1
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
+    else:
+        n_targets = y_pred.shape[1]
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=1)/n_targets)
 
-    def fun(epoch):
-        alpha = epoch / tau
-        learning_rate = (1 - alpha) * starting_learning_rate + alpha * final_learning_rate
-        
-        if epoch == 0:
-            return starting_learning_rate
-        
-        if (learning_rate < final_learning_rate or epoch >= tau):
-            return final_learning_rate
-        else:
-            return learning_rate
+# REVIEW: as in the slides here it does not divide by the number of components (in mse_score instead the division is done)
+def mee_score(y_true, y_pred):
+    if len(y_true.shape) != 2 and len(y_true.shape) != 1:
+        raise ValueError("Invalid shape")
+    if len(y_true.shape) == 1:
+        y_true = y_true.reshape(y_true.shape[0], 1)
+    if len(y_pred.shape) == 1:
+        y_pred = y_pred.reshape(y_pred.shape[0], 1) 
+    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
-    return fun
+def accuracy(y_true, y_pred):
+    y_pred = flatten_pred(y_pred) # TODO: sistemare
+    return accuracy_score(y_true=y_true, y_pred=y_pred)
 
 #-----OTHERS-----
 def unison_shuffle(x, y):
@@ -141,10 +158,10 @@ def unison_shuffle(x, y):
     return x, y
 
 # utility temporary function
-def f_pred(pred):
+def flatten_pred(pred):
     flattened_pred = np.empty(len(pred))
     for i in range(len(pred)):
-        if pred[i][0][0] > 0:
+        if pred[i][0] > 0:
             flattened_pred[i] = 1
         else:
             flattened_pred[i] = -1
