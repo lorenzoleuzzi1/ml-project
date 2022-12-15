@@ -134,6 +134,7 @@ def mee_score(y_true, y_pred):
     return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
 def accuracy(y_true, y_pred):
+    y_pred = flatten_pred(y_pred) # TODO: sistemare
     return accuracy_score(y_true=y_true, y_pred=y_pred)
 
 #-----OTHERS-----
@@ -146,7 +147,7 @@ def unison_shuffle(x, y):
     return x, y
 
 # utility temporary function
-def f_pred(pred):
+def flatten_pred(pred):
     flattened_pred = np.empty(len(pred))
     for i in range(len(pred)):
         if pred[i][0] > 0:

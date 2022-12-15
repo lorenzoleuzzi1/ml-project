@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 from network import Network
-from utils import f_pred
+from utils import flatten_pred
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'
@@ -32,7 +32,7 @@ X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 print(len(X_train))
 
-net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate_schedule = "linear_decay", learning_rate_init=0.05, nesterov=True)
+net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
 net.fit(X_train, y_train)
 
 pred = net.predict(X_test)
@@ -40,5 +40,5 @@ pred = net.predict(X_test)
 for p, y in zip(pred, y_test):
     print("pred: {} expected: {}".format(p,y))
 
-flattened_pred = f_pred(pred)
+flattened_pred = flatten_pred(pred)
 print(accuracy_score(y_true=y_test, y_pred=flattened_pred))
