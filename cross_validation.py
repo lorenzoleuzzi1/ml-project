@@ -38,23 +38,22 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     accuracy_fold = []
 
     # --------------cross validation--------------
-    for i in range(k):
+    for fold in range(k):
         # create validation set and training set
-        tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, i)
+        tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, fold)
 
-        net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
-        epochs = 1000 #TODO: scrivere bene
+        net = Network(activation_out='tanh', epochs=epochs, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
         
         # --------------train--------------
         # return error and accuracy values for each epoch 
         tr_error, val_error, tr_accuracy, val_accuracy = net.fit(tr_data, tr_targets)        
         
         # reshape
-        for i in range(epochs - len(tr_error)):
+        for _ in range(epochs - len(tr_error)):
             tr_error.append(0)
             val_error.append(0)
             tr_accuracy.append(0)
-        for i in range(epochs - len(val_accuracy)):
+        for _ in range(epochs - len(val_accuracy)):
             val_accuracy.append(0)   
         # convert to numpy object
         tr_error = np.array(tr_error)

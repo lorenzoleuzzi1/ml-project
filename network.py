@@ -287,11 +287,11 @@ class Network:
     
             
         #show stats
-        plt.plot(all_train_errors, label="training", color="blue")
+        """plt.plot(all_train_errors, label="training", color="blue")
         plt.plot(all_val_errors, label= "validation", color="green")
         plt.plot(all_evalution_scores, label="score",color="red")
         plt.legend(loc="upper right")
-        plt.show()
+        plt.show()"""
 
         return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
     
