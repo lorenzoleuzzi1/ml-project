@@ -7,6 +7,9 @@ from utils import linear_decay, error_plot, accuracy_plot, flatten_pred
 # TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
 
 def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
+    if k <= 1:
+        print('Number of folds k must be more than 1')
+        exit()
 
     X_train, y_train = shuffle(X_train, y_train) # random reorganize the order of the data
     
@@ -48,6 +51,7 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
             tr_error.append(0)
             val_error.append(0)
             tr_accuracy.append(0)
+        for i in range(epochs - len(val_accuracy)):
             val_accuracy.append(0)   
         # convert to numpy object
         tr_error = np.array(tr_error)

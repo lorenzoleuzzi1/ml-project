@@ -23,7 +23,7 @@ class Network:
         lambd=0.01, 
         alpha=0.5,
         toll=0.0005,
-        epochs_val_score = 1
+        epochs_val_score = 4 # test the network on validation every (epochs_val_score) epochs
         ):
 
         self.layers = []
