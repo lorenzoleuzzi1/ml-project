@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
@@ -105,6 +106,9 @@ def mse_score(y_true, y_pred):
 
 def mee_score(y_true, y_pred):
     return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
+
+def accuracy(y_true, y_pred):
+    return accuracy_score(y_true=y_true, y_pred=y_pred)
 
 #-----OTHERS-----
 def unison_shuffle(x, y):
