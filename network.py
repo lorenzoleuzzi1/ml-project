@@ -179,7 +179,7 @@ class Network:
                 learning_rate = self.learning_rate_fun(epoch)     
                 # update (for every batch)
                 for layer in self.layers:
-                    layer.update2(deltas_weights[layer.id], deltas_bias[layer.id], learning_rate, 
+                    layer.update(deltas_weights[layer.id], deltas_bias[layer.id], learning_rate, 
                         self.batch_size, self.alpha, self.lambd)                  
                     #reset the deltas accumulators
                     deltas_weights[layer.id].fill(0)

@@ -13,6 +13,8 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
 
     X_train, y_train = shuffle(X_train, y_train) # random reorganize the order of the data
     
+    # TODO: divisione in fold con StratifiedKFold (posso usarlo?)
+    
     number_used_data = len(X_train) - (len(X_train) % k) # numbers of data and target used in cross validation
     data = []
     targets = []
@@ -90,13 +92,14 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     error_plot(avg_tr_error, avg_val_error)
     accuracy_plot(avg_tr_accuracy, avg_val_accuracy)
     
+    # predict and accuracy
     pred_on_test_data = net.predict(X_test)
     
     for p, y in zip(pred_on_test_data, y_test):
-        print("pred: {} expected: {}".format(p,y))
+        print("pred: {} expected: {}".format(p[0],y))
 
     flattened_pred_on_test_data = flatten_pred(pred_on_test_data)
-    print(accuracy_score(y_true=y_test, y_pred=flattened_pred_on_test_data))
+    print("accuracy: {}%".format(accuracy_score(y_true=y_test, y_pred=flattened_pred_on_test_data) * 100))
 
 def create_sets(data_folds, target_folds, val_idx):
     """create k set of folds"""

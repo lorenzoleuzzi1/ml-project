@@ -46,8 +46,8 @@ def softmax(x):
     return np.exp(x) / sum(np.exp(x))
 
 def softmax_prime(x):
-    # TODO: 
-    return
+    f = softmax(x) 
+    return f * (1 - f)
 
 def logloss(x):
     # TODO:
