@@ -48,6 +48,7 @@ def softplus_prime(x):
 def softmax(x):
     e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
     return e / np.sum(e, axis=1)
+# TODO: NOOO non si può usare solo il gradiente -> passare da jacobiana
 
 def softmax_prime(x):
     f = softmax(x) 
