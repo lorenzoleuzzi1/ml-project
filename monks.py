@@ -35,7 +35,7 @@ X_test, y_test = read_monks(TEST_PATH)
 print(len(X_train))
 
 # cross validation
-cross_validation(X_train, y_train, X_test, y_test, k=7, epochs=300)
+cross_validation(X_train, y_train, X_test, y_test, k=3, epochs=300)
 
 """net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
 all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train)

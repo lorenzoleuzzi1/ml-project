@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.metrics import accuracy_score
 from sklearn.utils import shuffle
 from network import Network
-from utils import linear_decay, error_plot, accuracy_plot, flatten_pred
+from utils import error_plot, accuracy_plot, flatten_pred
 
 # TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
 
@@ -42,11 +42,12 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
         # create validation set and training set
         tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, i)
 
-        net = Network(activation_out='tanh', epochs=300, batch_size=32, learning_rate_fun=linear_decay(200, 0.1))
+        net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+        epochs = 1000 #TODO: scrivere bene
         
         # --------------train--------------
         # return error and accuracy values for each epoch 
-        tr_error, val_error, tr_accuracy, val_accuracy = net.fit(tr_data, tr_targets, val_data, val_targets)        
+        tr_error, val_error, tr_accuracy, val_accuracy = net.fit(tr_data, tr_targets)        
         
         # reshape
         for i in range(epochs - len(tr_error)):

@@ -167,15 +167,6 @@ def flatten_pred(pred):
             flattened_pred[i] = -1
     return flattened_pred
 
-# utility temporary function
-def flatten_pred(pred):
-    flattened_pred = np.empty(len(pred))
-    for i in range(len(pred)):
-        if pred[i][0][0] > 0:
-            flattened_pred[i] = 1
-        else:
-            flattened_pred[i] = -1
-    return flattened_pred
 
 #-----PLOT-----
 def error_plot(tr_error, val_error):

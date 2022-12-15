@@ -2,7 +2,7 @@ import numpy as np
 import pickle
 import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score #TODO: uniformare
-#from utils import unison_shuffle
+from utils import unison_shuffle
 from math import floor, ceil, isclose
 
 from utils import *
@@ -16,7 +16,7 @@ class Network:
         activation_hidden='tanh', 
         hidden_layer_sizes=[3], 
         loss='mse', 
-        evaluation_metric = accuracy,
+        evaluation_metric = accuracy, # TODO: per salvare rete su file non ci deve essere una funzione passata in input
         epochs=200,
         learning_rate = "fixed",
         learning_rate_init=0.001,
@@ -27,7 +27,7 @@ class Network:
         verbose=True,
         nesterov = False,
         early_stopping_patience = 20,
-        validation_split = 20
+        validation_split = 20,
         tol=0.0005,
         epochs_val_score = 4 # test the network on validation every (epochs_val_score) epochs
         ):
@@ -98,7 +98,8 @@ class Network:
     # predict output for given input
     def predict(self, input_data):
         # TODO: ATTENZIONE!!! Se invocata sul training set che è già stato ridimensionato è sbagliato!
-        input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
+        if len(input_data) == 2:
+            input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
 
         # sample dimension first
         samples = len(input_data)
@@ -196,8 +197,7 @@ class Network:
 
         all_train_errors = []
         all_val_errors = []
-        tr_accuracy = [] # TODO: TOGLIERE?
-        val_accuracy = []
+        all_train_score = []
         all_evalution_scores = []
 
         stopping = self.early_stopping_patience 
@@ -245,17 +245,20 @@ class Network:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
             predict_tr = self.predict(x_train)
-            predict_tr = f_pred(predict_tr)
             #TODO: reshaper y_train
-            tr_accuracy.append(accuracy_score(y_true=y_train, y_pred=predict_tr))
+            if len(y_train.shape)==1:
+                y_train = y_train.reshape(y_train.shape[0], 1)  
+            if len(y_train.shape)==3:
+                y_train = y_train.reshape(y_train.shape[0], y_train.shape[2]) 
+            train_score = self.evalutaion_metric(y_train, predict_tr)
             
             #-----validation-----
             if (epoch % self.epochs_val_score) == 0:
-              predict_val = self.predict(x_val)
-              if len(y_val.shape)==1:
-                y_val = y_val.reshape(y_val.shape[0], 1)
-              val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
-              evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
+                predict_val = self.predict(x_val)
+                if len(y_val.shape)==1:
+                    y_val = y_val.reshape(y_val.shape[0], 1)
+                val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
+                evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
             
              #-----early stopping-----
             if epoch >= 10:              
@@ -274,6 +277,7 @@ class Network:
             train_error /= samples #average on all samples
             all_train_errors.append(train_error)
             all_val_errors.append(val_error)
+            all_train_score.append(train_score)
             all_evalution_scores.append(evaluation_score)
             if self.verbose:
               print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
@@ -289,8 +293,7 @@ class Network:
         plt.legend(loc="upper right")
         plt.show()
 
-        return all_train_errors, all_val_errors, all_evalution_scores
-        # all_evalution_scores i.e. tr_accuracy, val_accuracy
+        return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
     
     def save(self, path):
         file = open(path, 'wb')
