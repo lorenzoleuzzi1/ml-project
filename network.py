@@ -1,13 +1,10 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score #TODO: uniformare
 from utils import unison_shuffle
-from math import floor, ceil, isclose
-
+from math import floor, ceil
 from utils import *
 from layer import *
-from sklearn.metrics import mean_squared_error
 
 class Network:
     def __init__(
@@ -16,12 +13,12 @@ class Network:
         activation_hidden='tanh', 
         hidden_layer_sizes=[3], 
         loss='mse', 
-        evaluation_metric = accuracy, # TODO: per salvare rete su file non ci deve essere una funzione passata in input
+        evaluation_metric = 'mse',
         epochs=200,
         learning_rate = "fixed",
         learning_rate_init=0.001,
         tau=100,
-        batch_size=1, 
+        batch_size=1, # 1 = stochastic, 1.0 = un batch
         lambd=0.0001,
         alpha=0.9,
         verbose=True,
@@ -29,7 +26,7 @@ class Network:
         early_stopping_patience = 20,
         validation_split = 20,
         tol=0.0005,
-        epochs_val_score = 4 # test the network on validation every (epochs_val_score) epochs
+        validation_frequency = 4
         ):
 
         self.layers = []
@@ -55,7 +52,10 @@ class Network:
         if epochs <= 0:
             raise ValueError("epochs must be > 0, got %s. " % epochs)
         
-        self.evalutaion_metric = evaluation_metric #TODO: check
+        if evaluation_metric not in EVALUATION_METRICS:
+            raise ValueError("Unrecognized evaluation_metric '%s'. "
+            "Supported evaluation metrics are %s." % (evaluation_metric, EVALUATION_METRICS))
+        self.evalutaion_metric = EVALUATION_METRICS[evaluation_metric]
         
         self.epochs = epochs
         learning_rate_schedules = ["fixed", "linear_decay"]
@@ -87,7 +87,7 @@ class Network:
         self.validation_split = validation_split
         
         self.tol = tol
-        self.epochs_val_score = epochs_val_score # get validation score every epochs_val_score epochs
+        self.validation_frequency = validation_frequency
 
 
 
@@ -98,7 +98,7 @@ class Network:
     # predict output for given input
     def predict(self, input_data):
         # TODO: ATTENZIONE!!! Se invocata sul training set che è già stato ridimensionato è sbagliato!
-        if len(input_data) == 2:
+        if len(input_data.shape) == 2:
             input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
 
         # sample dimension first
@@ -153,6 +153,7 @@ class Network:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
 
         x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1])
+        x_val = x_val.reshape(x_val.shape[0], 1, x_val.shape[1])
         if len(y_train.shape) == 1:
             y_train = y_train.reshape(y_train.shape[0], 1, 1)
         else:
@@ -244,21 +245,20 @@ class Network:
                 for layer in self.layers:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
-            predict_tr = self.predict(x_train)
-            #TODO: reshaper y_train
-            if len(y_train.shape)==1:
-                y_train = y_train.reshape(y_train.shape[0], 1)  
-            if len(y_train.shape)==3:
-                y_train = y_train.reshape(y_train.shape[0], y_train.shape[2]) 
+            predict_tr = self.predict(x_train) # len(predict_tr.shape==2)
+            # reshape to compare with predict_tr
+            y_train = y_train.reshape(y_train.shape[0], y_train.shape[2]) 
             train_score = self.evalutaion_metric(y_train, predict_tr)
+            # reshape to have again 3 dim
+            y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1]) 
             
             #-----validation-----
-            if (epoch % self.epochs_val_score) == 0:
+            if (epoch % self.validation_frequency) == 0:
                 predict_val = self.predict(x_val)
                 if len(y_val.shape)==1:
                     y_val = y_val.reshape(y_val.shape[0], 1)
-                val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
-                evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
+                val_error = self.loss(y_true=y_val, y_pred=predict_val)
+                evaluation_score = self.evalutaion_metric(y_val, predict_val)
             
              #-----early stopping-----
             if epoch >= 10:              

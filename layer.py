@@ -111,11 +111,11 @@ class Layer():
         return self.output
 
      # computes dE/dW, dE/dB for a given error=dE/dY. Returns input_error=dE/dX.
-    def backward_propagation(self, error):
+    def backward_propagation(self, error): # REVIEW: error = delta_j
         delta = self.activation_prime(self.net) * error
         # TODO: activation function -> gestire come matrci!!!! non solo il gradiente
-        sum_w_delta = np.dot(delta, self.weights.T)
-        weights_error = np.dot(self.input.T, delta)  # dE/dW
+        sum_w_delta = np.dot(delta, self.weights.T) # REVIEW: sum_w_delta = delta_i
+        weights_error = np.dot(self.input.T, delta)  # dE/dW # REVIEW: weights_error = delta_w
         # dBias = delta
         #accumalte deltas
         self.deltas_weights += weights_error
