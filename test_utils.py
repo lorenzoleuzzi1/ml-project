@@ -48,26 +48,17 @@ def test_softmax():
     print("SOFTMAX(INPUT):")
     print(f_net)
 
-def test_errors():
-    pred = np.array([[1], [3]])
-    true = np.array([[2], [5]])
-    print(mee_score(pred, true)) # (sqrt((1-2)^2)+sqrt((3-5)^2))/2 = (1+2)/2 = 3/2 = 1.5
-    print(mse_score(pred, true)) # ((1-2)^2+(3-5)^2)/2 = (1+4)/2 = 5/2 = 2.5
-    pred = np.array([[1, 1], [3, 1]])
-    true = np.array([[2, 1], [5, 2]])
-    print(mee_score(pred, true)) # (sqrt((1-2)^2+(1-1)^2)+sqrt((3-5)^2+(1-2)^2))/2 = (1+sqrt(5))/2 = 1.618...
-    print(mse_score(pred, true)) # ((1-2)^2+(1-1)^2+(3-5)^2+(1-2)^2)/2 = (1+4+1)/2 = 3
-    # computes the mean two times: first dividing by array size, then by number of points
-    from sklearn.metrics import mean_squared_error
-    print(mean_squared_error(pred, true)) # (((1-2)^2+(1-1)^2)/2 + ((3-5)^2+(1-2)^2)/2 )/2 = (1/2 + 5/2)/2 = 3/2 = 1.5
-
 def test_losses():
-    pred = np.array([[1, 1]])
-    true = np.array([[2, 1]])
+    pred = np.array([[1, 1], [3, 1]]) # mse flatten array (1 + 4 + 1)/4 == (1/2 + 5/2)/2 = 3/2 = 1.5
+    true = np.array([[2, 1], [5, 2]]) # mee = (1+sqrt(5))/2
+    #pred = np.array([[3,1]])
+    #true = np.array([[5,2]])
+    print(pred.shape)
+    print("--MEE--")
+    print(mee(true, pred))
+    print("--MSE--")
     print(mse(true, pred))
-    print(mse_prime(true, pred))
-    print("----")
-    print(ee(true, pred))
-    print(ee_prime(true, pred))
+    from sklearn.metrics import mean_squared_error
+    print(mean_squared_error(y_pred=pred, y_true=true))
 
 test_losses()
