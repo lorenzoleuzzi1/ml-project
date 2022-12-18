@@ -12,7 +12,7 @@ class Layer():
         self.weights_init(weights_init)
         self.deltas_weights = np.zeros(shape = (fan_in, fan_out))
         self.deltas_bias = np.zeros(shape = (1, fan_out))
-        self.deltas_weights_prev = np.zeros(shape = (fan_in, fan_out)) #previous weights used for the momentum   
+        self.deltas_weights_prev = np.zeros(shape = (fan_in, fan_out)) #previous weights used for the momentum
 
     def set_weights(self, w, b):
         self.wights = w
@@ -110,12 +110,11 @@ class Layer():
         self.output = self.activation(self.net)
         return self.output
 
-     # computes dE/dW, dE/dB for a given error=dE/dY. Returns input_error=dE/dX.
-    def backward_propagation(self, error):
-        delta = self.activation_prime(self.net) * error
-        # TODO: activation function -> gestire come matrci!!!! non solo il gradiente
-        sum_w_delta = np.dot(delta, self.weights.T)
-        weights_error = np.dot(self.input.T, delta)  # dE/dW
+    # computes dE/dW, dE/dB for a given error=dE/dY. Returns input_error=dE/dX.
+    def backward_propagation(self, error):        
+        delta = np.dot(error, self.activation_prime(self.net))
+        sum_w_delta = np.dot(delta, np.transpose(self.weights))
+        weights_error = np.dot(np.transpose(self.input), delta) # dE/dW
         # dBias = delta
         #accumalte deltas
         self.deltas_weights += weights_error

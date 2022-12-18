@@ -11,51 +11,54 @@ def identity(x):
     return x
 
 def identity_prime(x):
-    return np.ones(x.shape)
+    diag = np.ones(x.shape)
+    return np.diagflat(diag)
 
 def relu(x):
     return np.maximum(0, x)
 
 def relu_prime(x):
-    return np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
+    diag = np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
+    return np.diagflat(diag)
 
 def leaky_relu(x): 
     return np.where(x >= 0, x, 0.01 * x)
 
 def leaky_relu_prime(x): 
-    return np.where(x >= 0, 1, 0.01)
+    diag = np.where(x >= 0, 1, 0.01)
+    return np.diagflat(diag)
 
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 def logistic_prime(x):
     l = logistic(x)
-    return l * (1 - l)
+    diag = l * (1 - l)
+    return np.diagflat(diag)
 
 def tanh(x):
     return np.tanh(x)
 
 def tanh_prime(x):
     t = tanh(x)
-    return 1 - t**2
+    diag = 1 - t**2
+    return np.diagflat(diag)
 
 def softplus(x):
     return np.log(1 + np.exp(x))
 
 def softplus_prime(x):
-    return 1 / (1 + np.exp(-x))
+    diag = 1 / (1 + np.exp(-x))
+    return np.diagflat(diag)
 
 def softmax(x):
-    e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
-    return e / np.sum(e, axis=1)
-# TODO: NOOO non si può usare solo il gradiente -> passare da jacobiana
+    #e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
+    #return e / np.sum(e, axis=1)
+    return np.exp(x) / sum(np.exp(x))
 
 def softmax_prime(x):
     f = softmax(x) 
-    # TODO: 
-    # https://www.haio.ir/app/uploads/2021/12/Neural-Networks-from-Scratch-in-Python-by-Harrison-Kinsley-Daniel-Kukiela-z-lib.org_.pdf
-    # Chapter 9, page 46
-    return f * (1 - f)
+    return np.diagflat(f) - np.dot(f, np.transpose(f))
 
 def logloss(x):
     # TODO:
@@ -71,7 +74,8 @@ ACTIVATIONS = {
     'leaky_relu': leaky_relu,
     'logistic': logistic,
     'tanh': tanh,
-    'softplus': softplus
+    'softplus': softplus,
+    'softmax': softmax
 }
 
 ACTIVATIONS_DERIVATIVES = {
@@ -80,7 +84,8 @@ ACTIVATIONS_DERIVATIVES = {
     'leaky_relu': leaky_relu_prime,
     'logistic': logistic_prime,
     'tanh': tanh_prime,
-    'softplus': softplus_prime
+    'softplus': softplus_prime,
+    'softmax': softmax_prime
 }
 
 #-----LOSSES FOR BACKPROP-----
@@ -93,7 +98,9 @@ def mse(y_true, y_pred):
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred): # REVIEW: to follow Micheli (y_pred - y_true) => half_sse_prime
-    return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
+    df = 2 * (y_pred - y_true) / y_true.size 
+    #return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
+    return df
 
 # returns a scalar
 def ee(y_true, y_pred): # TODO: is equivalent to mse?
@@ -147,7 +154,9 @@ def mee_score(y_true, y_pred):
 
 def accuracy(y_true, y_pred):
     y_pred = flatten_pred(y_pred) # TODO: sistemare
-    return accuracy_score(y_true=y_true, y_pred=y_pred)
+    return accuracy_score(y_true=y_true, y_pred=y_pred) 
+# TODO: accuracy_score ERROR:
+# Classification metrics can't handle a mix of continuous-multioutput and multilabel-indicator targets
 
 #-----OTHERS-----
 def unison_shuffle(x, y):
@@ -159,8 +168,9 @@ def unison_shuffle(x, y):
     return x, y
 
 # utility temporary function
-def flatten_pred(pred):
-    flattened_pred = np.empty(len(pred))
+def flatten_pred(pred): # TODO: per regressione multipla non funziona, 
+    # calcola flatten_pred solo per prima colonna e poi copia nelle successiva
+    flattened_pred = np.empty(pred.shape)
     for i in range(len(pred)):
         if pred[i][0] > 0:
             flattened_pred[i] = 1
