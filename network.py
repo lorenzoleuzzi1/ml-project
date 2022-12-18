@@ -1,6 +1,8 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
+from sklearn.utils.multiclass import unique_labels
+from sklearn.model_selection import train_test_split
 from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
@@ -26,7 +28,8 @@ class Network:
         early_stopping_patience = 20,
         validation_split = 20,
         tol=0.0005,
-        validation_frequency = 4
+        validation_frequency = 4,
+        classification=False
         ):
 
         self.layers = []
@@ -88,6 +91,7 @@ class Network:
         
         self.tol = tol
         self.validation_frequency = validation_frequency
+        self.classification = classification
 
     # add layer to network
     def add(self, layer):
@@ -132,31 +136,40 @@ class Network:
                 self.learning_rate_curr = lr
 
     def fit(self, x_train, y_train):
-        #shuffle the whole training set 
+        if self.classification:
+            label = unique_labels(y_train)
+            validation_size = max(int(len(x_train)/100 * self.validation_split), len(label))
+            x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True, stratify=y_train)
+        else:
+            validation_size = max(int(len(x_train)/100 * self.validation_split), 1)
+            x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
+            
+        """#shuffle the whole training set 
         x_train, y_train = unison_shuffle(x_train, y_train)
-
+        
         #split training set for validation
-        validation_size = int(len(x_train)/100 * self.validation_split)
+        validation_size = max(int(len(x_train)/100 * self.validation_split), 1)
         x_val = x_train[:validation_size]
         y_val = y_train[:validation_size]    
         x_train = x_train[validation_size:]
         y_train = y_train[validation_size:]
-        
+        """
         samples = len(x_train)   
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
+        
+        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
         if len(y_val.shape) == 1:
             y_val = y_val.reshape(y_val.shape[0], 1)
-        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
-
+        
         if len(y_train.shape) == 1:
             y_train = y_train.reshape(y_train.shape[0], 1)
         
         # Add first hidden layer
         self.add(Layer(
             first=True,
-            fan_in=x_train.shape[1], 
+            fan_in=x_train.shape[-1], 
             fan_out=self.hidden_layer_sizes[0], 
             weights_init="GlorotBengioNorm", 
             activation=self.activation_hidden, 
@@ -187,9 +200,6 @@ class Network:
             n_batches = ceil(x_train.shape[0] / self.batch_size)
         else: # assuming it is a float
             n_batches = floor(1 / self.batch_size)
-        x_train_batched = np.array_split(x_train, n_batches)
-        y_train_batched = np.array_split(y_train, n_batches)
-
 
         all_train_errors = []
         all_val_errors = []
@@ -210,14 +220,12 @@ class Network:
         # end loop
         for epoch in range(self.epochs):         
             train_error = 0
-            x_train_batched, y_train_batched = unison_shuffle(x_train_batched, y_train_batched)
+            x_train, y_train = unison_shuffle(x_train, y_train)
+            x_train_batched = np.array_split(x_train, n_batches)
+            y_train_batched = np.array_split(y_train, n_batches)
 
             # for every batches in the set loop  
             for x_batch, y_batch in zip(x_train_batched, y_train_batched):                                      
-                
-                #shuffle the batch
-                x_batch, y_batch = unison_shuffle(x_batch, y_batch)
-
                 # for every patterns in the batch loop
                 for x, y in zip(x_batch, y_batch):
                     output = x
@@ -243,8 +251,6 @@ class Network:
             predict_tr = self.predict(x_train)
                 
             train_score = self.evalutaion_metric(y_train, predict_tr)
-            # reshape to have again 3 dim
-            y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1]) 
             
             #-----validation-----
             if (epoch % self.validation_frequency) == 0:

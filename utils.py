@@ -139,7 +139,7 @@ LOSSES_DERIVATIVES = {
 
 def accuracy(y_true, y_pred): # TODO: da rivedere sistemando la codifica dei target
     threshold = 0 # per tanh, per softmax 0.5
-    return accuracy_score(y_true=y_true, y_pred=np.where(y_pred > threshold, 1, 0))
+    return accuracy_score(y_true=y_true, y_pred=np.where(y_pred > threshold, 1, -1))
 
 EVALUATION_METRICS = {
     'mse': mse,

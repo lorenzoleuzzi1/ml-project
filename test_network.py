@@ -36,8 +36,13 @@ x_train = np.array([[0,0], [0,1], [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6
 y_train = np.array([[0,0], [0,1], [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8], [1,9]])
 # test data
 x_test = np.array([[0,0]])
-
+"""
 for params in grid:
     net = Network(**params)
     net.fit(x_train, y_train)
     out = net.predict(x_test)
+    """
+    
+net = Network(activation_out='tanh', epochs= 1000, batch_size=2, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+net.fit(x_train, y_train)
+print(net.predict(x_test))
