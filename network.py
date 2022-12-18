@@ -15,7 +15,7 @@ class Network:
         loss='mse', 
         evaluation_metric = 'mse',
         epochs=200,
-        learning_rate = "fixed",
+        learning_rate ='fixed',
         learning_rate_init=0.001,
         tau=100,
         batch_size=1, # 1 = stochastic, 1.0 = un batch
@@ -89,17 +89,12 @@ class Network:
         self.tol = tol
         self.validation_frequency = validation_frequency
 
-
-
     # add layer to network
     def add(self, layer):
         self.layers.append(layer)
 
     # predict output for given input
     def predict(self, input_data):
-        # TODO: ATTENZIONE!!! Se invocata sul training set che è già stato ridimensionato è sbagliato!
-        if len(input_data.shape) == 2:
-            input_data = input_data.reshape(input_data.shape[0], 1, input_data.shape[1])
 
         # sample dimension first
         samples = len(input_data)
@@ -113,7 +108,6 @@ class Network:
                 output = layer.forward_propagation(output)
             result.append(output)
 
-        #return result
         result = np.array(result) # converts external list into numpy array
         return result.reshape(result.shape[0], result.shape[2]) # come back to 2 dim array
 
@@ -144,7 +138,7 @@ class Network:
         #split training set for validation
         validation_size = int(len(x_train)/100 * self.validation_split)
         x_val = x_train[:validation_size]
-        y_val = y_train[:validation_size]      
+        y_val = y_train[:validation_size]    
         x_train = x_train[validation_size:]
         y_train = y_train[validation_size:]
         
@@ -152,17 +146,17 @@ class Network:
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
 
-        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1])
-        x_val = x_val.reshape(x_val.shape[0], 1, x_val.shape[1])
-        if len(y_train.shape) == 1:
-            y_train = y_train.reshape(y_train.shape[0], 1, 1)
-        else:
-            y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1])
+        if len(y_val.shape) == 1:
+            y_val = y_val.reshape(y_val.shape[0], 1)
+        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
+        if len(y_train.shape) == 1:
+            y_train = y_train.reshape(y_train.shape[0], 1)
+        
         # Add first hidden layer
         self.add(Layer(
             first=True,
-            fan_in=x_train.shape[2], 
+            fan_in=x_train.shape[1], 
             fan_out=self.hidden_layer_sizes[0], 
             weights_init="GlorotBengioNorm", 
             activation=self.activation_hidden, 
@@ -182,7 +176,7 @@ class Network:
         self.add(Layer(
             first=False,
             fan_in=self.hidden_layer_sizes[-1], 
-            fan_out=y_train.shape[2], 
+            fan_out=y_train.shape[1], # fan_out=y_train.shape[2]
             weights_init="GlorotBengioNorm", 
             activation=self.activation_out, 
             activation_prime=self.activation_out_prime
@@ -195,6 +189,7 @@ class Network:
             n_batches = floor(1 / self.batch_size)
         x_train_batched = np.array_split(x_train, n_batches)
         y_train_batched = np.array_split(y_train, n_batches)
+
 
         all_train_errors = []
         all_val_errors = []
@@ -229,7 +224,7 @@ class Network:
                     
                     # forward propagation  
                     for layer in self.layers:
-                        output = layer.forward_propagation(output)
+                        output = layer.forward_propagation(output)                        
                       
                     # compute loss (for display)
                     train_error += self.loss(y_true=y, y_pred=output)
@@ -245,9 +240,8 @@ class Network:
                 for layer in self.layers:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
-            predict_tr = self.predict(x_train) # len(predict_tr.shape==2)
-            # reshape to compare with predict_tr
-            y_train = y_train.reshape(y_train.shape[0], y_train.shape[2]) 
+            predict_tr = self.predict(x_train)
+                
             train_score = self.evalutaion_metric(y_train, predict_tr)
             # reshape to have again 3 dim
             y_train = y_train.reshape(y_train.shape[0], 1, y_train.shape[1]) 
@@ -255,8 +249,8 @@ class Network:
             #-----validation-----
             if (epoch % self.validation_frequency) == 0:
                 predict_val = self.predict(x_val)
-                if len(y_val.shape)==1:
-                    y_val = y_val.reshape(y_val.shape[0], 1)
+
+                #val_error = mean_squared_error(y_true=y_val, y_pred=predict_val)
                 val_error = self.loss(y_true=y_val, y_pred=predict_val)
                 evaluation_score = self.evalutaion_metric(y_val, predict_val)
             
