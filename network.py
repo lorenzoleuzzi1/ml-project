@@ -25,11 +25,11 @@ class Network:
         alpha=0.9,
         verbose=True,
         nesterov = False,
-        early_stopping_patience = 20,
+        early_stopping_patience = 20, # REVIEW: if low it stops too early
         validation_split = 20,
         tol=0.0005,
         validation_frequency = 4,
-        classification=False
+        classification=True
         ):
 
         self.layers = []
@@ -39,10 +39,8 @@ class Network:
         if (activation_hidden not in ACTIVATIONS):
             raise ValueError("Unrecognize activation_hidden '%s'. "
                 "Supported activation functions are %s."% (activation_hidden, list(ACTIVATIONS)))
-        self.activation_out = ACTIVATIONS[activation_out]
-        self.activation_out_prime = ACTIVATIONS_DERIVATIVES[activation_out]
-        self.activation_hidden = ACTIVATIONS[activation_hidden]
-        self.activation_hidden_prime = ACTIVATIONS_DERIVATIVES[activation_hidden]
+        self.activation_out = activation_out
+        self.activation_hidden = activation_hidden
         if not isinstance(hidden_layer_sizes, list):
             raise ValueError("hidden_layer_sizes must be a list of integers")
         if any(size <= 0 for size in hidden_layer_sizes):
@@ -113,7 +111,11 @@ class Network:
             result.append(output)
 
         result = np.array(result) # converts external list into numpy array
-        return result.reshape(result.shape[0], result.shape[2]) # come back to 2 dim array
+        if self.y_flatten:
+            result = result.reshape(result.shape[0])
+        else:
+            result = result.reshape(result.shape[0], result.shape[2])
+        return result
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -158,41 +160,35 @@ class Network:
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
         
-        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
+        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
-        if len(y_val.shape) == 1:
+        self.y_flatten = False
+        if len(y_train.shape)==1: # TODO: check y_val, y_train have same dim
+            self.y_flatten = True
             y_val = y_val.reshape(y_val.shape[0], 1)
-        
-        if len(y_train.shape) == 1:
             y_train = y_train.reshape(y_train.shape[0], 1)
         
         # Add first hidden layer
         self.add(Layer(
-            first=True,
             fan_in=x_train.shape[-1], 
             fan_out=self.hidden_layer_sizes[0], 
-            weights_init="GlorotBengioNorm", 
-            activation=self.activation_hidden, 
-            activation_prime=self.activation_hidden_prime
+            activation=self.activation_hidden#self.activation_hidden, 
+            #activation_prime=self.activation_hidden_prime
             ))
         # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
-                first=False,
                 fan_in=self.hidden_layer_sizes[i], 
                 fan_out=self.hidden_layer_sizes[i+1], 
-                weights_init="GlorotBengioNorm", 
-                activation=self.activation_hidden, 
-                activation_prime=self.activation_hidden_prime
+                activation=self.activation_hidden#self.activation_hidden, 
+                #activation_prime=self.activation_hidden_prime
             ))
         # Add output layer
         self.add(Layer(
-            first=False,
             fan_in=self.hidden_layer_sizes[-1], 
-            fan_out=y_train.shape[1], # fan_out=y_train.shape[2]
-            weights_init="GlorotBengioNorm", 
-            activation=self.activation_out, 
-            activation_prime=self.activation_out_prime
+            fan_out=y_train.shape[1], 
+            activation=self.activation_out#self.activation_out, 
+            #activation_prime=self.activation_out_prime
         ))
 
         #divide training set into batches
@@ -238,6 +234,7 @@ class Network:
                     train_error += self.loss(y_true=y, y_pred=output)
                     
                     # backward propagation
+                    # REVIEW: rename error --> delta
                     error = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         error = layer.backward_propagation(error)
@@ -255,8 +252,6 @@ class Network:
             #-----validation-----
             if (epoch % self.validation_frequency) == 0:
                 predict_val = self.predict(x_val)
-
-                #val_error = mean_squared_error(y_true=y_val, y_pred=predict_val)
                 val_error = self.loss(y_true=y_val, y_pred=predict_val)
                 evaluation_score = self.evalutaion_metric(y_val, predict_val)
             
