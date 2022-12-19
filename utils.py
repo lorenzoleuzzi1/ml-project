@@ -54,11 +54,11 @@ def softplus_prime(x):
 def softmax(x):
     #e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
     #return e / np.sum(e, axis=1)
-    return np.exp(x) / sum(np.exp(x))
+    return np.exp(x) / np.sum(np.exp(x))
 
-def softmax_prime(x):
+def softmax_prime(x): # TODO: softmax può essere usata con numero unità output layer > 1
     f = softmax(x) 
-    return np.diagflat(f) - np.dot(f, np.transpose(f))
+    return np.diagflat(f) - np.dot(np.transpose(f), f)
 
 def logloss(x):
     # TODO:

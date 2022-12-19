@@ -3,7 +3,7 @@ import numpy as np
 from network import Network
 
 # training data
-x_train = np.array([[0,0], [0,1], [1,0], [1,1]]) # TODO: validation set vuoto!
+x_train = np.array([[0,0], [0,1], [1,0], [1,1]])
 y_train = np.array([0, 1, 1, 0])
 
 print(x_train.shape)

@@ -29,7 +29,7 @@ class Network:
         validation_split = 20,
         tol=0.0005,
         validation_frequency = 4,
-        classification=True
+        classification=False
         ):
 
         self.layers = []
@@ -160,7 +160,7 @@ class Network:
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
         
-        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
+        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
         self.y_flatten = False
         if len(y_train.shape)==1: # TODO: check y_val, y_train have same dim
@@ -186,7 +186,7 @@ class Network:
         # Add output layer
         self.add(Layer(
             fan_in=self.hidden_layer_sizes[-1], 
-            fan_out=y_train.shape[1], 
+            fan_out=y_train.shape[1],
             activation=self.activation_out#self.activation_out, 
             #activation_prime=self.activation_out_prime
         ))

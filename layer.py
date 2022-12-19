@@ -91,8 +91,8 @@ class Layer():
     def backward_propagation(self, error): # REVIEW: rename error --> delta_j
         delta = np.dot(error, self.activation_prime(self.net))
         sum_w_delta = np.dot(delta, np.transpose(self.weights)) # REVIEW: rename sum_w_delta --> delta_i
-        #weights_error = np.dot(np.transpose(self.input), delta) # dE/dW
-        weights_error = np.outer(self.input, delta) # REVIEW: rename weights_error --> delta_w
+        weights_error = np.dot(np.transpose(self.input), delta) # dE/dW
+        #weights_error = np.outer(self.input, delta) # REVIEW: rename weights_error --> delta_w
         # dBias = delta
         #accumalte deltas
         self.deltas_weights += weights_error

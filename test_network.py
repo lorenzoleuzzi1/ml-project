@@ -30,7 +30,6 @@ for params in grid:
 
 ###### MULTI TARGET ######
 
-# TODO: con i primi 4 dati il validation set è vuoto!!!
 # training data
 x_train = np.array([[0,0], [0,1], [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8], [1,9]])
 y_train = np.array([[0,0], [0,1], [1,0], [1,1], [1,2], [1,3], [1,4], [1,5], [1,6], [1,7], [1,8], [1,9]])
