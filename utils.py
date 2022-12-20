@@ -149,6 +149,10 @@ def accuracy(y_true, y_pred):
     y_pred = flatten_pred(y_pred) # TODO: sistemare
     return accuracy_score(y_true=y_true, y_pred=y_pred)
 
+EVALUATION_METRICS = {
+    'accuracy' : accuracy
+}
+
 #-----OTHERS-----
 def unison_shuffle(x, y):
     seed = np.random.randint(0, 100000) 
@@ -157,6 +161,14 @@ def unison_shuffle(x, y):
     np.random.seed(seed) 
     np.random.shuffle(y)
     return x, y
+
+def validation_split(x_train, y_train, percentage):
+    validation_size = int(len(x_train)/100 * percentage) #% for val
+    x_val = x_train[:validation_size]
+    y_val = y_train[:validation_size]      
+    x_train = x_train[validation_size:]
+    y_train = y_train[validation_size:]
+    return x_train, y_train, x_val, y_val
 
 # utility temporary function
 def flatten_pred(pred):
@@ -168,41 +180,32 @@ def flatten_pred(pred):
             flattened_pred[i] = -1
     return flattened_pred
 
+def mean_and_std(data):
+    mean = np.mean(data)
+    dev = np.std(data)
+    return mean, dev
+
+def check_inputs():
+    pass
 
 #-----PLOT-----
-def error_plot(tr_error, val_error):
-    epochs = len(tr_error)
-    epoch_vector = np.linspace(1, epochs, epochs)
+def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
+    fold_count=1
     plt.figure()
-    plt.plot(epoch_vector, tr_error, "b",
-             label="Training error", linewidth=1.5)
-    plt.plot(epoch_vector, val_error, "r--",
-             label="Validation error", linewidth=1.5)
+    for tr, val in zip(tr_results, val_results):
+        plt.plot(np.trim_zeros(tr, 'b'), color="blue",
+                label="training {} fold {}".format(type, fold_count), alpha = 0.2)
+        plt.plot(np.trim_zeros(val, 'b'), color="green",
+                label="talidation {} fold {}".format(type, fold_count), alpha = 0.2)
+        fold_count += 1
+    plt.plot(avg_tr, color="blue",label="training {} avg".format(type))
+    plt.plot(avg_val, color="green",label="validation {} avg".format(type))
     plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("error")
     plt.grid()
-    plt.title("Training and validation error on monks 1 dataset")
-    fig_name = "ml-project-ErrorPlot"
+    plt.title("training and validation {}".format(type))
+    fig_name = "plot_{}".format(type)
     plt.savefig(fig_name)
 
-
-def accuracy_plot(tr_accuracy, val_accuracy):
-    tr_epochs = len(tr_accuracy)
-    val_epochs = len(val_accuracy)
-    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
-    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
-    
-    plt.figure()
-    plt.plot(tr_epoch_vector, tr_accuracy, "b",
-             label="Trainig accuracy", linewidth=1.5)
-    plt.plot(val_epoch_vector, val_accuracy, "r--",
-             label="Validation accuracy", linewidth=1.5)
-    plt.legend()
-    plt.xlabel("epoch")
-    plt.ylabel("accuracy")
-    plt.grid()
-    plt.title("Training and validation accuracy on monks 1 dataset")
-    fig_name = "ml-project-AccuracyPlot"
-    plt.savefig(fig_name)
     

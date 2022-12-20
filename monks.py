@@ -3,8 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from utils import accuracy
 from network import Network
-#from utils import linear_decay, error_plot, accuracy_plot, flatten_pred
-from cross_validation import *
+from utils import flatten_pred
+from new_cross_validation import cross_validation
 
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
@@ -37,9 +37,12 @@ X_test, y_test = read_monks(TEST_PATH)
 # cross validation
 cross_validation(X_train, y_train, X_test, y_test, k=3, epochs=1000)
 
-"""net = Network(activation_out='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
-all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train)
-pred = net.predict(X_test)
-print(accuracy(y_pred=pred, y_true=y_test))
-error_plot(all_train_errors, all_val_errors)
-accuracy_plot(tr_accuracy, val_accuracy)"""
+# net = Network(activation_out='tanh', epochs= 1000, batch_size=1, learning_rate="linear_decay", learning_rate_init=0.002)
+# net.fit(X_train, y_train)
+# pred = net.predict(X_test)
+
+# for p, y in zip(pred, y_test):
+#     print("pred: {} expected: {}".format(p,y))
+
+# flattened_pred = flatten_pred(pred)
+# print(accuracy(y_true=y_test, y_pred=flattened_pred))

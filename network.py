@@ -1,13 +1,10 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score #TODO: uniformare
 from utils import unison_shuffle
-from math import floor, ceil, isclose
-
 from utils import *
 from layer import *
-from sklearn.metrics import mean_squared_error
+
 
 class Network:
     def __init__(
@@ -16,8 +13,8 @@ class Network:
         activation_hidden='tanh', 
         hidden_layer_sizes=[3], 
         loss='mse', 
-        evaluation_metric = accuracy, # TODO: per salvare rete su file non ci deve essere una funzione passata in input
-        epochs=200,
+        evaluation_metric = 'accuracy', # TODO: per salvare rete su file non ci deve essere una funzione passata in input
+        epochs=500,
         learning_rate = "fixed",
         learning_rate_init=0.001,
         tau=100,
@@ -27,11 +24,11 @@ class Network:
         verbose=True,
         nesterov = False,
         early_stopping_patience = 20,
-        validation_split = 20,
+        validation_split = 10,
         tol=0.0005,
-        epochs_val_score = 4 # test the network on validation every (epochs_val_score) epochs
+        evaluation_frequency = 4 # test the network on validation every frequency epochs
         ):
-
+        #TODO: funzione check inputs?
         self.layers = []
         if (activation_out not in ACTIVATIONS):
             raise ValueError("Unrecognized activation_out '%s'. "
@@ -54,10 +51,11 @@ class Network:
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         if epochs <= 0:
             raise ValueError("epochs must be > 0, got %s. " % epochs)
-        
-        self.evalutaion_metric = evaluation_metric #TODO: check
-        
         self.epochs = epochs
+        if evaluation_metric not in EVALUATION_METRICS:
+            raise ValueError ("Unrecognized evaluation metric '%s'. "
+                "Supported evaluation metrics are %s."% (evaluation_metric, list(EVALUATION_METRICS)))
+        self.evalutaion_metric = EVALUATION_METRICS[evaluation_metric]
         learning_rate_schedules = ["fixed", "linear_decay"]
         if learning_rate not in learning_rate_schedules:
             raise ValueError("Unrecognized learning_rate_schedule '%s'. "
@@ -80,16 +78,24 @@ class Network:
         if alpha > 1 or alpha < 0:
             raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
+        if verbose > epochs or verbose <= 0:
+            raise ValueError("verbose must be between 1 and max epochs %s, got %s" % (epochs, verbose))
         self.verbose = verbose
-
+        if not isinstance(nesterov, bool):
+            raise ValueError("nesterov must be a boolean, got %s" % nesterov)
         self.nesterov = nesterov
+        if early_stopping_patience > epochs or early_stopping_patience <= 0:
+            raise ValueError("patience must be between 1 and max epochs %s, got %s" % (epochs, early_stopping_patience))
         self.early_stopping_patience = early_stopping_patience
-        self.validation_split = validation_split
-        
+        if validation_split > 100 or validation_split < 0:
+            raise ValueError("validation split must be between 0 and 100 (%), got %s" % validation_split)
+        self.validation_split = validation_split     
+        if tol < 0 or tol > 0.5:
+            raise ValueError("tolerance must be > 0 and < 0.5, got %s" % tol)
         self.tol = tol
-        self.epochs_val_score = epochs_val_score # get validation score every epochs_val_score epochs
-
-
+        if evaluation_frequency > epochs or evaluation_frequency <= 0:
+            raise ValueError("evaluation frequency must be between 1 and max epochs %s, got %s" % (epochs, evaluation_frequency))
+        self.evaluation_frequency = evaluation_frequency 
 
     # add layer to network
     def add(self, layer):
@@ -188,12 +194,14 @@ class Network:
         ))
 
         #divide training set into batches
-        if isinstance(self.batch_size, int):
-            n_batches = ceil(x_train.shape[0] / self.batch_size)
-        else: # assuming it is a float
-            n_batches = floor(1 / self.batch_size)
-        x_train_batched = np.array_split(x_train, n_batches)
-        y_train_batched = np.array_split(y_train, n_batches)
+        # if isinstance(self.batch_size, int):
+        #     n_batches = ceil(x_train.shape[0] / self.batch_size)
+        # else: # assuming it is a float
+        #     n_batches = floor(1 / self.batch_size)
+        # x_train_batched = np.array_split(x_train, n_batches)
+        # y_train_batched = np.array_split(y_train, n_batches)
+        x_train_batched = [x_train[i:i + self.batch_size] for i in range(0, len(x_train), self.batch_size)]
+        y_train_batched = [y_train[i:i + self.batch_size] for i in range(0, len(y_train), self.batch_size)]
 
         all_train_errors = []
         all_val_errors = []
@@ -214,7 +222,8 @@ class Network:
         # end loop
         for epoch in range(self.epochs):         
             train_error = 0
-            x_train_batched, y_train_batched = unison_shuffle(x_train_batched, y_train_batched)
+            if (self.batch_size == 1 ):
+                x_train_batched, y_train_batched = unison_shuffle(x_train_batched, y_train_batched)
 
             # for every batches in the set loop  
             for x_batch, y_batch in zip(x_train_batched, y_train_batched):                                      
@@ -253,14 +262,15 @@ class Network:
             train_score = self.evalutaion_metric(y_train, predict_tr)
             
             #-----validation-----
-            if (epoch % self.epochs_val_score) == 0:
+            if (epoch % self.evaluation_frequency) == 0:
                 predict_val = self.predict(x_val)
                 if len(y_val.shape)==1:
                     y_val = y_val.reshape(y_val.shape[0], 1)
-                val_error = mean_squared_error(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
+                val_error = self.loss(y_true=y_val, y_pred=predict_val) # TODO: rendere parametrizzabile (self.loss funziona con shape diverse, aggiustarla in modo da poterla applicare anche qui)
                 evaluation_score = self.evalutaion_metric(y_val, predict_val) #evaluation
             
              #-----early stopping-----
+            #print(stopping)
             if epoch >= 10:              
                 #if we've already converged (validation error near 0)
                 if val_error <= self.tol:
@@ -287,11 +297,11 @@ class Network:
     
             
         #show stats
-        """plt.plot(all_train_errors, label="training", color="blue")
-        plt.plot(all_val_errors, label= "validation", color="green")
-        plt.plot(all_evalution_scores, label="score",color="red")
-        plt.legend(loc="upper right")
-        plt.show()"""
+        # plt.plot(all_train_errors, label="training", color="blue")
+        # plt.plot(all_val_errors, label= "validation", color="green")
+        # plt.plot(all_evalution_scores, label="score",color="red")
+        # plt.legend(loc="upper right")
+        # plt.show()
 
         return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
     

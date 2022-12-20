@@ -6,7 +6,7 @@ from utils import error_plot, accuracy_plot, flatten_pred
 
 # TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
 
-def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
+def _cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     if k <= 1:
         print('Number of folds k must be more than 1')
         exit()
@@ -35,14 +35,15 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     val_error_fold = []
     tr_accuracy_fold = []
     val_accuracy_fold = []
-    accuracy_fold = []
+    test_accuracy_fold = []
 
     # --------------cross validation--------------
     for fold in range(k):
         # create validation set and training set
+        print("FOLD {}".format(k))
         tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, fold)
 
-        net = Network(activation_out='tanh', epochs=epochs, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+        net = Network(activation_out='tanh', epochs=epochs, batch_size=8, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
         
         # --------------train--------------
         # return error and accuracy values for each epoch 
@@ -71,7 +72,7 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
         pred = net.predict(val_data)
         flattened_pred = flatten_pred(pred)
         accuracy = accuracy_score(y_true=val_targets, y_pred=flattened_pred)
-        accuracy_fold.append(accuracy) # update accuracy
+        test_accuracy_fold.append(accuracy) # update accuracy
     #---------------------------------------------
         
     # convert to numpy object
@@ -79,7 +80,7 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     val_error_fold = np.array(val_error_fold, dtype=object)
     tr_accuracy_fold = np.array(tr_accuracy_fold, dtype=object)
     val_accuracy_fold = np.array(val_accuracy_fold, dtype=object)
-    accuracy_fold = np.array(accuracy_fold, dtype=object)
+    test_accuracy_fold = np.array(test_accuracy_fold, dtype=object)
     
     # --------------results--------------
     # i.e. average and std deviation of error and accuracy for each epoch
