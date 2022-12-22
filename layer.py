@@ -38,7 +38,6 @@ class Layer():
             self.bias = np.zeros((1, self.fan_out))
 
     def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
-        # TODO: ricontrollare
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size
  
@@ -65,15 +64,14 @@ class Layer():
         self.output = self.activation(self.net)
         return self.output
 
-    # computes dE/dW, dE/dB for a given error=dE/dY. Returns input_error=dE/dX.
-    def backward_propagation(self, error): # REVIEW: rename error --> delta_j
-        delta = np.dot(error, self.activation_prime(self.net))
-        sum_w_delta = np.dot(delta, np.transpose(self.weights)) # REVIEW: rename sum_w_delta --> delta_i
-        weights_error = np.dot(np.transpose(self.input), delta) # dE/dW
-        #weights_error = np.outer(self.input, delta) # REVIEW: rename weights_error --> delta_w
-        # dBias = delta
-        #accumalte deltas
-        self.deltas_weights += weights_error
-        self.deltas_bias += delta
+    def backward_propagation(self, delta_j): 
+        delta = np.dot(delta_j, self.activation_prime(self.net))
+        delta_i = np.dot(delta, np.transpose(self.weights)) 
+        #weights_error = np.dot(np.transpose(self.input), delta) 
+        delta_w = np.outer(self.input, delta) 
 
-        return sum_w_delta
+        #accumalte deltas
+        self.deltas_weights += delta_w
+        self.deltas_bias += delta 
+
+        return delta_i

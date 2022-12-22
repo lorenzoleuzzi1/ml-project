@@ -34,11 +34,12 @@ X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 #print(len(X_train))
 
-"""# cross validation
-cross_validation(X_train, y_train, X_test, y_test, k=3, epochs=1000)"""
+# cross validation
+#cross_validation(X_train, y_train, X_test, y_test, k=3, epochs=1000, activation_out='tanh',classification= True)
 
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True, early_stopping=False)
-all_train_errors, tr_accuracy = net.fit(X_train, y_train) # without early stopping
+net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 1000, batch_size=1, 
+learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=False, early_stopping=True)
+all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # without early stopping
 # #all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train) # with early stopping
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))

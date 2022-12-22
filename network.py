@@ -17,9 +17,9 @@ class Network:
         hidden_layer_sizes=[3], 
         loss='mse', 
         evaluation_metric = 'mse',
-        epochs=200,
+        epochs = 200,
         learning_rate ='fixed',
-        learning_rate_init=0.001,
+        learning_rate_init=0.0001,
         tau=100,
         batch_size=1, # 1 = stochastic, 1.0 = un batch
         lambd=0.0001,
@@ -27,8 +27,8 @@ class Network:
         verbose=True,
         nesterov = False,
         early_stopping = True, # TODO: checks
-        stopping_patience = 20, # TODO: se validation_frequency è alta può essere basso
-        validation_size = 10, # TODO: implement as batch size (if float % otw absolute)
+        stopping_patience = 20, 
+        validation_size = 0.1, 
         tol=0.0005,
         validation_frequency = 4 # TODO: formalmente dovremmo esprimerla coma frazione...
         ):
@@ -57,7 +57,7 @@ class Network:
         if evaluation_metric not in EVALUATION_METRICS:
             raise ValueError ("Unrecognized evaluation metric '%s'. "
                 "Supported evaluation metrics are %s."% (evaluation_metric, list(EVALUATION_METRICS)))
-        self.evalutaion_metric = EVALUATION_METRICS[evaluation_metric]
+        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]
         learning_rate_schedules = ["fixed", "linear_decay"]
         if learning_rate not in learning_rate_schedules:
             raise ValueError("Unrecognized learning_rate_schedule '%s'. "
@@ -67,7 +67,7 @@ class Network:
             raise ValueError("learning_rate_init must be > 0, got %s. " % learning_rate_init)
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
-        self.learning_rate_fin = learning_rate_init * 0.1 # REVIEW: parametrize?
+        self.learning_rate_fin = learning_rate_init * 0.1 
         if tau <= 0 or tau > self.epochs:
             raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
@@ -124,10 +124,10 @@ class Network:
             result.append(output)
 
         result = np.array(result) # converts external list into numpy array
-        if self.y_flatten:
-            result = result.reshape(result.shape[0])
-        else:
-            result = result.reshape(result.shape[0], result.shape[2])
+        # if self.y_flatten:
+        #     result = result.reshape(result.shape[0])
+        # else:
+        result = result.reshape(result.shape[0], result.shape[2])
         return result
 
     def update_learning_rate(self, epoch):
@@ -162,24 +162,25 @@ class Network:
                 #validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
                 #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
                 
-        """#shuffle the whole training set 
-        x_train, y_train = unison_shuffle(x_train, y_train)
+        # #shuffle the whole training set 
+        # x_train, y_train = unison_shuffle(x_train, y_train)
         
-        #split training set for validation
-        validation_size = max(int(len(x_train)/100 * self.validation_split), 1)
-        x_val = x_train[:validation_size]
-        y_val = y_train[:validation_size]    
-        x_train = x_train[validation_size:]
-        y_train = y_train[validation_size:]
-        """
+        # #split training set for validation
+        # validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
+        # x_val = x_train[:validation_size]
+        # y_val = y_train[:validation_size]      
+        # x_train = x_train[validation_size:]
+        # y_train = y_train[validation_size:]
+        
+        
         samples = len(x_train)   
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
         
-        x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
+        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
         self.y_flatten = False
-        if len(y_train.shape)==1: # TODO: check y_val, y_train have same dim
+        if len(y_train.shape)==1: 
             self.y_flatten = True
             if self.early_stopping: y_val = y_val.reshape(y_val.shape[0], 1)
             y_train = y_train.reshape(y_train.shape[0], 1)
@@ -232,6 +233,8 @@ class Network:
             x_train, y_train = unison_shuffle(x_train, y_train)
             x_train_batched = np.array_split(x_train, n_batches)
             y_train_batched = np.array_split(y_train, n_batches)
+            # x_train_batched = [x_train[i:i + self.batch_size] for i in range(0, len(x_train), self.batch_size)]
+            # y_train_batched = [y_train[i:i + self.batch_size] for i in range(0, len(y_train), self.batch_size)]
 
             # for every batches in the set loop
             for x_batch, y_batch in zip(x_train_batched, y_train_batched):
@@ -244,13 +247,12 @@ class Network:
                         output = layer.forward_propagation(output)
                       
                     # compute loss (for display)
-                    train_error += self.loss(y_true=y, y_pred=output)
+                    #train_error += self.loss(y_true=y, y_pred=output) #spostato a 264
                     
                     # backward propagation
-                    # REVIEW: rename error --> delta
-                    error = self.loss_prime(y_true=y, y_pred=output)
+                    delta = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
-                        error = layer.backward_propagation(error)
+                        delta = layer.backward_propagation(delta)
                 
                 # new learning rate
                 self.update_learning_rate(epoch)
@@ -258,19 +260,20 @@ class Network:
                 for layer in self.layers:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
-            # REVIEW: train error calcolata epoca per epoca, train_score alla fine
+            # REVIEW: train error calcolata batch per batch, train_score alla fine
             predict_tr = self.predict(x_train)
-            train_score = self.evalutaion_metric(y_train, predict_tr)
+            train_score = self.evaluation_metric(y_train, predict_tr)
+            train_error = self.loss(y_true=y_train, y_pred=predict_tr) #da 247
             
             #-----validation-----
-
             if self.early_stopping:
                 if (epoch % self.validation_frequency) == 0:
                     predict_val = self.predict(x_val)
-                    val_error = self.loss(y_true=y_val, y_pred=predict_val) # REVIEW: già diviso per num samples?
-                    evaluation_score = self.evalutaion_metric(y_val, predict_val)
+                    val_error = self.loss(y_true=y_val, y_pred=predict_val)
+                    evaluation_score = self.evaluation_metric(y_val, predict_val)
             
-            train_error /= samples # average on all samples # REVIEW: spostato qua sopra!
+            #train_error /= samples # average on all samples 
+            
             #-----stopping-----
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
@@ -284,15 +287,11 @@ class Network:
                 
                 if error_below_tol: # if we've already converged (error near 0)
                     stopping = 0
-                elif error_increased or error_decrease_perc < 1/1000: # if no more significant error decreasing (less than 0.1%) or we are not converging 
+                elif error_increased or error_decrease_perc < 1/1000: # if no more significant error decreasing (less than 0.1%) or we are not converging                   
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
-
-                # old-new < 1/1000*old => (old-new)/old < 1/1000
-                # 1000 old
-                #  999,5 new
-                # 1000 - 999,5 = 0.5 < 1 => stop
+                
             
             all_train_errors.append(train_error)
             all_train_score.append(train_score)
@@ -311,11 +310,11 @@ class Network:
 
         #show stats
 
-        """plt.plot(all_train_errors, label="training", color="blue")
+        plt.plot(all_train_errors, label="training", color="blue")
         plt.plot(all_val_errors, label= "validation", color="green")
         plt.plot(all_evalution_scores, label="score",color="red")
         plt.legend(loc="upper right")
-        plt.show()"""
+        plt.show()
         if self.early_stopping:
             return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
         else:

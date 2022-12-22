@@ -4,7 +4,7 @@ from network import Network
 from utils import fold_plot, flatten_pred, mean_and_std
 from sklearn.model_selection import StratifiedKFold
 
-def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
+def cross_validation(X_train, y_train, X_test, y_test, k, epochs, activation_out, classification):
     # if k <= 1:
     #     print('Number of folds k must be more than 1')
     #     exit()
@@ -26,7 +26,8 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
         y_train_fold, y_val_fold = y_train[train_index], y_train[validation_index] 
 
         # --------------train--------------
-        net = Network(activation_out='tanh')
+        #net = Network(activation_out=activation_out, classification=classification)
+        net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
         tr_error, val_error, tr_score, val_score = net.fit(X_train_fold, y_train_fold) 
         
         #fill with 0s
@@ -43,8 +44,8 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
 
         # --------------outer validation--------------
         pred = net.predict(X_val_fold)
-        flattened_pred = flatten_pred(pred)
-        score = accuracy_score(y_true=y_val_fold, y_pred=flattened_pred)
+        #flattened_pred = flatten_pred(pred)
+        score = net.evaluation_metric(y_true=y_val_fold, y_pred=pred)
         test_score_fold.append(score) 
     
     
@@ -85,7 +86,7 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     #-----test-----
     # predict and score
     pred_on_test_data = net.predict(X_test)
-    flattened_pred_on_test_data = flatten_pred(pred_on_test_data)
+    # flattened_pred_on_test_data = net.evalutaion_metric(pred_on_test_data)
     
     # for p, y in zip(pred_on_test_data, y_test):
     #     print("pred: {} expected: {}".format(p[0],y))
@@ -95,7 +96,7 @@ def cross_validation(X_train, y_train, X_test, y_test, k, epochs):
     print("TR error - mean: {} std: {}  \nVL error - mean {} std: {}".format(mean_tr_error, std_tr_error, mean_val_error, std_val_error))
     print("TR score - mean: {} std: {}  \nVL score - mean {} std: {}".format(mean_tr_score, std_tr_score, mean_val_score, std_val_score))
     print("outer VL score - mean: {} std: {}".format(mean_outer_val_score, std_outer_val_score))
-    print("TEST score: {}%".format(accuracy_score(y_true=y_test, y_pred=flattened_pred_on_test_data) * 100)) #TODO: non per forza accuracy
+    print("TEST score: {}%".format(net.evaluation_metric(y_true=y_test, y_pred=pred_on_test_data)))
 
     #TODO: return results?
 

@@ -148,10 +148,6 @@ EVALUATION_METRICS = {
     'accuracy': accuracy
 }
 
-EVALUATION_METRICS = {
-    'accuracy' : accuracy
-}
-
 #-----OTHERS-----
 def unison_shuffle(x, y):
     seed = np.random.randint(0, 100000) 
