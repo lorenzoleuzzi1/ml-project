@@ -1,141 +1,104 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
 from network import Network
-from utils import unison_shuffle,error_plot, accuracy_plot, flatten_pred
+from utils import fold_plot, flatten_pred, mean_and_std
+from sklearn.model_selection import StratifiedKFold
 
-# TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
+def cross_validation(X_train, y_train, X_test, y_test, k, epochs, activation_out, classification):
+    # if k <= 1:
+    #     print('Number of folds k must be more than 1')
+    #     exit()
+    
+    skf = StratifiedKFold(n_splits=k, shuffle=True) 
 
-def _cross_validation(X_train, y_train, X_test, y_test, k, epochs):
-    if k <= 1:
-        print('Number of folds k must be more than 1')
-        exit()
-
-    X_train, y_train = unison_shuffle(X_train, y_train) # random reorganize the order of the data
-    
-    # TODO: divisione in fold con StratifiedKFold (posso usarlo?)
-    
-    number_used_data = len(X_train) - (len(X_train) % k) # numbers of data and target used in cross validation
-    data = []
-    targets = []
-    for i in range(number_used_data):
-        data.append(X_train[i])
-        targets.append(y_train[i])
-        
-    # convert to numpy object        
-    data = np.array(data, dtype=np.int64) 
-    targets = np.array(targets, dtype=np.int64)
-    
-    # split dataset into k fold:   
-    data_folds = np.array(np.array_split(data, k), dtype=object) # list of folds containing the data (numpy tensor)
-    target_folds = np.array(np.array_split(targets, k), dtype=object) # list of folds containing the targets (numpy matrix)
-    
-    # init error and accuracy vector:    
+    # init error and score vectors    
     tr_error_fold = []
     val_error_fold = []
-    tr_accuracy_fold = []
-    val_accuracy_fold = []
-    test_accuracy_fold = []
+    tr_score_fold = []
+    val_score_fold = []
+    test_score_fold = []
 
-    # --------------cross validation--------------
-    for fold in range(k):
-        # create validation set and training set
-        print("FOLD {}".format(k))
-        tr_data, tr_targets, val_data, val_targets = create_sets(data_folds, target_folds, fold)
+    for train_index, validation_index in skf.split(X_train, y_train):
+        #-----stratified K-fold split-----
+        print("FOLD")
+        #split training set for validation
+        X_train_fold, X_val_fold = X_train[train_index], X_train[validation_index] 
+        y_train_fold, y_val_fold = y_train[train_index], y_train[validation_index] 
 
-        net = Network(activation_out='tanh', epochs=epochs, batch_size=8, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
-        
         # --------------train--------------
-        # return error and accuracy values for each epoch 
-        tr_error, val_error, tr_accuracy, val_accuracy = net.fit(tr_data, tr_targets)        
+        #net = Network(activation_out=activation_out, classification=classification)
+        net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 1000, batch_size=32, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+        tr_error, val_error, tr_score, val_score = net.fit(X_train_fold, y_train_fold) 
         
-        # reshape
+        #fill with 0s
         for _ in range(epochs - len(tr_error)):
             tr_error.append(0)
             val_error.append(0)
-            tr_accuracy.append(0)
-        for _ in range(epochs - len(val_accuracy)):
-            val_accuracy.append(0)   
-        # convert to numpy object
-        tr_error = np.array(tr_error)
-        val_error = np.array(val_error)
-        tr_accuracy = np.array(tr_accuracy)
-        val_accuracy = np.array(val_accuracy)   
+            tr_score.append(0)
+            val_score.append(0)    
 
-        # update errors and accuracy: 
         tr_error_fold.append(tr_error)        
         val_error_fold.append(val_error)
-        tr_accuracy_fold.append(tr_accuracy)      
-        val_accuracy_fold.append(val_accuracy) 
-          
-        # --------------test--------------
-        pred = net.predict(val_data)
-        flattened_pred = flatten_pred(pred)
-        accuracy = accuracy_score(y_true=val_targets, y_pred=flattened_pred)
-        test_accuracy_fold.append(accuracy) # update accuracy
-    #---------------------------------------------
-        
-    # convert to numpy object
-    tr_error_fold = np.array(tr_error_fold, dtype=object)
-    val_error_fold = np.array(val_error_fold, dtype=object)
-    tr_accuracy_fold = np.array(tr_accuracy_fold, dtype=object)
-    val_accuracy_fold = np.array(val_accuracy_fold, dtype=object)
-    test_accuracy_fold = np.array(test_accuracy_fold, dtype=object)
+        tr_score_fold.append(tr_score)      
+        val_score_fold.append(val_score) 
+
+        # --------------outer validation--------------
+        pred = net.predict(X_val_fold)
+        #flattened_pred = flatten_pred(pred)
+        score = net.evaluation_metric(y_true=y_val_fold, y_pred=pred)
+        test_score_fold.append(score) 
+    
     
     # --------------results--------------
-    # i.e. average and std deviation of error and accuracy for each epoch
-    avg_tr_error, dev_tr_error = mean_std_dev(tr_error_fold)
-    avg_val_error, dev_val_error = mean_std_dev(val_error_fold)
-    avg_tr_accuracy, dev_tr_accuracy = mean_std_dev(tr_accuracy_fold)
-    avg_val_accuracy, dev_val_accuracy = mean_std_dev(val_accuracy_fold)
     
+    last_tr_error = []
+    last_val_error = []
+    last_tr_score = []
+    last_val_score = []
+    last_outer_val_score = []
+    #create an array of the last results for each K-fold
+    for tr_error, val_error, tr_score, val_score, test_score \
+        in zip(tr_error_fold, val_error_fold, tr_score_fold, val_score_fold, test_score_fold):       
+        last_tr_error.append(np.trim_zeros(tr_error, 'b')[-1])
+        last_val_error.append(np.trim_zeros(val_error, 'b')[-1])
+        last_tr_score.append(np.trim_zeros(tr_score, 'b')[-1])
+        last_val_score.append(np.trim_zeros(val_score, 'b')[-1])
+        last_outer_val_score.append(test_score)
+
+    #mean and std dev of the last results (of each K-fold) TODO: better way without appending and trimming zeros
+    mean_tr_error, std_tr_error = mean_and_std(last_tr_error) 
+    mean_val_error, std_val_error = mean_and_std(last_val_error)
+    mean_tr_score, std_tr_score = mean_and_std(last_tr_score)
+    mean_val_score, std_val_score = mean_and_std(last_val_score)
+    mean_outer_val_score, std_outer_val_score = mean_and_std(last_outer_val_score)
+
+    #average of the learning curve  TODO: rename
+    avg_tr_error, dev_tr_error = mean_std_dev(np.array(tr_error_fold))
+    avg_val_error, dev_val_error = mean_std_dev(np.array(val_error_fold))
+    avg_tr_score, dev_tr_score = mean_std_dev(np.array(tr_score_fold))
+    avg_val_score, dev_val_score = mean_std_dev(np.array(val_score_fold))
+
+
     # plot results
-    error_plot(avg_tr_error, avg_val_error)
-    accuracy_plot(avg_tr_accuracy, avg_val_accuracy)
+    fold_plot("error", tr_error_fold, val_error_fold, avg_tr_error, avg_val_error) 
+    fold_plot("score", tr_score_fold, val_score_fold, avg_tr_score, avg_val_score) 
     
-    # predict and accuracy
+    #-----test-----
+    # predict and score
     pred_on_test_data = net.predict(X_test)
+    # flattened_pred_on_test_data = net.evalutaion_metric(pred_on_test_data)
     
-    for p, y in zip(pred_on_test_data, y_test):
-        print("pred: {} expected: {}".format(p[0],y))
+    # for p, y in zip(pred_on_test_data, y_test):
+    #     print("pred: {} expected: {}".format(p[0],y))
 
-    flattened_pred_on_test_data = flatten_pred(pred_on_test_data)
-    print("accuracy: {}%".format(accuracy_score(y_true=y_test, y_pred=flattened_pred_on_test_data) * 100))
+    
+    #-----print results-----
+    print("TR error - mean: {} std: {}  \nVL error - mean {} std: {}".format(mean_tr_error, std_tr_error, mean_val_error, std_val_error))
+    print("TR score - mean: {} std: {}  \nVL score - mean {} std: {}".format(mean_tr_score, std_tr_score, mean_val_score, std_val_score))
+    print("outer VL score - mean: {} std: {}".format(mean_outer_val_score, std_outer_val_score))
+    print("TEST score: {}%".format(net.evaluation_metric(y_true=y_test, y_pred=pred_on_test_data)))
 
-def create_sets(data_folds, target_folds, val_idx):
-    """create k set of folds"""
-    # validation fold
-    val_data = data_folds[val_idx]
-    val_data = np.array(val_data, dtype=np.float32)
-
-    val_targets = target_folds[val_idx]
-    val_targets = np.array(val_targets, dtype=np.float32)
-
-    # training fold
-    if val_idx != 0:
-        tr_data = data_folds[0]
-        tr_targets = target_folds[0]
-        start = 1
-        idx = 1
-    else:
-        tr_data = data_folds[1]
-        tr_targets = target_folds[1]
-        start = 0
-        idx = 0
-
-    for fold in data_folds[start:]:
-        if idx != val_idx:
-            tr_data = np.concatenate((tr_data, fold)) # concatenate matrices
-        idx += 1
-    tr_data = np.array(tr_data, dtype=np.float32)
-
-    idx = start
-    for fold in target_folds[start:]:
-        if idx != val_idx:
-            tr_targets = np.concatenate((tr_targets, fold))
-        idx += 1
-    tr_targets = np.array(tr_targets, dtype=np.float32)
-
-    return tr_data, tr_targets, val_data, val_targets
+    #TODO: return results?
 
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""

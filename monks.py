@@ -4,7 +4,7 @@ from sklearn.preprocessing import OneHotEncoder
 from utils import accuracy
 from network import Network
 from utils import flatten_pred
-from new_cross_validation import cross_validation
+from cross_validation import cross_validation
 
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
