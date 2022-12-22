@@ -3,8 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from utils import accuracy
 from network import Network
-#from utils import linear_decay, error_plot, accuracy_plot, flatten_pred
-from cross_validation import *
+from utils import flatten_pred
+from new_cross_validation import cross_validation
 
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
@@ -44,3 +44,4 @@ pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 #error_plot(all_train_errors, all_val_errors) # with early stopping
 #accuracy_plot(tr_accuracy, val_accuracy) # with early stopping
+

@@ -32,7 +32,7 @@ class Network:
         tol=0.0005,
         validation_frequency = 4 # TODO: formalmente dovremmo esprimerla coma frazione...
         ):
-
+        #TODO: funzione check inputs?
         self.layers = []
         if (activation_out not in ACTIVATIONS):
             raise ValueError("Unrecognized activation_out '%s'. "
@@ -53,13 +53,11 @@ class Network:
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         if epochs <= 0:
             raise ValueError("epochs must be > 0, got %s. " % epochs)
-        
-        if evaluation_metric not in EVALUATION_METRICS:
-            raise ValueError("Unrecognized evaluation_metric '%s'. "
-            "Supported evaluation metrics are %s." % (evaluation_metric, EVALUATION_METRICS))
-        self.evalutaion_metric = EVALUATION_METRICS[evaluation_metric]
-        
         self.epochs = epochs
+        if evaluation_metric not in EVALUATION_METRICS:
+            raise ValueError ("Unrecognized evaluation metric '%s'. "
+                "Supported evaluation metrics are %s."% (evaluation_metric, list(EVALUATION_METRICS)))
+        self.evalutaion_metric = EVALUATION_METRICS[evaluation_metric]
         learning_rate_schedules = ["fixed", "linear_decay"]
         if learning_rate not in learning_rate_schedules:
             raise ValueError("Unrecognized learning_rate_schedule '%s'. "
@@ -82,16 +80,29 @@ class Network:
         if alpha > 1 or alpha < 0:
             raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
+        if verbose > epochs or verbose <= 0:
+            raise ValueError("verbose must be between 1 and max epochs %s, got %s" % (epochs, verbose))
         self.verbose = verbose
-
+        if not isinstance(nesterov, bool):
+            raise ValueError("nesterov must be a boolean, got %s" % nesterov)
         self.nesterov = nesterov
+        if stopping_patience > epochs or stopping_patience <= 0:
+            raise ValueError("patience must be between 1 and max epochs %s, got %s" % (epochs, stopping_patience))
         self.stopping_patience = stopping_patience
-        self.early_stopping = early_stopping
-        self.validation_size = validation_size
+ 
+        self.early_stopping = early_stopping #TODO: check
         
+        if validation_size > 100 or validation_size < 0:
+            raise ValueError("validation size must be between 0 and 100 (%), got %s" % validation_size)
+        self.validation_size = validation_size    
+        if tol < 0 or tol > 0.5:
+            raise ValueError("tolerance must be > 0 and < 0.5, got %s" % tol)
         self.tol = tol
-        self.validation_frequency = validation_frequency
-        self.classification = classification
+        if validation_frequency > epochs or validation_frequency <= 0:
+            raise ValueError("validation frequency must be between 1 and max epochs %s, got %s" % (epochs, validation_frequency))
+        self.validation_frequency = validation_frequency 
+        
+        self.classification = classification #TODO: check
 
     # add layer to network
     def add(self, layer):
@@ -217,6 +228,7 @@ class Network:
         # end loop
         for epoch in range(self.epochs):
             train_error = 0
+            
             x_train, y_train = unison_shuffle(x_train, y_train)
             x_train_batched = np.array_split(x_train, n_batches)
             y_train_batched = np.array_split(y_train, n_batches)
@@ -251,6 +263,7 @@ class Network:
             train_score = self.evalutaion_metric(y_train, predict_tr)
             
             #-----validation-----
+
             if self.early_stopping:
                 if (epoch % self.validation_frequency) == 0:
                     predict_val = self.predict(x_val)
@@ -297,6 +310,7 @@ class Network:
             if stopping <= 0: break
 
         #show stats
+
         """plt.plot(all_train_errors, label="training", color="blue")
         plt.plot(all_val_errors, label= "validation", color="green")
         plt.plot(all_evalution_scores, label="score",color="red")
