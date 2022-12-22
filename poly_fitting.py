@@ -50,6 +50,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 net = Network(
     hidden_layer_sizes=[3, 3],
     activation_out='identity',
+    classification=False,
     activation_hidden='tanh',
     lambd=0.0001,
     batch_size=1,

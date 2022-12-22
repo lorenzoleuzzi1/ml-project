@@ -12,6 +12,7 @@ class Network:
     def __init__(
         self, 
         activation_out,
+        classification,
         activation_hidden='tanh', 
         hidden_layer_sizes=[3], 
         loss='mse', 
@@ -25,11 +26,11 @@ class Network:
         alpha=0.9,
         verbose=True,
         nesterov = False,
-        early_stopping_patience = 20, # REVIEW: if low it stops too early
-        validation_split = 20,
+        early_stopping = True, # TODO: checks
+        stopping_patience = 20, # TODO: se validation_frequency è alta può essere basso
+        validation_size = 10, # TODO: implement as batch size (if float % otw absolute)
         tol=0.0005,
-        validation_frequency = 4,
-        classification=False
+        validation_frequency = 4 # TODO: formalmente dovremmo esprimerla coma frazione...
         ):
 
         self.layers = []
@@ -84,8 +85,9 @@ class Network:
         self.verbose = verbose
 
         self.nesterov = nesterov
-        self.early_stopping_patience = early_stopping_patience
-        self.validation_split = validation_split
+        self.stopping_patience = stopping_patience
+        self.early_stopping = early_stopping
+        self.validation_size = validation_size
         
         self.tol = tol
         self.validation_frequency = validation_frequency
@@ -138,14 +140,17 @@ class Network:
                 self.learning_rate_curr = lr
 
     def fit(self, x_train, y_train):
-        if self.classification:
-            label = unique_labels(y_train)
-            validation_size = max(int(len(x_train)/100 * self.validation_split), len(label))
-            x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True, stratify=y_train)
-        else:
-            validation_size = max(int(len(x_train)/100 * self.validation_split), 1)
-            x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
-            
+        if self.early_stopping:
+            if self.classification:
+                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, stratify=y_train)
+                #label = unique_labels(y_train)
+                #validation_size = max(int(len(x_train)/100 * self.validation_size), len(label))
+                #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True, stratify=y_train)
+            else:
+                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True)
+                #validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
+                #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
+                
         """#shuffle the whole training set 
         x_train, y_train = unison_shuffle(x_train, y_train)
         
@@ -165,33 +170,30 @@ class Network:
         self.y_flatten = False
         if len(y_train.shape)==1: # TODO: check y_val, y_train have same dim
             self.y_flatten = True
-            y_val = y_val.reshape(y_val.shape[0], 1)
+            if self.early_stopping: y_val = y_val.reshape(y_val.shape[0], 1)
             y_train = y_train.reshape(y_train.shape[0], 1)
         
         # Add first hidden layer
         self.add(Layer(
             fan_in=x_train.shape[-1], 
             fan_out=self.hidden_layer_sizes[0], 
-            activation=self.activation_hidden#self.activation_hidden, 
-            #activation_prime=self.activation_hidden_prime
+            activation=self.activation_hidden
             ))
         # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
                 fan_in=self.hidden_layer_sizes[i], 
                 fan_out=self.hidden_layer_sizes[i+1], 
-                activation=self.activation_hidden#self.activation_hidden, 
-                #activation_prime=self.activation_hidden_prime
+                activation=self.activation_hidden
             ))
         # Add output layer
         self.add(Layer(
             fan_in=self.hidden_layer_sizes[-1], 
             fan_out=y_train.shape[1],
-            activation=self.activation_out#self.activation_out, 
-            #activation_prime=self.activation_out_prime
+            activation=self.activation_out
         ))
 
-        #divide training set into batches
+        # divide training set into batches
         if isinstance(self.batch_size, int):
             n_batches = ceil(x_train.shape[0] / self.batch_size)
         else: # assuming it is a float
@@ -202,8 +204,7 @@ class Network:
         all_train_score = []
         all_evalution_scores = []
 
-        stopping = self.early_stopping_patience 
-
+        stopping = self.stopping_patience 
 
         #-----training loop-----
         # loop max-epoch times
@@ -214,21 +215,21 @@ class Network:
         #       end for
         #   adjust weights and bias deltas using accumulated deltas
         # end loop
-        for epoch in range(self.epochs):         
+        for epoch in range(self.epochs):
             train_error = 0
             x_train, y_train = unison_shuffle(x_train, y_train)
             x_train_batched = np.array_split(x_train, n_batches)
             y_train_batched = np.array_split(y_train, n_batches)
 
-            # for every batches in the set loop  
-            for x_batch, y_batch in zip(x_train_batched, y_train_batched):                                      
+            # for every batches in the set loop
+            for x_batch, y_batch in zip(x_train_batched, y_train_batched):
                 # for every patterns in the batch loop
                 for x, y in zip(x_batch, y_batch):
                     output = x
                     
-                    # forward propagation  
+                    # forward propagation
                     for layer in self.layers:
-                        output = layer.forward_propagation(output)                        
+                        output = layer.forward_propagation(output)
                       
                     # compute loss (for display)
                     train_error += self.loss(y_true=y, y_pred=output)
@@ -239,59 +240,74 @@ class Network:
                     for layer in reversed(self.layers):
                         error = layer.backward_propagation(error)
                 
-                #new learning rate
-                self.update_learning_rate(epoch)  
+                # new learning rate
+                self.update_learning_rate(epoch)
                 # update (for every batch)
                 for layer in self.layers:
                     layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
             
+            # REVIEW: train error calcolata epoca per epoca, train_score alla fine
             predict_tr = self.predict(x_train)
-                
             train_score = self.evalutaion_metric(y_train, predict_tr)
             
             #-----validation-----
-            if (epoch % self.validation_frequency) == 0:
-                predict_val = self.predict(x_val)
-                val_error = self.loss(y_true=y_val, y_pred=predict_val)
-                evaluation_score = self.evalutaion_metric(y_val, predict_val)
+            if self.early_stopping:
+                if (epoch % self.validation_frequency) == 0:
+                    predict_val = self.predict(x_val)
+                    val_error = self.loss(y_true=y_val, y_pred=predict_val) # REVIEW: già diviso per num samples?
+                    evaluation_score = self.evalutaion_metric(y_val, predict_val)
             
-             #-----early stopping-----
-            if epoch >= 10:              
-                #if we've already converged (validation error near 0)
-                if val_error <= self.tol:
-                    stopping = 0  
-                else:            
-                    #if no more significant error decreasing (less than 0.1%) or we are not converging 
-                    #all_val_errors[-1] - val_error < val_error/1000 or (removed because small validation)
-                    if (all_val_errors[-1] - val_error < val_error/1000 or val_error > all_val_errors[-1]): # TODO: alzare la percentuale
-                        stopping -= 1 #decrease the 'patience'
-                    else:
-                        stopping = self.early_stopping_patience
-            
-            
-            train_error /= samples #average on all samples
-            all_train_errors.append(train_error)
-            all_val_errors.append(val_error)
-            all_train_score.append(train_score)
-            all_evalution_scores.append(evaluation_score)
-            if self.verbose:
-              print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
-                % (epoch+1, self.epochs, train_error, val_error, evaluation_score))
+            train_error /= samples # average on all samples # REVIEW: spostato qua sopra!
+            #-----stopping-----
+            if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
+                if self.early_stopping:
+                    error_below_tol = val_error <= self.tol
+                    error_decrease_perc = (all_val_errors[-1] - val_error) / all_val_errors[-1]
+                    error_increased = val_error > all_val_errors[-1] # REVIEW: loss deve essere tale che valore minore => migliore
+                else:
+                    error_below_tol = train_error <= self.tol
+                    error_decrease_perc = (all_train_errors[-1] - train_error) / all_train_errors[-1]
+                    error_increased = train_error > all_train_errors[-1] # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
+                
+                if error_below_tol: # if we've already converged (error near 0)
+                    stopping = 0
+                elif error_increased or error_decrease_perc < 1/1000: # if no more significant error decreasing (less than 0.1%) or we are not converging 
+                    stopping -= 1
+                else:
+                    stopping = self.stopping_patience
 
-            if stopping <= 0: break
-    
+                # old-new < 1/1000*old => (old-new)/old < 1/1000
+                # 1000 old
+                #  999,5 new
+                # 1000 - 999,5 = 0.5 < 1 => stop
             
+            all_train_errors.append(train_error)
+            all_train_score.append(train_score)
+            if self.early_stopping:
+                all_val_errors.append(val_error)
+                all_evalution_scores.append(evaluation_score)
+            
+            if self.verbose:
+                if self.early_stopping:
+                    print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
+                        % (epoch+1, self.epochs, train_error, val_error, evaluation_score))
+                else:
+                    print('epoch %d/%d   train error=%f' 
+                        % (epoch+1, self.epochs, train_error))
+            if stopping <= 0: break
+
         #show stats
         """plt.plot(all_train_errors, label="training", color="blue")
         plt.plot(all_val_errors, label= "validation", color="green")
         plt.plot(all_evalution_scores, label="score",color="red")
         plt.legend(loc="upper right")
         plt.show()"""
-
-        return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
+        if self.early_stopping:
+            return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
+        else:
+            return all_train_errors, all_train_score
     
     def save(self, path):
         file = open(path, 'wb')
         pickle.dump(self, file)
         file.close()
-

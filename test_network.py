@@ -42,6 +42,6 @@ for params in grid:
     out = net.predict(x_test)
     """
     
-net = Network(activation_out='tanh', epochs= 1000, batch_size=2, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
+net = Network(activation_out='identity', classification=False, epochs= 1000, batch_size=2, learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True)
 net.fit(x_train, y_train)
 print(net.predict(x_test))
