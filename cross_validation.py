@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
-from sklearn.utils import shuffle
 from network import Network
-from utils import error_plot, accuracy_plot, flatten_pred
+from utils import unison_shuffle,error_plot, accuracy_plot, flatten_pred
 
 # TODO: rappresentare graficamente: accuracy_fold + dev std di accuracy e error per ogni epoca (o forse no?)
 
@@ -11,7 +10,7 @@ def _cross_validation(X_train, y_train, X_test, y_test, k, epochs):
         print('Number of folds k must be more than 1')
         exit()
 
-    X_train, y_train = shuffle(X_train, y_train) # random reorganize the order of the data
+    X_train, y_train = unison_shuffle(X_train, y_train) # random reorganize the order of the data
     
     # TODO: divisione in fold con StratifiedKFold (posso usarlo?)
     
