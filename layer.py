@@ -21,18 +21,17 @@ class Layer():
 
     def weights_init(self, activation):
         '''
-        Qui https://link.springer.com/article/10.1007/s12065-022-00795-y per identity usa il secondo
-        Per softplus, softmax, logistic, identity
+        TODO: softplus? identity?
         '''
-        if activation == 'relu' or activation == 'leaky_relu': #TODO: softplus??
+        if activation == 'relu' or activation == 'leaky_relu':
             # He inizialization [https://arxiv.org/abs/1502.01852]
             self.weights = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))
-        else:
+        else: # softmax? nel paper la utilizzano
             # Xavier initialization [https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf]
             factor = 6.0
             if activation == "logistic":
-                factor = 2.0 # TODO: perchè? ha media 1/2, le assunzioni per cui viene derivata non valgono
+                factor = 2.0 # TODO: la logistic in 0 è 1/2, Xavier assume di avere tanh che vale 0 in 0
             bound = np.sqrt(factor / (self.fan_in + self.fan_out))
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))

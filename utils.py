@@ -60,13 +60,26 @@ def softmax_prime(x): # TODO: softmax può essere usata con numero unità output
     f = softmax(x) 
     return np.diagflat(f) - np.dot(np.transpose(f), f)
 
-def logloss(x):
-    # TODO:
-    return
+# TODO: ricontrollare se funziona con scalari / vettori, in generale se funziona e come usarla nel nostro progetto
+def crossEntropy_fun(y_true, y_pred):
+    y_pred = np.log(y_pred)
+    return - np.dot(y_pred, y_true)
 
-def logloss_prime(x):
-    # TODO:
-    return
+def crossEntropy_der(y, lb):
+    y = 1. / y
+    return - y * lb
+
+def binaryCrossEntropy_fun(y, lb):
+    if lb == 0:
+        return - np.log(1. - y)
+    else:
+        return - np.log(y)
+
+def binaryCrossEntropy_der(y, lb):
+    if lb == 0:
+        return 1 / (1. - y)
+    else:
+        return - 1. / y
 
 ACTIVATIONS = {
     'identity': identity,
@@ -204,4 +217,39 @@ def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
     fig_name = "plot_{}".format(type)
     plt.savefig(fig_name)
 
+def error_plot(tr_error, val_error):
+    epochs = len(tr_error)
+    epoch_vector = np.linspace(1, epochs, epochs)
+    plt.figure()
+    plt.plot(epoch_vector, tr_error, "b",
+             label="Training error", linewidth=1.5)
+    plt.plot(epoch_vector, val_error, "r--",
+             label="Validation error", linewidth=1.5)
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("error")
+    plt.grid()
+    plt.title("Training and validation error on monks 1 dataset")
+    fig_name = "ml-project-ErrorPlot"
+    plt.savefig(fig_name)
+
+
+def accuracy_plot(tr_accuracy, val_accuracy):
+    tr_epochs = len(tr_accuracy)
+    val_epochs = len(val_accuracy)
+    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
+    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
     
+    plt.figure()
+    plt.plot(tr_epoch_vector, tr_accuracy, "b",
+             label="Trainig accuracy", linewidth=1.5)
+    plt.plot(val_epoch_vector, val_accuracy, "r--",
+             label="Validation accuracy", linewidth=1.5)
+    plt.legend()
+    plt.xlabel("epoch")
+    plt.ylabel("accuracy")
+    plt.grid()
+    plt.title("Training and validation accuracy on monks 1 dataset")
+    fig_name = "ml-project-AccuracyPlot"
+    plt.savefig(fig_name)
+
