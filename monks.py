@@ -39,10 +39,6 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 1000, batch_size=1, 
 learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=False, early_stopping=True)
-all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # without early stopping
-# #all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train) # with early stopping
+all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early stopping, otw returns 2 args
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
-#error_plot(all_train_errors, all_val_errors) # with early stopping
-#accuracy_plot(tr_accuracy, val_accuracy) # with early stopping
-

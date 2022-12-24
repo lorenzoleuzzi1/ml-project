@@ -162,11 +162,12 @@ EVALUATION_METRICS = {
 }
 
 #-----OTHERS-----
-def unison_shuffle(x, y):
-    seed = np.random.randint(0, 100000) 
-    np.random.seed(seed) 
+def unison_shuffle(x, y, seed):
+    if seed == None:
+        seed = np.random.randint(0, 100000)
+    np.random.seed(seed)
     np.random.shuffle(x)
-    np.random.seed(seed) 
+    np.random.seed(seed)
     np.random.shuffle(y)
     return x, y
 
