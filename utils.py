@@ -51,12 +51,11 @@ def softplus_prime(x):
     diag = 1 / (1 + np.exp(-x))
     return np.diagflat(diag)
 
-def softmax(x):
-    #e = np.exp(x - np.max(x, axis=1)) # TODO: normalization?
-    #return e / np.sum(e, axis=1)
+def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1
+    x = normalize(x)
     return np.exp(x) / np.sum(np.exp(x))
 
-def softmax_prime(x): # TODO: softmax può essere usata con numero unità output layer > 1
+def softmax_prime(x):
     f = softmax(x) 
     return np.diagflat(f) - np.dot(np.transpose(f), f)
 
@@ -69,7 +68,7 @@ def crossEntropy_der(y, lb):
     y = 1. / y
     return - y * lb
 
-def binaryCrossEntropy_fun(y, lb):
+def binaryCrossEntropy_fun(y, lb): # usare solo le y è una probabilità -> activ fun softmax
     if lb == 0:
         return - np.log(1. - y)
     else:
@@ -106,31 +105,37 @@ ACTIVATIONS_DERIVATIVES = {
 
 # returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2)) # TODO: use scikit learn?
+    return np.sum(np.power(y_true - y_pred, 2)) / y_true.size # TODO: use scikit learn?
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
-    return 2 * (y_pred - y_true) / y_true.size # derivative w.r.t. y_pred
+    return 2 * (y_pred - y_true) / y_true.size  # derivative w.r.t. y_pred
 
 # returns a scalar
-def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse?
+def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis))) # REVIEW: togliendo axis fa flattening, a differenza di mse è diverso 
+    return np.sqrt( np.sum(np.power(y_true - y_pred, 2), axis=axis) ) / y_true.size
+    #return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: togliendo axis fa flattening, a differenza di mse è diverso 
 
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
-    e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
-    return (y_pred - y_true) / e # derivative w.r.t. y_pred
+    f = mee(y_true, y_pred)
+    if f == 0: return np.zeros(y_true.shape)
+    else : return (y_pred - y_true) / ( (y_true.size ** 2) * f )
+    #e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
+    #return (y_pred - y_true) / e # derivative w.r.t. y_pred
 
 def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
+    #return np.sqrt( np.mean(np.power(y_true - y_pred, 2), axis=axis) )
     return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis)))
 
 def mrmse_prime(y_true, y_pred):
-    e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
-    return (y_pred - y_true) / (e * y_true.size) # derivative w.r.t. y_pred
+    return (y_pred - y_true) / mrmse(y_true, y_pred)
+    #e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
+    #return (y_pred - y_true) / (e * y_true.size) # derivative w.r.t. y_pred
 
 # link above, somewhere
 def logloss(x):
@@ -142,11 +147,15 @@ def logloss_prime(x):
     return
 
 LOSSES = {
-    'mse': mse
+    'mse': mse,
+    'mee': mee,
+    'mrmse': mrmse
 }
 
 LOSSES_DERIVATIVES = {
-    'mse': mse_prime
+    'mse': mse_prime,
+    'mee': mee_prime,
+    'mrmse': mrmse_prime
 }
 
 
@@ -193,6 +202,10 @@ def mean_and_std(data):
     mean = np.mean(data)
     dev = np.std(data)
     return mean, dev
+
+def normalize(data):
+    mean, std = mean_and_std(data)
+    return (data - mean) / std
 
 def check_inputs():
     pass
