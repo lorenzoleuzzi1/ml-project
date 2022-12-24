@@ -9,7 +9,7 @@ def cross_validation(network, X_train, y_train, X_test, y_test, k_out, k_inn, ne
     #     print('Number of folds k must be more than 1')
     #     exit()
     if nested: resampling = "outer"
-    else: resampling = "    inner"
+    else: resampling = "inner"
     #print("Total samples = {}".format(len(X_train)))
     skf = StratifiedKFold(n_splits=k_out, shuffle=True) #REVIEW: non divide total samples / k StratifiedGroupKFold
 
