@@ -7,109 +7,112 @@ from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
 from layer import *
+from schema import Schema, Optional, And
 
 class Network:
     def __init__(
         self, 
-        activation_out,
-        classification,
-        activation_hidden='tanh', 
-        hidden_layer_sizes=[3], 
-        loss='mse', 
-        evaluation_metric = 'mse',
-        epochs = 200,
-        learning_rate ='fixed',
-        learning_rate_init=0.0001,
-        tau=100,
-        batch_size=1, # 1 = stochastic, 1.0 = un batch
-        lambd=0.0001,
-        alpha=0.9,
-        verbose=True,
-        nesterov = False,
-        early_stopping = True, # TODO: checks
-        stopping_patience = 20, 
-        validation_size = 0.1, 
-        tol=0.0005,
-        validation_frequency = 4, # TODO: formalmente dovremmo esprimerla coma frazione...
-        random_state=None, # TODO: check
-        reinit_weights=True, # TODO: check
+        activation_out : str,
+        classification : bool,
+        activation_hidden : str ='tanh', 
+        hidden_layer_sizes = [3], 
+        loss : str ='mse', 
+        evaluation_metric : str = 'mse',
+        epochs : int = 200,
+        learning_rate : str = 'fixed',
+        learning_rate_init : float = 0.0001,
+        tau : int = 100,
+        batch_size : int or float = 1, # 1 = stochastic, 1.0 = un batch
+        lambd : float = 0.0001,
+        alpha : float = 0.9,
+        verbose : bool = True,
+        nesterov : bool = False,
+        early_stopping : bool = True,
+        stopping_patience : int = 20, 
+        validation_size : float = 0.1, 
+        tol : float = 0.0005,
+        validation_frequency : int = 4
+        random_state = None, # TODO: check
+        reinit_weights : bool = True, # TODO: check
         ):
-        #TODO: funzione check inputs?
-        self.layers = []
-        if (activation_out not in ACTIVATIONS):
-            raise ValueError("Unrecognized activation_out '%s'. "
-                "Supported activation functions are %s." % (activation_out, list(ACTIVATIONS)))
-        if (activation_hidden not in ACTIVATIONS):
-            raise ValueError("Unrecognize activation_hidden '%s'. "
-                "Supported activation functions are %s."% (activation_hidden, list(ACTIVATIONS)))
+       
+        self.check_params(locals())
+        self.layers = []       
         self.activation_out = activation_out
-        self.activation_hidden = activation_hidden
-        if not isinstance(hidden_layer_sizes, list):
-            raise ValueError("hidden_layer_sizes must be a list of integers")
-        if any(size <= 0 for size in hidden_layer_sizes):
-            raise ValueError("hidden_layer_sizes must be > 0, got %s." % hidden_layer_sizes)
-        self.hidden_layer_sizes = hidden_layer_sizes
-        if loss not in LOSSES:
-            raise ValueError("Unrecognized loss.")
+        self.activation_hidden = activation_hidden      
+        self.hidden_layer_sizes = hidden_layer_sizes       
         self.loss = LOSSES[loss]
-        self.loss_prime = LOSSES_DERIVATIVES[loss]
-        if epochs <= 0:
-            raise ValueError("epochs must be > 0, got %s. " % epochs)
+        self.loss_prime = LOSSES_DERIVATIVES[loss]        
         self.epochs = epochs
-        if evaluation_metric not in EVALUATION_METRICS:
-            raise ValueError ("Unrecognized evaluation metric '%s'. "
-                "Supported evaluation metrics are %s."% (evaluation_metric, list(EVALUATION_METRICS)))
-        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]
-        learning_rate_schedules = ["fixed", "linear_decay"]
-        if learning_rate not in learning_rate_schedules:
-            raise ValueError("Unrecognized learning_rate_schedule '%s'. "
-            "Supported learning rate schedules are %s." % (learning_rate, learning_rate_schedules))
-        self.learning_rate = learning_rate
-        if learning_rate_init <= 0.0:
-            raise ValueError("learning_rate_init must be > 0, got %s. " % learning_rate_init)
+        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]      
+        self.learning_rate = learning_rate       
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
         self.learning_rate_fin = learning_rate_init * 0.1 
-        if tau <= 0 or tau > self.epochs:
-            raise ValueError("tau must be > 0 and <= epochs, got %s." % tau)
         self.tau = tau
-        if batch_size <= 0:
-            raise ValueError("batch_size must be > 0, got %s." % batch_size)
         self.batch_size = batch_size
-        if lambd < 0.0:
-            raise ValueError("lambd must be >= 0, got %s." % lambd)
         self.lambd = lambd
-        if alpha > 1 or alpha < 0:
-            raise ValueError("alpha must be >= 0 and <= 1, got %s" % alpha)
         self.alpha = alpha
-        #if verbose > epochs or verbose <= 0: # FIXME: ????
-        #    raise ValueError("verbose must be between 1 and max epochs %s, got %s" % (epochs, verbose))
         self.verbose = verbose
-        if not isinstance(nesterov, bool):
-            raise ValueError("nesterov must be a boolean, got %s" % nesterov)
         self.nesterov = nesterov
-        if stopping_patience > epochs or stopping_patience <= 0:
-            raise ValueError("patience must be between 1 and max epochs %s, got %s" % (epochs, stopping_patience))
         self.stopping_patience = stopping_patience
- 
-        self.early_stopping = early_stopping #TODO: check
-        
-        if validation_size > 100 or validation_size < 0:
-            raise ValueError("validation size must be between 0 and 100 (%), got %s" % validation_size)
+        self.early_stopping = early_stopping 
         self.validation_size = validation_size    
-        if tol < 0 or tol > 0.5:
-            raise ValueError("tolerance must be > 0 and < 0.5, got %s" % tol)
         self.tol = tol
-        if validation_frequency > epochs or validation_frequency <= 0:
-            raise ValueError("validation frequency must be between 1 and max epochs %s, got %s" % (epochs, validation_frequency))
-        self.validation_frequency = validation_frequency 
-        
-        self.classification = classification #TODO: check
+        self.validation_frequency = validation_frequency         
+        self.classification = classification  
         self.random_state = random_state #TODO: check 
-        #if random_state == None:
-        #    self.random_state = np.random.randint(0, 100000)
         self.reinit_weights = reinit_weights
 
+
+    def check_params(self, params):
+        if (params['activation_out'] not in ACTIVATIONS):
+            raise ValueError("Unrecognized activation_out '%s'. "
+                "Supported activation functions are %s." % (params['activation_out'], list(ACTIVATIONS)))
+        if (params['activation_hidden'] not in ACTIVATIONS):
+            raise ValueError("Unrecognize activation_hidden '%s'. "
+                "Supported activation functions are %s."% (params['activation_hidden'], list(ACTIVATIONS)))
+        if not isinstance(params['hidden_layer_sizes'], list):
+            raise ValueError("hidden_layer_sizes must be a list of integers")
+        if any(size <= 0 for size in params['hidden_layer_sizes']):
+            raise ValueError("hidden_layer_sizes must be > 0, got %s." % params['hidden_layer_sizes'])
+        if params['loss'] not in LOSSES:
+            raise ValueError("Unrecognized loss.")
+        if params['epochs'] <= 0:
+            raise ValueError("epochs must be > 0, got %s. " % params['epochs'])
+        if params['evaluation_metric'] not in EVALUATION_METRICS:
+            raise ValueError ("Unrecognized evaluation metric '%s'. "
+                "Supported evaluation metrics are %s."% (params['evaluation_metric'], list(EVALUATION_METRICS)))
+        if params['learning_rate'] not in ["fixed", "linear_decay"]:
+            raise ValueError("Unrecognized learning_rate_schedule '%s'. "
+            "Supported learning rate schedules are %s." % (params['learning_rate'], ["fixed", "linear_decay"]))
+        if params['learning_rate_init'] <= 0.0:
+            raise ValueError("learning_rate_init must be > 0, got %s. " % params['learning_rate_init'] )
+        if params['tau']  <= 0 or params['tau'] > params['epochs']:
+            raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
+        if params['batch_size']  <= 0:
+            raise ValueError("batch_size must be > 0, got %s." % params['batch_size'])
+        if params['lambd'] < 0.0:
+            raise ValueError("lambd must be >= 0, got %s." % params['lambd'])       
+        if params['alpha'] > 1 or params['alpha'] < 0:
+            raise ValueError("alpha must be >= 0 and <= 1, got %s" % params['alpha'])     
+        if not isinstance(params['verbose'], bool):
+            raise ValueError("verbose must be a boolean, got %s" % params['verbose'])
+        if not isinstance(params['nesterov'], bool):
+            raise ValueError("nesterov must be a boolean, got %s" % params['nesterov'])     
+        if params['stopping_patience'] > params['epochs'] or params['stopping_patience']  <= 0:
+            raise ValueError("patience must be between 1 and max epochs %s, got %s" % (params['epochs'], params['stopping_patience'] ))
+        if not isinstance(params['early_stopping'] , bool):
+            raise ValueError("ealry stopping must be a boolean, got %s" % params['early_stopping'])      
+        if params['validation_size']  > 100 or params['validation_size']  < 0:
+            raise ValueError("validation size must be between 0 and 100 (%), got %s" % params['validation_size'] )   
+        if params['tol']  < 0 or params['tol']  > 0.5:
+            raise ValueError("tolerance must be > 0 and < 0.5, got %s" % params['tol'] )
+        if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
+            raise ValueError("validation frequency must be between 1 and max epochs %s, got %s" % (params['epochs'], params['validation_frequency']))
+        if not isinstance(params['classification'], bool):
+            raise ValueError("classification must be a boolean, got %s" % params['classification'])       
+        
     # add layer to network
     def add(self, layer):
         self.layers.append(layer)
@@ -156,6 +159,27 @@ class Network:
             else:
                 self.learning_rate_curr = lr
 
+    def compose(self, fan_in, fan_out):
+        # Add first hidden layer
+        self.add(Layer(
+            fan_in = fan_in, #x_train.shape[-1], 
+            fan_out = self.hidden_layer_sizes[0], 
+            activation = self.activation_hidden
+            ))
+        # Add further hidden layers
+        for i in range(len(self.hidden_layer_sizes)-1):
+            self.add(Layer(
+                fan_in = self.hidden_layer_sizes[i], 
+                fan_out = self.hidden_layer_sizes[i+1], 
+                activation = self.activation_hidden
+            ))
+        # Add output layer
+        self.add(Layer(
+            fan_in = self.hidden_layer_sizes[-1], 
+            fan_out = fan_out, #y_train.shape[1],
+            activation = self.activation_out
+        ))
+
     def fit(self, x_train, y_train):
         if self.early_stopping:
             if self.classification:
@@ -197,24 +221,7 @@ class Network:
                 for layer in self.layers:
                     layer.weights_init()
         else:
-            self.add(Layer(
-                fan_in=x_train.shape[-1], 
-                fan_out=self.hidden_layer_sizes[0], 
-                activation=self.activation_hidden
-                ))
-            # Add further hidden layers
-            for i in range(len(self.hidden_layer_sizes)-1):
-                self.add(Layer(
-                    fan_in=self.hidden_layer_sizes[i], 
-                    fan_out=self.hidden_layer_sizes[i+1], 
-                    activation=self.activation_hidden
-                ))
-            # Add output layer
-            self.add(Layer(
-                fan_in=self.hidden_layer_sizes[-1], 
-                fan_out=y_train.shape[1],
-                activation=self.activation_out
-            ))
+            self.compose(x_train.shape[-1], y_train.shape[1])
 
         # divide training set into batches
         if isinstance(self.batch_size, int):
@@ -320,12 +327,11 @@ class Network:
             if stopping <= 0: break
 
         #show stats
-
-        plt.plot(all_train_errors, label="training", color="blue")
-        plt.plot(all_val_errors, label= "validation", color="green")
-        plt.plot(all_evalution_scores, label="score",color="red")
-        plt.legend(loc="upper right")
-        plt.show()
+        # plt.plot(all_train_errors, label="training", color="blue")
+        # plt.plot(all_val_errors, label= "validation", color="green")
+        # plt.plot(all_evalution_scores, label="score",color="red")
+        # plt.legend(loc="upper right")
+        # plt.show()
         if self.early_stopping:
             return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
         else:

@@ -227,8 +227,8 @@ def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
     plt.xlabel("epoch")
     plt.ylabel("error")
     plt.grid()
-    plt.title("training and validation {}".format(type))
-    fig_name = "plot_{}".format(type)
+    plt.title("k-fold training and validation {}".format(type))
+    fig_name = "plot_k-fold_{}".format(type)
     plt.savefig(fig_name)
 
 def error_plot(tr_error, val_error):
@@ -266,4 +266,3 @@ def accuracy_plot(tr_accuracy, val_accuracy):
     plt.title("Training and validation accuracy on monks 1 dataset")
     fig_name = "ml-project-AccuracyPlot"
     plt.savefig(fig_name)
-
