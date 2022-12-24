@@ -32,6 +32,8 @@ class Network:
         validation_size : float = 0.1, 
         tol : float = 0.0005,
         validation_frequency : int = 4
+        random_state = None, # TODO: check
+        reinit_weights : bool = True, # TODO: check
         ):
        
         self.check_params(locals())
@@ -59,6 +61,9 @@ class Network:
         self.tol = tol
         self.validation_frequency = validation_frequency         
         self.classification = classification  
+        self.random_state = random_state #TODO: check 
+        self.reinit_weights = reinit_weights
+
 
     def check_params(self, params):
         if (params['activation_out'] not in ACTIVATIONS):
@@ -178,12 +183,12 @@ class Network:
     def fit(self, x_train, y_train):
         if self.early_stopping:
             if self.classification:
-                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, stratify=y_train)
+                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, stratify=y_train, random_state=self.random_state)
                 #label = unique_labels(y_train)
                 #validation_size = max(int(len(x_train)/100 * self.validation_size), len(label))
                 #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True, stratify=y_train)
             else:
-                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True)
+                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, random_state=self.random_state)
                 #validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
                 #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
                 
@@ -210,7 +215,13 @@ class Network:
             if self.early_stopping: y_val = y_val.reshape(y_val.shape[0], 1)
             y_train = y_train.reshape(y_train.shape[0], 1)
         
-        self.compose(x_train.shape[-1], y_train.shape[1])
+        # Add first hidden layer
+        if self.layers: # TODO: dimensioni input/output layer consistenti con quelle con cui è stato fatto fit precedentemente?
+            if self.reinit_weights:
+                for layer in self.layers:
+                    layer.weights_init()
+        else:
+            self.compose(x_train.shape[-1], y_train.shape[1])
 
         # divide training set into batches
         if isinstance(self.batch_size, int):
@@ -237,7 +248,8 @@ class Network:
         for epoch in range(self.epochs):
             train_error = 0
             
-            x_train, y_train = unison_shuffle(x_train, y_train)
+            x_train, y_train = unison_shuffle(x_train, y_train, self.random_state)
+            #if epoch==1: print(x_train) # per controllare come viene fatto lo splitting con random state
             x_train_batched = np.array_split(x_train, n_batches)
             y_train_batched = np.array_split(y_train, n_batches)
             # x_train_batched = [x_train[i:i + self.batch_size] for i in range(0, len(x_train), self.batch_size)]
@@ -285,20 +297,19 @@ class Network:
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
                     error_below_tol = val_error <= self.tol
-                    error_decrease_perc = (all_val_errors[-1] - val_error) / all_val_errors[-1]
+                    rel_error_decrease = (all_val_errors[-1] - val_error) / all_val_errors[-1]
                     error_increased = val_error > all_val_errors[-1] # REVIEW: loss deve essere tale che valore minore => migliore
                 else:
                     error_below_tol = train_error <= self.tol
-                    error_decrease_perc = (all_train_errors[-1] - train_error) / all_train_errors[-1]
+                    rel_error_decrease = (all_train_errors[-1] - train_error) / all_train_errors[-1]
                     error_increased = train_error > all_train_errors[-1] # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
                 
                 if error_below_tol: # if we've already converged (error near 0)
                     stopping = 0
-                elif error_increased or error_decrease_perc < 1/1000: # if no more significant error decreasing (less than 0.1%) or we are not converging                   
+                elif error_increased or rel_error_decrease < 0.1/100: # if no more significant error decreasing (less than 0.1%) or we are not converging                   
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
-                
             
             all_train_errors.append(train_error)
             all_train_score.append(train_score)
@@ -325,7 +336,33 @@ class Network:
             return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
         else:
             return all_train_errors, all_train_score
-    
+
+    def get_init_weights(self):
+        init_weights = []
+        init_bias = []
+        for layer in self.layers:
+            init_weights.append(layer.init_weights)
+            init_bias.append(layer.init_bias)
+        return init_weights, init_bias
+
+    def set_weights(self, weights, bias):
+        for l, weights_l, bias_l in zip(self.layers, weights, bias):
+            l.set_weights(weights_l, bias_l)
+
+    def get_weights(self):
+        weights = []
+        bias = []
+        for l in self.layers:
+            weights.append(l.weights)
+            bias.append(l.bias)
+        return weights, bias
+
+    def set_reinit_weights(self):
+        self.reinit_weights = True
+
+    def reset_reinit_weights(self):
+        self.reinit_weights = False
+
     def save(self, path):
         file = open(path, 'wb')
         pickle.dump(self, file)

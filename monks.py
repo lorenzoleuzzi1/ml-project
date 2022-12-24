@@ -34,6 +34,7 @@ X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
 # cross validation
+
 network = Network('tanh', True, batch_size=1, learning_rate_init=0.002, evaluation_metric='accuracy', verbose=True)
 cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, nested=True)
 
@@ -45,4 +46,3 @@ cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, ne
 # print(accuracy(y_pred=pred, y_true=y_test))
 #error_plot(all_train_errors, all_val_errors) # with early stopping
 #accuracy_plot(tr_accuracy, val_accuracy) # with early stopping
-
