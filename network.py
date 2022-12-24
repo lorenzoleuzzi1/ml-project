@@ -31,7 +31,7 @@ class Network:
         stopping_patience : int = 20, 
         validation_size : float = 0.1, 
         tol : float = 0.0005,
-        validation_frequency : int = 4
+        validation_frequency : int = 4,
         random_state = None, # TODO: check
         reinit_weights : bool = True, # TODO: check
         ):
