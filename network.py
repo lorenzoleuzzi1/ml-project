@@ -7,7 +7,7 @@ from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
 from layer import *
-from schema import Schema, Optional, And
+#from schema import Schema, Optional, And
 
 class Network:
     def __init__(
@@ -37,18 +37,19 @@ class Network:
         ):
        
         self.check_params(locals())
-        self.layers = []       
+        self.layers = []
+        self.first_fit = True
         self.activation_out = activation_out
-        self.activation_hidden = activation_hidden      
-        self.hidden_layer_sizes = hidden_layer_sizes       
+        self.activation_hidden = activation_hidden
+        self.hidden_layer_sizes = hidden_layer_sizes
         self.loss = LOSSES[loss]
-        self.loss_prime = LOSSES_DERIVATIVES[loss]        
+        self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
-        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]      
-        self.learning_rate = learning_rate       
+        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]
+        self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
-        self.learning_rate_fin = learning_rate_init * 0.1 
+        self.learning_rate_fin = learning_rate_init * 0.1
         self.tau = tau
         self.batch_size = batch_size
         self.lambd = lambd
@@ -56,12 +57,12 @@ class Network:
         self.verbose = verbose
         self.nesterov = nesterov
         self.stopping_patience = stopping_patience
-        self.early_stopping = early_stopping 
-        self.validation_size = validation_size    
+        self.early_stopping = early_stopping
+        self.validation_size = validation_size
         self.tol = tol
-        self.validation_frequency = validation_frequency         
-        self.classification = classification  
-        self.random_state = random_state #TODO: check 
+        self.validation_frequency = validation_frequency
+        self.classification = classification
+        self.random_state = random_state #TODO: check
         self.reinit_weights = reinit_weights
 
 
@@ -159,10 +160,11 @@ class Network:
             else:
                 self.learning_rate_curr = lr
 
-    def compose(self, fan_in, fan_out):
+    def compose(self, input_size, output_size):
+        self.layers = []
         # Add first hidden layer
         self.add(Layer(
-            fan_in = fan_in, #x_train.shape[-1], 
+            fan_in = input_size, #x_train.shape[-1], 
             fan_out = self.hidden_layer_sizes[0], 
             activation = self.activation_hidden
             ))
@@ -176,9 +178,10 @@ class Network:
         # Add output layer
         self.add(Layer(
             fan_in = self.hidden_layer_sizes[-1], 
-            fan_out = fan_out, #y_train.shape[1],
+            fan_out = output_size, #y_train.shape[1],
             activation = self.activation_out
         ))
+        self.first_fit = False
 
     def fit(self, x_train, y_train):
         if self.early_stopping:
@@ -202,12 +205,12 @@ class Network:
         # x_train = x_train[validation_size:]
         # y_train = y_train[validation_size:]
         
-        
         samples = len(x_train)   
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
         
-        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
+        # not needed if in layer we use outer
+        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1])
 
         self.y_flatten = False
         if len(y_train.shape)==1: 
@@ -215,12 +218,17 @@ class Network:
             if self.early_stopping: y_val = y_val.reshape(y_val.shape[0], 1)
             y_train = y_train.reshape(y_train.shape[0], 1)
         
-        # Add first hidden layer
-        if self.layers: # TODO: dimensioni input/output layer consistenti con quelle con cui è stato fatto fit precedentemente?
+        # check if current net structure is compatible with the dataset to fit
+        if not self.first_fit and (self.layers[0].fan_in == x_train.shape[-1] and \
+                            self.layers[-1].fan_out == y_train.shape[1]):
+            # eventually reinitialize weights
             if self.reinit_weights:
                 for layer in self.layers:
                     layer.weights_init()
         else:
+            if not self.first_fit and self.reinit_weights == False:
+                raise ValueError("Cannot use current weights. "
+                "Net structure is not compatible with the dataset to fit.")
             self.compose(x_train.shape[-1], y_train.shape[1])
 
         # divide training set into batches
@@ -294,7 +302,7 @@ class Network:
             #train_error /= samples # average on all samples 
             
             #-----stopping-----
-            if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
+            if epoch >= 10: # REVIEW: farne minimo 10 oppure self.stopping_patience/2 non mi sembra tanto meglio... forse possiamo abbassare a 5?
                 if self.early_stopping:
                     error_below_tol = val_error <= self.tol
                     rel_error_decrease = (all_val_errors[-1] - val_error) / all_val_errors[-1]
@@ -349,7 +357,7 @@ class Network:
         for l, weights_l, bias_l in zip(self.layers, weights, bias):
             l.set_weights(weights_l, bias_l)
 
-    def get_weights(self):
+    def get_current_weights(self):
         weights = []
         bias = []
         for l in self.layers:
@@ -357,11 +365,8 @@ class Network:
             bias.append(l.bias)
         return weights, bias
 
-    def set_reinit_weights(self):
-        self.reinit_weights = True
-
-    def reset_reinit_weights(self):
-        self.reinit_weights = False
+    def set_reinit_weights(self, value: bool):
+        self.reinit_weights = value
 
     def save(self, path):
         file = open(path, 'wb')

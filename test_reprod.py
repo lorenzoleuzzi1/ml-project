@@ -33,7 +33,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -48,7 +48,7 @@ print(init_bias)
 net.set_weights(init_weights, init_bias)
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -70,7 +70,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -84,7 +84,7 @@ print(init_bias)
 
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -106,7 +106,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -120,7 +120,7 @@ print(init_bias)
 
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")

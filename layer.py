@@ -18,11 +18,11 @@ class Layer():
         self.velocity_w = np.zeros(shape = (fan_in, fan_out))
         self.velocity_b = np.zeros(shape = (1, fan_out))
 
-    def set_weights(self, w, b):
-        self.weights = w
-        self.bias = b
-        self.init_weights = copy.deepcopy(w)
-        self.init_bias = copy.deepcopy(b)
+    def set_weights(self, weights, bias):
+        self.weights = weights
+        self.bias = bias
+        self.init_weights = copy.deepcopy(weights)
+        self.init_bias = copy.deepcopy(bias)
 
     def weights_init(self):
         '''
