@@ -232,19 +232,21 @@ def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
     plt.savefig(fig_name)
 
 def error_plot(tr_error, val_error):
-    epochs = len(tr_error)
-    epoch_vector = np.linspace(1, epochs, epochs)
+    tr_epochs = len(tr_error)
+    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
+    val_epochs = len(val_error)
+    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
     plt.figure()
-    plt.plot(epoch_vector, tr_error, "b",
+    plt.plot(tr_epoch_vector, tr_error, "b",
              label="Training error", linewidth=1.5)
-    plt.plot(epoch_vector, val_error, "r--",
+    plt.plot(val_epoch_vector, val_error, "r--",
              label="Validation error", linewidth=1.5)
     plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("error")
     plt.grid()
     plt.title("Training and validation error on monks 1 dataset")
-    fig_name = "ml-project-ErrorPlot"
+    fig_name = "ml_project_error_plot"
     plt.savefig(fig_name)
 
 
@@ -256,13 +258,13 @@ def accuracy_plot(tr_accuracy, val_accuracy):
     
     plt.figure()
     plt.plot(tr_epoch_vector, tr_accuracy, "b",
-             label="Trainig accuracy", linewidth=1.5)
+             label="Trainig score", linewidth=1.5)
     plt.plot(val_epoch_vector, val_accuracy, "r--",
-             label="Validation accuracy", linewidth=1.5)
+             label="Validation score", linewidth=1.5)
     plt.legend()
     plt.xlabel("epoch")
-    plt.ylabel("accuracy")
+    plt.ylabel("score")
     plt.grid()
-    plt.title("Training and validation accuracy on monks 1 dataset")
-    fig_name = "ml-project-AccuracyPlot"
+    plt.title("Training and validation score on monks 1 dataset")
+    fig_name = "ml_project_score_plot"
     plt.savefig(fig_name)
