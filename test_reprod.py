@@ -21,6 +21,7 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
     if target_rescaling:
         targets[targets == 0] = -1 # int 64
+    targets = targets.reshape(targets.shape[0], 1)
     return (data, targets)
 
 X_train, y_train = read_monks(TRAIN_PATH)

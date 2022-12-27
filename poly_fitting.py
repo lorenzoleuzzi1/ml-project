@@ -5,6 +5,15 @@ from network import Network
 from sklearn.neural_network import MLPRegressor
 from utils import mse, mee
 
+def visualize_weights(weights, bias):
+    for w, b in zip(weights, bias): # for now biases are not displayed
+        print("------")
+        print(w)
+        print(b)
+        plt.imshow(w, vmax=2, vmin=-1)
+        plt.colorbar()
+        plt.show()
+
 def random_poly(coefs, xinf, xsup, size):
     # generate size points equally spaced in [xinf, xsup]
     x = np.linspace(xinf, xsup, size)
@@ -52,23 +61,41 @@ net = Network(
     activation_out='identity',
     classification=False,
     activation_hidden='tanh',
-    lambd=0.0001,
+    lambd=0.0001,#1,#0.1
     batch_size=1,
     learning_rate='fixed',
     learning_rate_init=0.001,
     alpha=0.9
     )
-net.fit(X_train, y_train)
+net.fit(X_train, y_train.reshape(y_train.shape[0], 1))
 y_pred = net.predict(X_test)
+y_pred = y_pred.reshape(y_pred.shape[0])
 our_mse = mse(y_test, y_pred)
 our_mee = mee(y_test, y_pred)
+
+weights, bias = net.get_current_weights()
+visualize_weights(weights, bias)
+net = Network(
+    hidden_layer_sizes=[3, 3],
+    activation_out='identity',
+    classification=False,
+    activation_hidden='tanh',
+    lambd=1, # high labda, weights should be smaller...
+    batch_size=1,
+    learning_rate='fixed',
+    learning_rate_init=0.001,
+    alpha=0.9
+    )
+net.fit(X_train, y_train.reshape(y_train.shape[0], 1))
+weights, bias = net.get_current_weights()
+visualize_weights(weights, bias)
 
 # fit scikit-learn net and get predictions for test points
 scikit_net = MLPRegressor(
     hidden_layer_sizes=(3, 3),
     activation='tanh', # for hidden layers
     solver='sgd', 
-    alpha=0.0001, # our lambd
+    alpha=1,#0.1,#0.0001, # our lambd
     batch_size=1, 
     learning_rate='constant', 
     learning_rate_init=0.001, 

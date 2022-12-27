@@ -147,7 +147,7 @@ LOSSES = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse
-}
+} # REVIEW: devono essere tutte "medie"
 
 LOSSES_DERIVATIVES = {
     'mse': mse_prime,
@@ -165,7 +165,7 @@ EVALUATION_METRICS = {
     'mee': mee,
     'mrmse': mrmse,
     'accuracy': accuracy
-}
+} # REVIEW: devono essere tutte "medie"
 
 #-----OTHERS-----
 def unison_shuffle(x, y, seed):
