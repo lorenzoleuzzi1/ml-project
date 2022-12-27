@@ -44,6 +44,14 @@ def tanh_prime(x):
     diag = 1 - t**2
     return np.diagflat(diag)
 
+def sigmoid(x): #TODO: usare questa e togliere tanh (?) -> così siamo tra 0 e 1 
+    return 0.5 + 0.5 * np.tanh(0.5 * x)
+
+def sigmoid_prime(x):
+    s = sigmoid(x)
+    diag = s * (1 - s)
+    return np.diagflat(diag)
+
 def softplus(x):
     return np.log(1 + np.exp(x))
 
@@ -51,34 +59,13 @@ def softplus_prime(x):
     diag = 1 / (1 + np.exp(-x))
     return np.diagflat(diag)
 
-def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1
+def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1 -> ho messo il messaggio di errore
     x = normalize(x)
     return np.exp(x) / np.sum(np.exp(x))
 
 def softmax_prime(x):
     f = softmax(x) 
     return np.diagflat(f) - np.dot(np.transpose(f), f)
-
-# TODO: ricontrollare se funziona con scalari / vettori, in generale se funziona e come usarla nel nostro progetto
-def crossEntropy_fun(y_true, y_pred):
-    y_pred = np.log(y_pred)
-    return - np.dot(y_pred, y_true)
-
-def crossEntropy_der(y, lb):
-    y = 1. / y
-    return - y * lb
-
-def binaryCrossEntropy_fun(y, lb): # usare solo le y è una probabilità -> activ fun softmax
-    if lb == 0:
-        return - np.log(1. - y)
-    else:
-        return - np.log(y)
-
-def binaryCrossEntropy_der(y, lb):
-    if lb == 0:
-        return 1 / (1. - y)
-    else:
-        return - 1. / y
 
 ACTIVATIONS = {
     'identity': identity,
@@ -104,55 +91,68 @@ ACTIVATIONS_DERIVATIVES = {
 # loss functions and their derivatives
 
 # returns a scalar
-def mse(y_true, y_pred):
-    return np.sum(np.power(y_true - y_pred, 2)) / y_true.size # TODO: use scikit learn?
+def mse(y_true, y_pred): 
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
-    return 2 * (y_pred - y_true) / y_true.size  # derivative w.r.t. y_pred
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
+    return 2 * (y_pred - y_true) / y_true.shape[axis] # derivative w.r.t. y_pred
 
 # returns a scalar
 def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.sqrt( np.sum(np.power(y_true - y_pred, 2), axis=axis) ) / y_true.size
-    #  TODO: sostituire (?) con np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis)))
+    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis)))
+
 
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
     f = mee(y_true, y_pred)
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
     if f == 0: return np.zeros(y_true.shape)
-    else : return (y_pred - y_true) / ( (y_true.size ** 2) * f )
-    # TODO: sostituire (?) con (y_pred - y_true) / f (quando usato come loss la media non viene fatta in mee)
+    else : return (y_pred - y_true) / f
 
 def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis)))
+    return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis))) #TODO: sqrt(n)?????
 
 def mrmse_prime(y_true, y_pred):
-    return (y_pred - y_true) / mrmse(y_true, y_pred)
-    # TODO: sostituire (?) (y_pred - y_true) / (y_true.size * mrmse(y_true, y_pred))
+    return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
+    #TODO: (y_pred - y_true) / (y_true.size * mrmse(y_true, y_pred))
+
 
 # link above, somewhere
-def logloss(x):
-    # TODO:
-    return
+def logloss(y_true, y_pred):
+    p = sigmoid(y_pred)
+    return np.mean( -sum(y_true * np.log(p)) )
+    # TODO: così va bene per la multiclassificazione s.s.s. abbiamo un neurone di output per ogni classe
+    # se decidiamo che per classificazione binaria volgiamo un solo neurone di output dobbiamo allora sistemare logloss
+    # distinguendo caso multiclasse e caso binario -> io non lo farei perché è una roba in più da controllare, ed è uno sbatti
+    # ma comunque sono due righe da aggiugere a codice
 
-def logloss_prime(x):
-    # TODO:
-    return
+def logloss_prime(y_true, y_pred):
+    p = sigmoid(y_pred)
+    inv = 1/p
+    return -(y_true * inv)
 
 LOSSES = {
     'mse': mse,
     'mee': mee,
-    'mrmse': mrmse
-} # REVIEW: devono essere tutte "medie"
+    'mrmse': mrmse,
+    'logloss': logloss
+}
 
 LOSSES_DERIVATIVES = {
     'mse': mse_prime,
     'mee': mee_prime,
-    'mrmse': mrmse_prime
+    'mrmse': mrmse_prime,
+    'logloss': logloss_prime
 }
 
 
@@ -164,6 +164,7 @@ EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse,
+    'logloss': logloss,
     'accuracy': accuracy
 } # REVIEW: devono essere tutte "medie"
 
@@ -229,19 +230,21 @@ def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
     plt.savefig(fig_name)
 
 def error_plot(tr_error, val_error):
-    epochs = len(tr_error)
-    epoch_vector = np.linspace(1, epochs, epochs)
+    tr_epochs = len(tr_error)
+    tr_epoch_vector = np.linspace(1, tr_epochs, tr_epochs)
+    val_epochs = len(val_error)
+    val_epoch_vector = np.linspace(1, tr_epochs, val_epochs)
     plt.figure()
-    plt.plot(epoch_vector, tr_error, "b",
+    plt.plot(tr_epoch_vector, tr_error, "b",
              label="Training error", linewidth=1.5)
-    plt.plot(epoch_vector, val_error, "r--",
+    plt.plot(val_epoch_vector, val_error, "r--",
              label="Validation error", linewidth=1.5)
     plt.legend()
     plt.xlabel("epoch")
     plt.ylabel("error")
     plt.grid()
     plt.title("Training and validation error on monks 1 dataset")
-    fig_name = "ml-project-ErrorPlot"
+    fig_name = "ml_project_error_plot"
     plt.savefig(fig_name)
 
 
@@ -253,13 +256,13 @@ def accuracy_plot(tr_accuracy, val_accuracy):
     
     plt.figure()
     plt.plot(tr_epoch_vector, tr_accuracy, "b",
-             label="Trainig accuracy", linewidth=1.5)
+             label="Trainig score", linewidth=1.5)
     plt.plot(val_epoch_vector, val_accuracy, "r--",
-             label="Validation accuracy", linewidth=1.5)
+             label="Validation score", linewidth=1.5)
     plt.legend()
     plt.xlabel("epoch")
-    plt.ylabel("accuracy")
+    plt.ylabel("score")
     plt.grid()
-    plt.title("Training and validation accuracy on monks 1 dataset")
-    fig_name = "ml-project-AccuracyPlot"
+    plt.title("Training and validation score on monks 1 dataset")
+    fig_name = "ml_project_score_plot"
     plt.savefig(fig_name)

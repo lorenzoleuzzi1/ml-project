@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from utils import accuracy
 from network import Network
-from utils import flatten_pred
+from utils import flatten_pred, error_plot, accuracy_plot
 from cross_validation import cross_validation
 from utils import error_plot, accuracy_plot
 
@@ -34,10 +34,7 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-# cross validation
-
 import time
-
 start = time.time()
 
 net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
@@ -50,3 +47,4 @@ print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
 
 end = time.time()
 print(end - start)
+
