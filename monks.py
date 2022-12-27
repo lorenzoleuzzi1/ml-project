@@ -35,14 +35,20 @@ X_test, y_test = read_monks(TEST_PATH)
 
 # cross validation
 
-network = Network('tanh', True, batch_size=1, learning_rate_init=0.002, evaluation_metric='accuracy', verbose=True)
-cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, nested=True)
+# network = Network('tanh', True, batch_size=1, learning_rate_init=0.002, evaluation_metric='accuracy', verbose=True)
+# cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, nested=True)
+import time
 
-# net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
-# learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
-# all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # without early stopping
-# # #all_train_errors, all_val_errors, tr_accuracy, val_accuracy = net.fit(X_train, y_train) # with early stopping
-# pred = net.predict(X_test)
-# print(accuracy(y_pred=pred, y_true=y_test))
-#error_plot(all_train_errors, all_val_errors) # with early stopping
-#accuracy_plot(tr_accuracy, val_accuracy) # with early stopping
+start = time.time()
+
+net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
+learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
+all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) 
+pred = net.predict(X_test)
+pred_backtracked = net.backtracked_network.predict(X_test)
+print(accuracy(y_true=y_test, y_pred=pred))
+print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
+
+end = time.time()
+print(end - start)
+

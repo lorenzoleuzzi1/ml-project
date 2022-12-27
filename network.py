@@ -7,7 +7,7 @@ from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
 from layer import *
-from schema import Schema, Optional, And
+from copy import deepcopy
 
 class Network:
     def __init__(
@@ -88,8 +88,9 @@ class Network:
             "Supported learning rate schedules are %s." % (params['learning_rate'], ["fixed", "linear_decay"]))
         if params['learning_rate_init'] <= 0.0:
             raise ValueError("learning_rate_init must be > 0, got %s. " % params['learning_rate_init'] )
-        if params['tau']  <= 0 or params['tau'] > params['epochs']:
-            raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
+        if params['learning_rate'] == "linear_decay":
+            if params['tau']  <= 0 or params['tau'] > params['epochs']:
+                raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
         if params['batch_size']  <= 0:
             raise ValueError("batch_size must be > 0, got %s." % params['batch_size'])
         if params['lambd'] < 0.0:
@@ -235,7 +236,6 @@ class Network:
         all_evalution_scores = []
 
         stopping = self.stopping_patience 
-
         #-----training loop-----
         # loop max-epoch times
         #   for each bacth       
@@ -292,7 +292,7 @@ class Network:
                     evaluation_score = self.evaluation_metric(y_val, predict_val)
             
             #train_error /= samples # average on all samples 
-            
+
             #-----stopping-----
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
@@ -310,7 +310,8 @@ class Network:
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
-            
+                    self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
+
             all_train_errors.append(train_error)
             all_train_score.append(train_score)
             if self.early_stopping:
@@ -332,6 +333,7 @@ class Network:
         # plt.plot(all_evalution_scores, label="score",color="red")
         # plt.legend(loc="upper right")
         # plt.show()
+
         if self.early_stopping:
             return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
         else:
