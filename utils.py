@@ -44,7 +44,7 @@ def tanh_prime(x):
     diag = 1 - t**2
     return np.diagflat(diag)
 
-def sigmoid(x): #TODO: usare questa e togliere tanh (?)
+def sigmoid(x): #TODO: usare questa e togliere tanh (?) -> così siamo tra 0 e 1 
     return 0.5 + 0.5 * np.tanh(0.5 * x)
 
 def sigmoid_prime(x):
@@ -59,7 +59,7 @@ def softplus_prime(x):
     diag = 1 / (1 + np.exp(-x))
     return np.diagflat(diag)
 
-def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1
+def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1 -> ho messo il messaggio di errore
     x = normalize(x)
     return np.exp(x) / np.sum(np.exp(x))
 
@@ -129,9 +129,9 @@ def logloss(y_true, y_pred):
     p = sigmoid(y_pred)
     return np.mean( -sum(y_true * np.log(p)) )
     # TODO: così va bene per la multiclassificazione s.s.s. abbiamo un neurone di output per ogni classe
-    # se decidiamo che per classificazione binaria volgiamo un solo neurone di aèoutput dobbiamo allora sistemare logloss
-    # distinguendo caso multiclasse e caso binario -> io non lo farei perché è una roba in più da controllare, 
-    # ma comunque sono due righe
+    # se decidiamo che per classificazione binaria volgiamo un solo neurone di output dobbiamo allora sistemare logloss
+    # distinguendo caso multiclasse e caso binario -> io non lo farei perché è una roba in più da controllare, ed è uno sbatti
+    # ma comunque sono due righe da aggiugere a codice
 
 def logloss_prime(y_true, y_pred):
     p = sigmoid(y_pred)

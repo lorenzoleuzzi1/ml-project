@@ -79,10 +79,10 @@ class Network:
         if params['loss'] not in LOSSES:
             raise ValueError("Unrecognized loss.")
         if params['classification'] == False and params['loss'] == 'logloss':
-            raise ValueError("Classification == True required to use logloss as loss function logloss")
+            raise ValueError("Classification == True required to use logloss as loss function")
         if not (params['loss'] == 'logloss' and params['activation_out'] == 'softmax') and \
             not (params['loss'] != 'logloss' and params['activation_out'] != 'softmax'):
-            raise ValueError("Loss function logloss allowed only with activation function softmax")
+            raise ValueError("Softmax activation function and logloss loss function must be used together")
         if params['epochs'] <= 0:
             raise ValueError("epochs must be > 0, got %s. " % params['epochs'])
         if params['evaluation_metric'] not in EVALUATION_METRICS:
@@ -211,7 +211,6 @@ class Network:
         samples = len(x_train)   
         if self.batch_size > samples:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
-        
         #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
 
         self.y_flatten = False
@@ -226,9 +225,11 @@ class Network:
                 for layer in self.layers:
                     layer.weights_init()
         else:
-            if self.activation_out == 'softmax' and y_train.shape[1] == 1:
-                raise ValueError("More than two output units are required to use the chosen activation function")
             self.compose(x_train.shape[-1], y_train.shape[1])
+            if self.activation_out == 'softmax' and y_train.shape[1] == 1:
+                raise ValueError("Two or more output units are required to use softmax as activation function.")
+            if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and y_train.shape[1] == 1:
+                raise ValueError("More than two output units are required to use the chosen loss function.")
 
         # divide training set into batches
         if isinstance(self.batch_size, int):
@@ -321,28 +322,26 @@ class Network:
                     error_increased = train_error > all_train_errors[-1]
                     # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
                    
-                if error_increased and not precedent_error_increased: # in previous iteration error function was in min
+                if (train_error > all_train_errors[-1]) and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
                     if (min_error - max_error) <= 10: #TODO: parametrico? 
                         # TODO: con early stopping se valuti eval score ogni tot epoche funziona male -> valuto sempre su tr error?
-                        if (self.early_stopping and (all_val_errors[max_error] - val_error) > 2*self.tol) or \
-                            (all_train_errors[max_error] - train_error) > 2*self.tol:
+                        if (all_train_errors[max_error] - train_error) > 2*self.tol:
                             peaks_error_function += 1
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
                             weights_to_return, bias_to_return = self.get_weights()
-                elif not error_increased and precedent_error_increased: # in previous iteration error function was in max
+                elif not (train_error > all_train_errors[-1]) and precedent_error_increased: # in previous iteration error function was in max
                     max_error = epoch
                     if (max_error - min_error) <= 10:
-                        if (self.early_stopping and (val_error - all_val_errors[min_error]) > 2*self.tol) or \
-                            (train_error - all_train_errors[min_error]) > 2*self.tol:
+                        if (train_error - all_train_errors[min_error]) > 2*self.tol:
                             peaks_error_function += 1   
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
                             weights_before_peaks, bias_before_peaks = self.get_weights()                    
-                precedent_error_increased =  error_increased
+                precedent_error_increased =  train_error > all_train_errors[-1]
 
                 if error_below_tol: # if we've already converged (error near 0)
                     stopping = -1
