@@ -1,8 +1,8 @@
 import numpy as np
 import pickle
 import matplotlib.pyplot as plt
-from sklearn.utils.multiclass import unique_labels
 from sklearn.model_selection import train_test_split
+from sklearn.utils import shuffle
 from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
@@ -33,22 +33,23 @@ class Network:
         tol : float = 0.0005,
         validation_frequency : int = 4,
         random_state = None, # TODO: check
-        reinit_weights : bool = True, # TODO: check
+        reinit_weights : bool = True # TODO: check
         ):
        
         self.check_params(locals())
-        self.layers = []       
+        self.layers = []
+        self.first_fit = True
         self.activation_out = activation_out
-        self.activation_hidden = activation_hidden      
-        self.hidden_layer_sizes = hidden_layer_sizes       
+        self.activation_hidden = activation_hidden
+        self.hidden_layer_sizes = hidden_layer_sizes
         self.loss = LOSSES[loss]
-        self.loss_prime = LOSSES_DERIVATIVES[loss]        
+        self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
-        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]      
-        self.learning_rate = learning_rate       
+        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]
+        self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
-        self.learning_rate_fin = learning_rate_init * 0.1 
+        self.learning_rate_fin = learning_rate_init * 0.1
         self.tau = tau
         self.batch_size = batch_size
         self.lambd = lambd
@@ -56,14 +57,14 @@ class Network:
         self.verbose = verbose
         self.nesterov = nesterov
         self.stopping_patience = stopping_patience
-        self.early_stopping = early_stopping 
-        self.validation_size = validation_size    
+        self.early_stopping = early_stopping
+        self.validation_size = validation_size
         self.tol = tol
-        self.validation_frequency = validation_frequency         
-        self.classification = classification  
-        self.random_state = random_state #TODO: check 
+        self.validation_frequency = validation_frequency
+        self.classification = classification
+        self.random_state = random_state #TODO: check
         self.reinit_weights = reinit_weights
-
+        self.n_targets = None
 
     def check_params(self, params):
         if (params['activation_out'] not in ACTIVATIONS):
@@ -119,26 +120,21 @@ class Network:
         self.layers.append(layer)
 
     # predict output for given input
-    def predict(self, input_data):
+    def predict(self, X):
+        if self.n_targets == None:
+            raise ValueError("Net has not been fitted yet.")
 
-        # sample dimension first
-        samples = len(input_data)
-        result = []
+        Y = np.empty((X.shape[0], 1, self.n_targets))
 
         # run network over all samples
-        for i in range(samples):
+        for i in range(X.shape[0]):
             # forward propagation
-            output = input_data[i]
+            output = X[i]
             for layer in self.layers:
                 output = layer.forward_propagation(output)
-            result.append(output)
+            Y[i] = output
 
-        result = np.array(result) # converts external list into numpy array
-        # if self.y_flatten:
-        #     result = result.reshape(result.shape[0])
-        # else:
-        result = result.reshape(result.shape[0], result.shape[2])
-        return result
+        return Y.reshape(Y.shape[0], Y.shape[2])
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -160,80 +156,104 @@ class Network:
             else:
                 self.learning_rate_curr = lr
 
-    def compose(self, fan_in, fan_out):
+    def compose(self, input_size, output_size):
+        self.layers = []
         # Add first hidden layer
         self.add(Layer(
-            fan_in = fan_in, #x_train.shape[-1], 
-            fan_out = self.hidden_layer_sizes[0], 
+            fan_in = input_size,
+            fan_out = self.hidden_layer_sizes[0],
             activation = self.activation_hidden
             ))
         # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
-                fan_in = self.hidden_layer_sizes[i], 
-                fan_out = self.hidden_layer_sizes[i+1], 
+                fan_in = self.hidden_layer_sizes[i],
+                fan_out = self.hidden_layer_sizes[i+1],
                 activation = self.activation_hidden
             ))
         # Add output layer
         self.add(Layer(
-            fan_in = self.hidden_layer_sizes[-1], 
-            fan_out = fan_out, #y_train.shape[1],
+            fan_in = self.hidden_layer_sizes[-1],
+            fan_out = output_size,
             activation = self.activation_out
         ))
+        self.first_fit = False
 
-    def fit(self, x_train, y_train):
+    def fit(self, X_train, Y_train): 
+        # NOTE: ora Y deve essere una matrice. 
+        # Prima accettava anche array ad 1 dim ma sicoome predict deve ritornare matrici 
+        # il chiamante deve comunque occuparsi delle dimensioni dei target per invocare le metriche,
+        # almeno adesso accetta Y nel formato in cui lo predice.
+        if len(X_train.shape) != 2:
+            raise ValueError("X_train must be a 2-dimensional array")
+        if len(Y_train.shape) != 2:
+            raise ValueError("Y_train must be a 2-dimensional array")
+        
         if self.early_stopping:
             if self.classification:
-                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, stratify=y_train, random_state=self.random_state)
-                #label = unique_labels(y_train)
-                #validation_size = max(int(len(x_train)/100 * self.validation_size), len(label))
-                #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True, stratify=y_train)
+                X_train, X_val, Y_train, Y_val = train_test_split(
+                    X_train,
+                    Y_train,
+                    test_size=self.validation_size,
+                    shuffle=True,
+                    stratify=Y_train,
+                    random_state=self.random_state
+                )
+                #label = unique_labels(Y_train)
+                #validation_size = max(int(len(X_train)/100 * self.validation_size), len(label))
+                #X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=validation_size, shuffle=True, stratify=Y_train)
             else:
-                x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=self.validation_size, shuffle=True, random_state=self.random_state)
-                #validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
-                #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=validation_size, shuffle=True)
+                X_train, X_val, Y_train, Y_val = train_test_split(
+                    X_train,
+                    Y_train,
+                    test_size=self.validation_size,
+                    shuffle=True,
+                    random_state=self.random_state
+                )
+                #validation_size = max(int(len(X_train)/100 * self.validation_size), 1)
+                #X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=validation_size, shuffle=True)
                 
         # #shuffle the whole training set 
-        # x_train, y_train = unison_shuffle(x_train, y_train)
+        # X_train, Y_train = unison_shuffle(X_train, Y_train)
         
         # #split training set for validation
-        # validation_size = max(int(len(x_train)/100 * self.validation_size), 1)
-        # x_val = x_train[:validation_size]
-        # y_val = y_train[:validation_size]      
-        # x_train = x_train[validation_size:]
-        # y_train = y_train[validation_size:]
+        # validation_size = max(int(len(X_train)/100 * self.validation_size), 1)
+        # X_val = X_train[:validation_size]
+        # Y_val = Y_train[:validation_size]
+        # X_train = X_train[validation_size:]
+        # Y_train = Y_train[validation_size:]
         
-        
-        samples = len(x_train)   
-        if self.batch_size > samples:
+        if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
         
-        #x_train = x_train.reshape(x_train.shape[0], 1, x_train.shape[1]) # reshape to split
-
-        self.y_flatten = False
-        if len(y_train.shape)==1: 
-            self.y_flatten = True
-            if self.early_stopping: y_val = y_val.reshape(y_val.shape[0], 1)
-            y_train = y_train.reshape(y_train.shape[0], 1)
+        # not needed if in layer we use outer
+        #X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
         
-        # Add first hidden layer
-        if self.layers: # TODO: dimensioni input/output layer consistenti con quelle con cui è stato fatto fit precedentemente?
+        # check if current net structure is compatible with the dataset to fit
+        if not self.first_fit and (self.layers[0].fan_in == X_train.shape[-1] and \
+                            self.layers[-1].fan_out == Y_train.shape[1]):
+            # eventually reinitialize weights
             if self.reinit_weights:
                 for layer in self.layers:
                     layer.weights_init()
         else:
-            self.compose(x_train.shape[-1], y_train.shape[1])
+            if not self.first_fit and self.reinit_weights == False:
+                raise ValueError("Cannot use current weights. "
+                "Net structure is not compatible with the dataset to fit.")
+            self.compose(X_train.shape[-1], Y_train.shape[1]) # TODO: in realtà basta cambiare primo e ultimo layer
+
+        self.n_targets = Y_train.shape[1]
 
         # divide training set into batches
         if isinstance(self.batch_size, int):
-            n_batches = ceil(x_train.shape[0] / self.batch_size)
+            n_batches = ceil(X_train.shape[0] / self.batch_size)
         else: # assuming it is a float
             n_batches = floor(1 / self.batch_size)
 
-        all_train_errors = []
-        all_val_errors = []
-        all_train_score = []
-        all_evalution_scores = []
+        train_losses = []
+        val_errors = []
+        train_scores = []
+        val_scores = []
 
         stopping = self.stopping_patience 
         #-----training loop-----
@@ -246,63 +266,76 @@ class Network:
         #   adjust weights and bias deltas using accumulated deltas
         # end loop
         for epoch in range(self.epochs):
-            train_error = 0
+            train_loss = 0
+            train_score = 0
+            X_train, Y_train = shuffle(X_train, Y_train, random_state=self.random_state)
+            X_train_batched = np.array_split(X_train, n_batches)
+            Y_train_batched = np.array_split(Y_train, n_batches)
+            # X_train_batched = [X_train[i:i + self.batch_size] for i in range(0, len(X_train), self.batch_size)]
+            # Y_train_batched = [Y_train[i:i + self.batch_size] for i in range(0, len(Y_train), self.batch_size)]
             
-            x_train, y_train = unison_shuffle(x_train, y_train, self.random_state)
-            #if epoch==1: print(x_train) # per controllare come viene fatto lo splitting con random state
-            x_train_batched = np.array_split(x_train, n_batches)
-            y_train_batched = np.array_split(y_train, n_batches)
-            # x_train_batched = [x_train[i:i + self.batch_size] for i in range(0, len(x_train), self.batch_size)]
-            # y_train_batched = [y_train[i:i + self.batch_size] for i in range(0, len(y_train), self.batch_size)]
-
-            # for every batches in the set loop
-            for x_batch, y_batch in zip(x_train_batched, y_train_batched):
-                # for every patterns in the batch loop
-                for x, y in zip(x_batch, y_batch):
+            # for every batch in the set loop
+            for X_batch, Y_batch in zip(X_train_batched, Y_train_batched):
+                # for every pattern in the batch loop
+                for x, y in zip(X_batch, Y_batch):
                     output = x
                     
                     # forward propagation
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
                       
-                    # compute loss (for display)
-                    #train_error += self.loss(y_true=y, y_pred=output) #spostato a 264
+                    # compute loss and evaluation metric (for display)
+                    train_loss += self.loss(y_true=y, y_pred=output)
+                    reg_term = 0
+                    for layer in self.layers:
+                        weights = layer.weights.ravel()
+                        reg_term += np.dot(weights, weights)
+                    train_loss += self.lambd*reg_term
+                    train_score += self.evaluation_metric(y_true=y, y_pred=output) # TODO: if mse add reg term?
                     
                     # backward propagation
-                    delta = self.loss_prime(y_true=y, y_pred=output)
+                    delta = self.loss_prime(y_true=y, y_pred=output) # REVIEW: no need add l2 term (in layer update)
                     for layer in reversed(self.layers):
                         delta = layer.backward_propagation(delta)
-                
+
                 # new learning rate
                 self.update_learning_rate(epoch)
-                # update (for every batch)
+                # update weights
                 for layer in self.layers:
-                    layer.update(self.learning_rate_curr, x_batch.shape[0], self.alpha, self.lambd, self.nesterov) 
+                    layer.update(
+                        learning_rate=self.learning_rate_curr,
+                        batch_size=X_batch.shape[0],
+                        alpha=self.alpha,
+                        lambd=self.lambd,
+                        nesterov=self.nesterov
+                    )
             
-            # REVIEW: train error calcolata batch per batch, train_score alla fine
-            predict_tr = self.predict(x_train)
-            train_score = self.evaluation_metric(y_train, predict_tr)
-            train_error = self.loss(y_true=y_train, y_pred=predict_tr) #da 247
+            # REVIEW: di solito si acculumano gli error pattern per pattern, così risparmiamo anche sui tempi di computazione
+            #predict_tr = self.predict(X_train)
+            #train_score = self.evaluation_metric(Y_train, predict_tr)
+            #train_loss = self.loss(y_true=Y_train, y_pred=predict_tr)
             
             #-----validation-----
             if self.early_stopping:
                 if (epoch % self.validation_frequency) == 0:
-                    predict_val = self.predict(x_val)
-                    val_error = self.loss(y_true=y_val, y_pred=predict_val)
-                    evaluation_score = self.evaluation_metric(y_val, predict_val)
+                    predict_val = self.predict(X_val)
+                    val_error = self.loss(y_true=Y_val, y_pred=predict_val)
+                    evaluation_score = self.evaluation_metric(Y_val, predict_val)
             
-            #train_error /= samples # average on all samples 
-
+            # average on all samples 
+            train_loss /= X_train.shape[0]
+            train_score /= X_train.shape[0]
+            
             #-----stopping-----
-            if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
+            if epoch >= 10:
                 if self.early_stopping:
                     error_below_tol = val_error <= self.tol
-                    rel_error_decrease = (all_val_errors[-1] - val_error) / all_val_errors[-1]
-                    error_increased = val_error > all_val_errors[-1] # REVIEW: loss deve essere tale che valore minore => migliore
+                    rel_error_decrease = (val_errors[-1] - val_error) / val_errors[-1]
+                    error_increased = val_error > val_errors[-1] # REVIEW: loss deve essere tale che valore minore => migliore
                 else:
-                    error_below_tol = train_error <= self.tol
-                    rel_error_decrease = (all_train_errors[-1] - train_error) / all_train_errors[-1]
-                    error_increased = train_error > all_train_errors[-1] # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
+                    error_below_tol = train_loss <= self.tol
+                    rel_error_decrease = (train_losses[-1] - train_loss) / train_losses[-1]
+                    error_increased = train_loss > train_losses[-1] # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
                 
                 if error_below_tol: # if we've already converged (error near 0)
                     stopping = 0
@@ -311,20 +344,21 @@ class Network:
                 else:
                     stopping = self.stopping_patience
                     self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
+            
+            train_losses.append(train_loss)
+            train_scores.append(train_score)
 
-            all_train_errors.append(train_error)
-            all_train_score.append(train_score)
             if self.early_stopping:
-                all_val_errors.append(val_error)
-                all_evalution_scores.append(evaluation_score)
+                val_errors.append(val_error)
+                val_scores.append(evaluation_score)
             
             if self.verbose:
                 if self.early_stopping:
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
-                        % (epoch+1, self.epochs, train_error, val_error, evaluation_score))
+                        % (epoch+1, self.epochs, train_loss, val_error, evaluation_score))
                 else:
                     print('epoch %d/%d   train error=%f' 
-                        % (epoch+1, self.epochs, train_error))
+                        % (epoch+1, self.epochs, train_loss))
             if stopping <= 0: break
 
         #show stats
@@ -335,9 +369,9 @@ class Network:
         # plt.show()
 
         if self.early_stopping:
-            return all_train_errors, all_val_errors, all_train_score, all_evalution_scores
+            return train_losses, val_errors, train_scores, val_scores
         else:
-            return all_train_errors, all_train_score
+            return train_losses, train_scores
 
     def get_init_weights(self):
         init_weights = []
@@ -351,7 +385,7 @@ class Network:
         for l, weights_l, bias_l in zip(self.layers, weights, bias):
             l.set_weights(weights_l, bias_l)
 
-    def get_weights(self):
+    def get_current_weights(self):
         weights = []
         bias = []
         for l in self.layers:
@@ -359,11 +393,8 @@ class Network:
             bias.append(l.bias)
         return weights, bias
 
-    def set_reinit_weights(self):
-        self.reinit_weights = True
-
-    def reset_reinit_weights(self):
-        self.reinit_weights = False
+    def set_reinit_weights(self, value: bool):
+        self.reinit_weights = value
 
     def save(self, path):
         file = open(path, 'wb')

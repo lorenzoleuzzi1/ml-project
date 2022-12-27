@@ -5,7 +5,7 @@ from utils import accuracy
 from network import Network
 from utils import flatten_pred
 from cross_validation import cross_validation
-
+from utils import error_plot, accuracy_plot
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'
@@ -28,15 +28,14 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
     if target_rescaling:
         targets[targets == 0] = -1 # int 64
-    return (data, targets)
+    targets = targets.reshape(targets.shape[0], 1)
+    return data, targets
 
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
 # cross validation
 
-# network = Network('tanh', True, batch_size=1, learning_rate_init=0.002, evaluation_metric='accuracy', verbose=True)
-# cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, nested=True)
 import time
 
 start = time.time()
@@ -51,4 +50,3 @@ print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
 
 end = time.time()
 print(end - start)
-
