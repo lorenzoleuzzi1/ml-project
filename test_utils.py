@@ -68,10 +68,10 @@ def test_softmax():
     print(f_prime)
 
 def test_losses():
-    pred = np.array([[1, 1], [3, 1]]) # mse flatten array (1 + 4 + 1)/4 == (1/2 + 5/2)/2 = 3/2 = 1.5
-    true = np.array([[2, 1], [5, 2]]) # mee = (1+sqrt(5))/2
-    #pred = np.array([[3,1]])
-    #true = np.array([[5,2]])
+    #pred = np.array([[1, 1], [3, 1]]) # mse flatten array (1 + 4 + 1)/4 == (1/2 + 5/2)/2 = 3/2 = 1.5
+    #true = np.array([[2, 1], [5, 2]]) # mee = (1+sqrt(5))/2
+    pred = np.array([[3,1]])
+    true = np.array([[5,2]])
     print(pred.shape)
     print("--MEE--")
     print(mee(true, pred))

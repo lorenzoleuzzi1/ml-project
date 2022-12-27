@@ -78,6 +78,11 @@ class Network:
             raise ValueError("hidden_layer_sizes must be > 0, got %s." % params['hidden_layer_sizes'])
         if params['loss'] not in LOSSES:
             raise ValueError("Unrecognized loss.")
+        if params['classification'] == False and params['loss'] == 'logloss':
+            raise ValueError("Classification == True required to use logloss as loss function logloss")
+        if not (params['loss'] == 'logloss' and params['activation_out'] == 'softmax') and \
+            not (params['loss'] != 'logloss' and params['activation_out'] != 'softmax'):
+            raise ValueError("Loss function logloss allowed only with activation function softmax")
         if params['epochs'] <= 0:
             raise ValueError("epochs must be > 0, got %s. " % params['epochs'])
         if params['evaluation_metric'] not in EVALUATION_METRICS:
@@ -221,6 +226,8 @@ class Network:
                 for layer in self.layers:
                     layer.weights_init()
         else:
+            if self.activation_out == 'softmax' and y_train.shape[1] == 1:
+                raise ValueError("More than two output units are required to use the chosen activation function")
             self.compose(x_train.shape[-1], y_train.shape[1])
 
         # divide training set into batches

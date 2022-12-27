@@ -48,8 +48,8 @@ def sigmoid(x): #TODO: usare questa e togliere tanh (?)
     return 0.5 + 0.5 * np.tanh(0.5 * x)
 
 def sigmoid_prime(x):
-    t = np.tanh(0.5 * x)
-    diag = 0.25 * (1 - t**2)
+    s = sigmoid(x)
+    diag = s * (1 - s)
     return np.diagflat(diag)
 
 def softplus(x):
@@ -161,6 +161,7 @@ EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse,
+    'logloss': logloss,
     'accuracy': accuracy
 }
 
