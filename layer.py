@@ -40,13 +40,6 @@ class Layer():
         self.init_weights = copy.deepcopy(self.weights)
         self.init_bias = copy.deepcopy(self.bias)
 
-    # learning_rate = learning_rate * (batch_size/total_samples)
-    # lamd = lamd * (batch_size/total_samples)
-    # https://arxiv.org/pdf/1206.5533.pdf
-    # così possiamo usiare il range di lambda e eta consigliato con 1 solo batch
-    # il 2?
-    # scikit learn usa lambda = doppio del nostro, se aggiunta alla loss è -2*learning_rate*lambd
-    # forse in un altro range ancora...
     def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size

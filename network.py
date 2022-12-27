@@ -8,6 +8,7 @@ from math import floor, ceil
 from utils import *
 from layer import *
 from copy import deepcopy
+from sklearn import preprocessing
 
 class Network:
     def __init__(
@@ -118,7 +119,8 @@ class Network:
         if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
             raise ValueError("validation frequency must be between 1 and max epochs %s, got %s" % (params['epochs'], params['validation_frequency']))
         if not isinstance(params['classification'], bool):
-            raise ValueError("classification must be a boolean, got %s" % params['classification'])       
+            raise ValueError("classification must be a boolean, got %s" % params['classification'])
+        # TODO: fare i check che nel caso di classificazione l'output activation function sia softmax/tanh/logistic
         
     # add layer to network
     def add(self, layer):
@@ -139,7 +141,26 @@ class Network:
                 output = layer.forward_propagation(output)
             Y[i] = output
 
-        return Y.reshape(Y.shape[0], Y.shape[2])
+        Y = Y.reshape(Y.shape[0], Y.shape[2])
+        if self.classification:
+            if self.n_classes == 2 and self.activation_out != 'softmax':
+                if self.activation_out == 'tanh':
+                    threshold = 0
+                    neg_label = -1
+                else:
+                    threshold = 0.5
+                    neg_label = 0
+                Y = np.where(Y > threshold, 1, neg_label)
+            else:
+                # TODO: da sistemare
+                Y_new = []
+                B = np.max(Y, axis=1)
+                for i in range(Y.shape[0]):
+                    Y_new.append(np.where(Y[i] < B[i], neg_label, 1))
+                Y = np.array(Y_new)
+                # TODO: gestire più massimi
+            Y = self.binarizer.inverse_transform(Y)
+        return Y
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -185,6 +206,15 @@ class Network:
         self.first_fit = False
 
     def fit(self, X_train, Y_train): 
+        # se Y_train ha due sole etichette
+        # vogliamo una sola output unit
+        # prima di usare le loss dobbiamo usare una soglia per 
+
+        # multiclasse
+        # un'unità per classe 
+
+
+
         # NOTE: ora Y deve essere una matrice. 
         # Prima accettava anche array ad 1 dim ma sicoome predict deve ritornare matrici 
         # il chiamante deve comunque occuparsi delle dimensioni dei target per invocare le metriche,
@@ -227,6 +257,13 @@ class Network:
         # Y_val = Y_train[:validation_size]
         # X_train = X_train[validation_size:]
         # Y_train = Y_train[validation_size:]
+        if self.activation_out == 'tanh':
+            neg_label = -1
+        else:
+            neg_label = 0
+        self.binarizer = preprocessing.LabelBinarizer(pos_label=1, neg_label=neg_label) # TODO: quando viene fatto it più volte??
+        self.binarizer.fit(Y_train)
+        Y_train = self.binarizer.transform(Y_train)
         
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
@@ -245,7 +282,15 @@ class Network:
             if not self.first_fit and self.reinit_weights == False:
                 raise ValueError("Cannot use current weights. "
                 "Net structure is not compatible with the dataset to fit.")
-            self.compose(X_train.shape[-1], Y_train.shape[1]) # TODO: in realtà basta cambiare primo e ultimo layer
+            if self.classification:
+                self.n_classes = len(self.binarizer.classes_)
+                if self.n_classes == 2 and self.activation_out != 'softmax':
+                    n_output_units = 1
+                else:
+                    n_output_units = self.n_classes
+            else:
+                n_output_units = Y_train.shape[1]
+            self.compose(X_train.shape[-1], n_output_units) # TODO: in realtà basta cambiare primo e ultimo layer
 
         self.n_targets = Y_train.shape[1]
         if self.activation_out == 'softmax' and self.n_targets == 1:
@@ -313,11 +358,13 @@ class Network:
                 self.update_learning_rate(epoch)
                 # update weights
                 for layer in self.layers:
+                    # learning_rate e lambd devono essere scelti ipotizzando di avere 1 solo batch
+                    # https://arxiv.org/pdf/1206.5533.pdf (come scalare gli iperparametri in base alla dim del batch)
                     layer.update(
-                        learning_rate=self.learning_rate_curr,
+                        learning_rate=self.learning_rate_curr*(X_batch.shape[0]/X_train.shape[0]),
                         batch_size=X_batch.shape[0],
                         alpha=self.alpha,
-                        lambd=self.lambd,
+                        lambd=self.lambd*(X_batch.shape[0]/X_train.shape[0]),
                         nesterov=self.nesterov
                     )
             
@@ -344,7 +391,8 @@ class Network:
                 max_error = -1 # epoch in which error function has the last relative minimum point  
                 min_error = -1 # epoch in which error function has the last relative max point
                 start_peaks_epoch = epoch
-            
+                weights_to_return, bias_to_return = self.get_current_weights() 
+
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
                         error_below_tol = val_error <= self.tol

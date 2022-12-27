@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from utils import accuracy
+from sklearn.metrics import accuracy_score
 from network import Network
 from utils import flatten_pred, error_plot, accuracy_plot
 from cross_validation import cross_validation
@@ -37,15 +38,16 @@ X_test, y_test = read_monks(TEST_PATH)
 import time
 start = time.time()
 
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
-learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
-all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) 
+net = Network(activation_out='logistic', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
+learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=False)
+all_train_errors, tr_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
 #pred_backtracked = net.backtracked_network.predict(X_test)
 
-print(accuracy(y_true=y_test, y_pred=pred))
+print(accuracy_score(y_true=y_test, y_pred=pred))
+#print(accuracy(y_true=y_test, y_pred=pred))
 #print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
 
 end = time.time()
-print(end - start)
+#print(end - start)
 
