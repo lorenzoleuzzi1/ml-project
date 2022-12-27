@@ -83,7 +83,7 @@ ACTIVATIONS_DERIVATIVES = {
 # loss functions and their derivatives
 
 # returns a scalar
-def mse(y_true, y_pred): 
+def mse(y_true, y_pred):
     return np.mean(np.power(y_true - y_pred, 2))
     """axis = 1
     if len(y_true.shape) == 1: axis = 0

@@ -142,6 +142,9 @@ class Network:
             Y[i] = output
 
         Y = Y.reshape(Y.shape[0], Y.shape[2])
+        return Y
+
+    def predict_to_labels(self, Y):
         if self.classification:
             if self.n_classes == 2 and self.activation_out != 'softmax':
                 if self.activation_out == 'tanh':
@@ -160,6 +163,7 @@ class Network:
                 Y = np.array(Y_new)
                 # TODO: gestire più massimi
             Y = self.binarizer.inverse_transform(Y).astype(np.float64)
+            Y = Y.reshape(Y.shape[0], 1)
         return Y
 
     def update_learning_rate(self, epoch):
@@ -223,6 +227,15 @@ class Network:
             raise ValueError("X_train must be a 2-dimensional array")
         if len(Y_train.shape) != 2:
             raise ValueError("Y_train must be a 2-dimensional array")
+
+
+        if self.activation_out == 'tanh':
+            neg_label = -1.0
+        else:
+            neg_label = 0.0
+        self.binarizer = preprocessing.LabelBinarizer(pos_label=1.0, neg_label=neg_label) # TODO: quando viene fatto it più volte??
+        self.binarizer.fit(Y_train)
+        Y_train = self.binarizer.transform(Y_train).astype(np.float64)
         
         if self.early_stopping:
             if self.classification:
@@ -257,13 +270,6 @@ class Network:
         # Y_val = Y_train[:validation_size]
         # X_train = X_train[validation_size:]
         # Y_train = Y_train[validation_size:]
-        if self.activation_out == 'tanh':
-            neg_label = -1.0
-        else:
-            neg_label = 0.0
-        self.binarizer = preprocessing.LabelBinarizer(pos_label=1.0, neg_label=neg_label) # TODO: quando viene fatto it più volte??
-        self.binarizer.fit(Y_train)
-        Y_train = self.binarizer.transform(Y_train).astype(np.float64)
         
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
@@ -481,6 +487,15 @@ class Network:
         # plt.plot(val_scores, label="score",color="red")
         # plt.legend(loc="upper right")
         # plt.show()
+
+        """pred = self.predict(X_train)
+        train_error = self.loss(y_true=Y_train, y_pred=pred)
+        print("Y train")
+        print(Y_train)
+        print("pred")
+        print(pred)
+        print("train error")
+        print(train_error)"""
 
         if self.early_stopping:
             return train_losses, val_errors, train_scores, val_scores
