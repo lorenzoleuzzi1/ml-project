@@ -146,20 +146,20 @@ class Network:
             if self.n_classes == 2 and self.activation_out != 'softmax':
                 if self.activation_out == 'tanh':
                     threshold = 0
-                    neg_label = -1
+                    neg_label = -1.0
                 else:
                     threshold = 0.5
-                    neg_label = 0
-                Y = np.where(Y > threshold, 1, neg_label)
+                    neg_label = 0.0
+                Y = np.where(Y > threshold, 1.0, neg_label)
             else:
                 # TODO: da sistemare
                 Y_new = []
                 B = np.max(Y, axis=1)
                 for i in range(Y.shape[0]):
-                    Y_new.append(np.where(Y[i] < B[i], neg_label, 1))
+                    Y_new.append(np.where(Y[i] < B[i], neg_label, 1.0))
                 Y = np.array(Y_new)
                 # TODO: gestire più massimi
-            Y = self.binarizer.inverse_transform(Y)
+            Y = self.binarizer.inverse_transform(Y).astype(np.float64)
         return Y
 
     def update_learning_rate(self, epoch):
@@ -258,12 +258,12 @@ class Network:
         # X_train = X_train[validation_size:]
         # Y_train = Y_train[validation_size:]
         if self.activation_out == 'tanh':
-            neg_label = -1
+            neg_label = -1.0
         else:
-            neg_label = 0
-        self.binarizer = preprocessing.LabelBinarizer(pos_label=1, neg_label=neg_label) # TODO: quando viene fatto it più volte??
+            neg_label = 0.0
+        self.binarizer = preprocessing.LabelBinarizer(pos_label=1.0, neg_label=neg_label) # TODO: quando viene fatto it più volte??
         self.binarizer.fit(Y_train)
-        Y_train = self.binarizer.transform(Y_train)
+        Y_train = self.binarizer.transform(Y_train).astype(np.float64)
         
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
@@ -347,6 +347,7 @@ class Network:
                         weights = layer.weights.ravel()
                         reg_term += np.dot(weights, weights)
                     train_loss += self.lambd*reg_term
+                    # TODO: y è continuo, se evaluation_metric è accuracy attualmente non funziona
                     train_score += self.evaluation_metric(y_true=y, y_pred=output) # TODO: if mse add reg term?
                     
                     # backward propagation
@@ -361,10 +362,12 @@ class Network:
                     # learning_rate e lambd devono essere scelti ipotizzando di avere 1 solo batch
                     # https://arxiv.org/pdf/1206.5533.pdf (come scalare gli iperparametri in base alla dim del batch)
                     layer.update(
-                        learning_rate=self.learning_rate_curr*(X_batch.shape[0]/X_train.shape[0]),
+                        #learning_rate=self.learning_rate_curr*(X_batch.shape[0]/X_train.shape[0]),
+                        learning_rate=self.learning_rate_curr,
                         batch_size=X_batch.shape[0],
                         alpha=self.alpha,
-                        lambd=self.lambd*(X_batch.shape[0]/X_train.shape[0]),
+                        lambd=self.lambd,
+                        #lambd=self.lambd*(X_batch.shape[0]/X_train.shape[0]),
                         nesterov=self.nesterov
                     )
             

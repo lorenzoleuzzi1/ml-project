@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from utils import accuracy
 from sklearn.metrics import accuracy_score
 from network import Network
 from utils import flatten_pred, error_plot, accuracy_plot
@@ -39,8 +38,8 @@ import time
 start = time.time()
 
 net = Network(activation_out='logistic', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
-learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=False)
-all_train_errors, tr_accuracy = net.fit(X_train, y_train) 
+learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
+all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
 #pred_backtracked = net.backtracked_network.predict(X_test)
 

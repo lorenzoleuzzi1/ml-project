@@ -84,15 +84,17 @@ ACTIVATIONS_DERIVATIVES = {
 
 # returns a scalar
 def mse(y_true, y_pred): 
-    axis = 1
+    return np.mean(np.power(y_true - y_pred, 2))
+    """axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?"""
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
-    axis = 1
+    return 2 * (y_pred - y_true) / y_true.size
+    """axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return 2 * (y_pred - y_true) / y_true.shape[axis] # derivative w.r.t. y_pred
+    return 2 * (y_pred - y_true) / y_true.shape[axis] # derivative w.r.t. y_pred"""
 
 # returns a scalar
 def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
@@ -148,16 +150,16 @@ LOSSES_DERIVATIVES = {
 }
 
 
-def accuracy(y_true, y_pred): # TODO: da rivedere sistemando la codifica dei target
+"""def accuracy(y_true, y_pred): # TODO: da rivedere sistemando la codifica dei target
     threshold = 0 # per tanh, per softmax 0.5
-    return accuracy_score(y_true=y_true, y_pred=np.where(y_pred > threshold, 1, -1))
+    return accuracy_score(y_true=y_true, y_pred=np.where(y_pred > threshold, 1, -1))"""
 
 EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse,
     'logloss': logloss,
-    'accuracy': accuracy
+    'accuracy': accuracy_score
 } # REVIEW: devono essere tutte "medie"
 
 #-----OTHERS-----
