@@ -360,7 +360,6 @@ class Network:
                 if (train_loss > train_losses[-1]) and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
                     if (min_error - max_error) <= 10: #TODO: parametrico? 
-                        # TODO: con early stopping se valuti eval score ogni tot epoche funziona male -> valuto sempre su tr error?
                         if (train_losses[max_error] - train_loss) > 2*self.tol:
                             peaks_error_function += 1
                         else: 
@@ -387,7 +386,7 @@ class Network:
                 else:
                     stopping = self.stopping_patience
                     weights_to_return, bias_to_return = self.get_current_weights()  
-                    self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
+                    #self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
 
             
             train_losses.append(train_loss)
@@ -412,8 +411,7 @@ class Network:
                         val_scores[-self.stopping_patience:] = []
                     train_losses[-self.stopping_patience:] = []
                     train_scores[-self.stopping_patience:] = []
-                if stopping == -1: # error function has already converged (error near 0)
-                    weights_to_return, bias_to_return = self.get_current_weights() # set wheights and bias of the last iteration
+                    self.set_weights(weights_to_return, bias_to_return)
                 if stopping == -2: # error function is instable
                     surplus = len(train_losses) - start_peaks_epoch # remove values ​​that do not satisfy the criteria
                     if self.early_stopping:
@@ -423,8 +421,9 @@ class Network:
                     train_scores[-surplus:] = []
                     weights_to_return = weights_before_peaks # set wheights and bias of the last iteration
                     bias_to_return = bias_before_peaks
+                    self.set_weights(weights_to_return, bias_to_return)
                 break
-
+        
         #show stats
         # plt.plot(train_losses, label="training", color="blue")
         # plt.plot(val_errors, label= "validation", color="green")

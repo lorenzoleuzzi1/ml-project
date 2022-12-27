@@ -41,9 +41,10 @@ net = Network(activation_out='tanh', classification=True, activation_hidden='tan
 learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
-pred_backtracked = net.backtracked_network.predict(X_test)
+#pred_backtracked = net.backtracked_network.predict(X_test)
+
 print(accuracy(y_true=y_test, y_pred=pred))
-print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
+#print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
 
 end = time.time()
 print(end - start)

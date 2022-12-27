@@ -44,14 +44,6 @@ def tanh_prime(x):
     diag = 1 - t**2
     return np.diagflat(diag)
 
-def sigmoid(x): #TODO: usare questa e togliere tanh (?) -> così siamo tra 0 e 1 
-    return 0.5 + 0.5 * np.tanh(0.5 * x)
-
-def sigmoid_prime(x):
-    s = sigmoid(x)
-    diag = s * (1 - s)
-    return np.diagflat(diag)
-
 def softplus(x):
     return np.log(1 + np.exp(x))
 
@@ -129,7 +121,7 @@ def mrmse_prime(y_true, y_pred):
 
 # link above, somewhere
 def logloss(y_true, y_pred):
-    p = sigmoid(y_pred)
+    p = logistic(y_pred)
     return np.mean( -sum(y_true * np.log(p)) )
     # TODO: così va bene per la multiclassificazione s.s.s. abbiamo un neurone di output per ogni classe
     # se decidiamo che per classificazione binaria volgiamo un solo neurone di output dobbiamo allora sistemare logloss
@@ -137,7 +129,7 @@ def logloss(y_true, y_pred):
     # ma comunque sono due righe da aggiugere a codice
 
 def logloss_prime(y_true, y_pred):
-    p = sigmoid(y_pred)
+    p = logistic(y_pred)
     inv = 1/p
     return -(y_true * inv)
 
