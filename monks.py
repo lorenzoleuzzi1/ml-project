@@ -5,7 +5,7 @@ from utils import accuracy
 from network import Network
 from utils import flatten_pred, error_plot, accuracy_plot
 from cross_validation import cross_validation
-
+from utils import error_plot, accuracy_plot
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'
@@ -28,21 +28,23 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
     if target_rescaling:
         targets[targets == 0] = -1 # int 64
-    return (data, targets)
+    targets = targets.reshape(targets.shape[0], 1)
+    return data, targets
 
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-# cross validation
+import time
+start = time.time()
 
-"""network = Network('tanh', True, batch_size=1, learning_rate_init=0.002, evaluation_metric='accuracy', verbose=True)
-cross_validation(network, X_train, y_train, X_test, y_test, k_out=3, k_inn=3, nested=True)
-"""
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', 
-    epochs= 200, batch_size=1, learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
-# all_train_errors, tr_score, _, _ = net.fit(X_train, y_train) # without early stopping
-all_train_errors, all_val_errors, tr_score, val_score = net.fit(X_train, y_train) # with early stopping
+net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs= 200, batch_size=1, 
+learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, early_stopping=True)
+all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
-print(accuracy(y_pred=pred, y_true=y_test))
-error_plot(all_train_errors, all_val_errors) # with early stopping
-accuracy_plot(tr_score, val_score) # with early stopping
+pred_backtracked = net.backtracked_network.predict(X_test)
+print(accuracy(y_true=y_test, y_pred=pred))
+print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
+
+end = time.time()
+print(end - start)
+

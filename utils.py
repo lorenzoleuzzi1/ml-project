@@ -106,7 +106,8 @@ def mse_prime(y_true, y_pred):
 def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt( np.sum(np.power(y_true - y_pred, 2), axis=axis) ) / y_true.shape[axis])
+    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis)))
+
 
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
@@ -114,15 +115,17 @@ def mee_prime(y_true, y_pred):
     axis = 1
     if len(y_true.shape) == 1: axis = 0
     if f == 0: return np.zeros(y_true.shape)
-    else : return (y_pred - y_true) / ( (y_true.shape[axis] ** 2) * f )
+    else : return (y_pred - y_true) / f
 
 def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt( np.mean(np.power(y_true - y_pred, 2), axis=axis) ))
+    return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis))) #TODO: sqrt(n)?????
 
 def mrmse_prime(y_true, y_pred):
     return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
+    #TODO: (y_pred - y_true) / (y_true.size * mrmse(y_true, y_pred))
+
 
 # link above, somewhere
 def logloss(y_true, y_pred):
@@ -163,7 +166,7 @@ EVALUATION_METRICS = {
     'mrmse': mrmse,
     'logloss': logloss,
     'accuracy': accuracy
-}
+} # REVIEW: devono essere tutte "medie"
 
 #-----OTHERS-----
 def unison_shuffle(x, y, seed):

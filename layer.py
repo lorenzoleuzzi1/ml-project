@@ -18,31 +18,35 @@ class Layer():
         self.velocity_w = np.zeros(shape = (fan_in, fan_out))
         self.velocity_b = np.zeros(shape = (1, fan_out))
 
-    def set_weights(self, w, b):
-        self.weights = w
-        self.bias = b
-        self.init_weights = copy.deepcopy(w)
-        self.init_bias = copy.deepcopy(b)
+    def set_weights(self, weights, bias):
+        self.weights = weights
+        self.bias = bias
+        self.init_weights = copy.deepcopy(weights)
+        self.init_bias = copy.deepcopy(bias)
 
     def weights_init(self):
-        '''
-        TODO: softplus? identity?
-        '''
-        if self.activation == 'relu' or self.activation == 'leaky_relu':
+        if self.activation in ['relu', 'leaky_relu', 'softplus']:
             # He inizialization [https://arxiv.org/abs/1502.01852]
             self.weights = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))
         else: # softmax? nel paper la utilizzano
             # Xavier initialization [https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf]
             factor = 6.0
-            if self.activation == "logistic":
-                factor = 2.0 # TODO: la logistic in 0 è 1/2, Xavier assume di avere tanh che vale 0 in 0
             bound = np.sqrt(factor / (self.fan_in + self.fan_out))
+            if self.activation in ['logistic', 'softmax']: 
+                bound *= 4 # https://arxiv.org/pdf/1206.5533.pdf pag 15
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
             self.bias = np.zeros((1, self.fan_out))
         self.init_weights = copy.deepcopy(self.weights)
         self.init_bias = copy.deepcopy(self.bias)
 
+    # learning_rate = learning_rate * (batch_size/total_samples)
+    # lamd = lamd * (batch_size/total_samples)
+    # https://arxiv.org/pdf/1206.5533.pdf
+    # così possiamo usiare il range di lambda e eta consigliato con 1 solo batch
+    # il 2?
+    # scikit learn usa lambda = doppio del nostro, se aggiunta alla loss è -2*learning_rate*lambd
+    # forse in un altro range ancora...
     def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size
@@ -50,14 +54,14 @@ class Layer():
         # weights and bias update
         velocity_w =  alpha * self.velocity_w - learning_rate * self.deltas_weights
         velocity_b =  alpha * self.velocity_b - learning_rate * self.deltas_bias
-        self.weights -= lambd * self.weights
+        self.weights -= 2 * lambd * self.weights
         if nesterov:
             self.weights += alpha * velocity_w - learning_rate * self.deltas_weights
             self.bias += alpha * velocity_b - learning_rate * self.deltas_bias
         else:
             self.weights += velocity_w
             self.bias += velocity_b
-        
+
         self.velocity_w  = velocity_w
         self.velocity_b = velocity_b
         self.deltas_weights.fill(0)

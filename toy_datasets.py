@@ -22,6 +22,7 @@ print(mse(y_pred, y_test))
 
 ################## CLASSIFICATION TEST ##################
 """X, y = load_breast_cancer(return_X_y=True)
+y = y.reshape(y.shape[0], 1)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=42)
 net = Network(activation_out='tanh', classification=True, hidden_layer_sizes=[3, 3])
 net.fit(X_train, y_train)

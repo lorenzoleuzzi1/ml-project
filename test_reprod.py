@@ -21,6 +21,7 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
     if target_rescaling:
         targets[targets == 0] = -1 # int 64
+    targets = targets.reshape(targets.shape[0], 1)
     return (data, targets)
 
 X_train, y_train = read_monks(TRAIN_PATH)
@@ -33,7 +34,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -48,7 +49,7 @@ print(init_bias)
 net.set_weights(init_weights, init_bias)
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -70,7 +71,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -84,7 +85,7 @@ print(init_bias)
 
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -106,7 +107,7 @@ all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train) # with early sto
 pred = net.predict(X_test)
 print(accuracy(y_pred=pred, y_true=y_test))
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
@@ -120,7 +121,7 @@ print(init_bias)
 
 all_train_errors, tr_accuracy, _, _ = net.fit(X_train, y_train)
 
-weights, bias = net.get_weights()
+weights, bias = net.get_current_weights()
 print("weights")
 print(weights)
 print("bias")
