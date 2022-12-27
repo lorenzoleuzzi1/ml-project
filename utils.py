@@ -44,6 +44,14 @@ def tanh_prime(x):
     diag = 1 - t**2
     return np.diagflat(diag)
 
+def sigmoid(x): #TODO: usare questa e togliere tanh (?)
+    return 0.5 + 0.5 * np.tanh(0.5 * x)
+
+def sigmoid_prime(x):
+    t = np.tanh(0.5 * x)
+    diag = 0.25 * (1 - t**2)
+    return np.diagflat(diag)
+
 def softplus(x):
     return np.log(1 + np.exp(x))
 
@@ -58,27 +66,6 @@ def softmax(x): # TODO: softmax può essere usata con numero unità output layer
 def softmax_prime(x):
     f = softmax(x) 
     return np.diagflat(f) - np.dot(np.transpose(f), f)
-
-# TODO: ricontrollare se funziona con scalari / vettori, in generale se funziona e come usarla nel nostro progetto
-def crossEntropy_fun(y_true, y_pred):
-    y_pred = np.log(y_pred)
-    return - np.dot(y_pred, y_true)
-
-def crossEntropy_der(y, lb):
-    y = 1. / y
-    return - y * lb
-
-def binaryCrossEntropy_fun(y, lb): # usare solo le y è una probabilità -> activ fun softmax
-    if lb == 0:
-        return - np.log(1. - y)
-    else:
-        return - np.log(y)
-
-def binaryCrossEntropy_der(y, lb):
-    if lb == 0:
-        return 1 / (1. - y)
-    else:
-        return - 1. / y
 
 ACTIVATIONS = {
     'identity': identity,
@@ -104,58 +91,65 @@ ACTIVATIONS_DERIVATIVES = {
 # loss functions and their derivatives
 
 # returns a scalar
-def mse(y_true, y_pred):
-    return np.sum(np.power(y_true - y_pred, 2)) / y_true.size # TODO: use scikit learn?
+def mse(y_true, y_pred): 
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
-    return 2 * (y_pred - y_true) / y_true.size  # derivative w.r.t. y_pred
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
+    return 2 * (y_pred - y_true) / y_true.shape[axis] # derivative w.r.t. y_pred
 
 # returns a scalar
 def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.sqrt( np.sum(np.power(y_true - y_pred, 2), axis=axis) ) / y_true.size
-    #return np.mean(np.power(y_true - y_pred, 2)) # REVIEW: togliendo axis fa flattening, a differenza di mse è diverso 
+    return np.mean(np.sqrt( np.sum(np.power(y_true - y_pred, 2), axis=axis) ) / y_true.shape[axis])
 
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
     f = mee(y_true, y_pred)
+    axis = 1
+    if len(y_true.shape) == 1: axis = 0
     if f == 0: return np.zeros(y_true.shape)
-    else : return (y_pred - y_true) / ( (y_true.size ** 2) * f )
-    #e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
-    #return (y_pred - y_true) / e # derivative w.r.t. y_pred
+    else : return (y_pred - y_true) / ( (y_true.shape[axis] ** 2) * f )
 
 def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
-    #return np.sqrt( np.mean(np.power(y_true - y_pred, 2), axis=axis) )
-    return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis)))
+    return np.mean(np.sqrt( np.mean(np.power(y_true - y_pred, 2), axis=axis) ))
 
 def mrmse_prime(y_true, y_pred):
-    return (y_pred - y_true) / mrmse(y_true, y_pred)
-    #e = mee(y_true=y_true, y_pred=y_pred) # TODO: è giusta?
-    #return (y_pred - y_true) / (e * y_true.size) # derivative w.r.t. y_pred
+    return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
 
 # link above, somewhere
-def logloss(x):
-    # TODO:
-    return
+def logloss(y_true, y_pred):
+    p = sigmoid(y_pred)
+    return np.mean( -sum(y_true * np.log(p)) )
+    # TODO: così va bene per la multiclassificazione s.s.s. abbiamo un neurone di output per ogni classe
+    # se decidiamo che per classificazione binaria volgiamo un solo neurone di aèoutput dobbiamo allora sistemare logloss
+    # distinguendo caso multiclasse e caso binario -> io non lo farei perché è una roba in più da controllare, 
+    # ma comunque sono due righe
 
-def logloss_prime(x):
-    # TODO:
-    return
+def logloss_prime(y_true, y_pred):
+    p = sigmoid(y_pred)
+    inv = 1/p
+    return -(y_true * inv)
 
 LOSSES = {
     'mse': mse,
     'mee': mee,
-    'mrmse': mrmse
+    'mrmse': mrmse,
+    'logloss': logloss
 }
 
 LOSSES_DERIVATIVES = {
     'mse': mse_prime,
     'mee': mee_prime,
-    'mrmse': mrmse_prime
+    'mrmse': mrmse_prime,
+    'logloss': logloss_prime
 }
 
 

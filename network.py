@@ -261,6 +261,7 @@ class Network:
                 for x, y in zip(x_batch, y_batch):
                     output = x
                     
+                    
                     # forward propagation
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
@@ -305,11 +306,13 @@ class Network:
                 if self.early_stopping:
                         error_below_tol = val_error <= self.tol
                         rel_error_decrease = (all_val_errors[-1] - val_error) / all_val_errors[-1]
-                        error_increased = val_error > all_val_errors[-1] # REVIEW: loss deve essere tale che valore minore => migliore
+                        error_increased = val_error > all_val_errors[-1]
+                        # REVIEW: loss deve essere tale che valore minore => migliore
                 else:
                     error_below_tol = train_error <= self.tol
                     rel_error_decrease = (all_train_errors[-1] - train_error) / all_train_errors[-1]
-                    error_increased = train_error > all_train_errors[-1] # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
+                    error_increased = train_error > all_train_errors[-1]
+                    # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
                    
                 if error_increased and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
@@ -331,7 +334,7 @@ class Network:
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
-                            weights_to_return_peaks, bias_to_return_peaks = self.get_weights()                    
+                            weights_before_peaks, bias_before_peaks = self.get_weights()                    
                 precedent_error_increased =  error_increased
 
                 if error_below_tol: # if we've already converged (error near 0)
@@ -374,8 +377,8 @@ class Network:
                         all_evalution_scores[-surplus:] = []
                     all_train_errors[-surplus:] = []
                     all_train_score[-surplus:] = []
-                    weights_to_return = weights_to_return_peaks # set wheights and bias of the last iteration
-                    bias_to_return = bias_to_return_peaks
+                    weights_to_return = weights_before_peaks # set wheights and bias of the last iteration
+                    bias_to_return = bias_before_peaks
                 break
 
         if self.early_stopping:
