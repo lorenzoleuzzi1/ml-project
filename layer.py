@@ -31,8 +31,6 @@ class Layer():
             self.bias = np.zeros((1, self.fan_out))
         else: # softmax? nel paper la utilizzano
             # Xavier initialization [https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf]
-            """if self.activation == 'logistic':
-                factor = 2.0"""
             factor = 6.0
             bound = np.sqrt(factor / (self.fan_in + self.fan_out))
             if self.activation in ['logistic', 'softmax']: 

@@ -238,7 +238,7 @@ class Network:
             if not self.first_fit and self.reinit_weights == False:
                 raise ValueError("Cannot use current weights. "
                 "Net structure is not compatible with the dataset to fit.")
-            self.compose(X_train.shape[-1], Y_train.shape[1])
+            self.compose(X_train.shape[-1], Y_train.shape[1]) # TODO: in realtà basta cambiare primo e ultimo layer
 
         self.n_targets = Y_train.shape[1]
 
@@ -326,7 +326,7 @@ class Network:
             train_score /= X_train.shape[0]
             
             #-----stopping-----
-            if epoch >= 10: # REVIEW: farne minimo 10 oppure self.stopping_patience/2 non mi sembra tanto meglio... forse possiamo abbassare a 5?
+            if epoch >= 10:
                 if self.early_stopping:
                     error_below_tol = val_error <= self.tol
                     rel_error_decrease = (val_errors[-1] - val_error) / val_errors[-1]
