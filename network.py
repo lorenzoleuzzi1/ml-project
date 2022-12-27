@@ -246,12 +246,12 @@ class Network:
                 raise ValueError("Cannot use current weights. "
                 "Net structure is not compatible with the dataset to fit.")
             self.compose(X_train.shape[-1], Y_train.shape[1]) # TODO: in realtà basta cambiare primo e ultimo layer
-            if self.activation_out == 'softmax' and y_train.shape[1] == 1:
-                raise ValueError("Two or more output units are required to use softmax as activation function.")
-            if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and y_train.shape[1] == 1:
-                raise ValueError("More than two output units are required to use the chosen loss function.")
 
         self.n_targets = Y_train.shape[1]
+        if self.activation_out == 'softmax' and self.n_targets == 1:
+            raise ValueError("Two or more output units are required to use softmax as activation function.")
+        if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and self.n_targets == 1:
+            raise ValueError("More than two output units are required to use the chosen loss function.")
 
         # divide training set into batches
         if isinstance(self.batch_size, int):
@@ -339,7 +339,7 @@ class Network:
             
             #-----stopping-----
             if epoch == 10: #init
-                precedent_error_increased = all_train_errors[-1] > all_train_errors[-2] # error_increased cond. at 9th epoch
+                precedent_error_increased = train_losses[-1] > train_losses[-2] # error_increased cond. at 9th epoch
                 peaks_error_function = 0
                 max_error = -1 # epoch in which error function has the last relative minimum point  
                 min_error = -1 # epoch in which error function has the last relative max point
@@ -348,35 +348,35 @@ class Network:
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
                         error_below_tol = val_error <= self.tol
-                        rel_error_decrease = (all_val_errors[-1] - val_error) / all_val_errors[-1]
-                        error_increased = val_error > all_val_errors[-1]
+                        rel_error_decrease = (val_errors[-1] - val_error) / val_errors[-1]
+                        error_increased = val_error > val_errors[-1]
                         # REVIEW: loss deve essere tale che valore minore => migliore
                 else:
-                    error_below_tol = train_error <= self.tol
-                    rel_error_decrease = (all_train_errors[-1] - train_error) / all_train_errors[-1]
-                    error_increased = train_error > all_train_errors[-1]
+                    error_below_tol = train_loss <= self.tol
+                    rel_error_decrease = (train_losses[-1] - train_loss) / train_losses[-1]
+                    error_increased = train_loss > train_losses[-1]
                     # REVIEW: tipicamente l'errore di training non cresce, settare a False? (attenzione decr)
                    
-                if (train_error > all_train_errors[-1]) and not precedent_error_increased: # in previous iteration error function was in min
+                if (train_loss > train_losses[-1]) and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
                     if (min_error - max_error) <= 10: #TODO: parametrico? 
                         # TODO: con early stopping se valuti eval score ogni tot epoche funziona male -> valuto sempre su tr error?
-                        if (all_train_errors[max_error] - train_error) > 2*self.tol:
+                        if (train_losses[max_error] - train_loss) > 2*self.tol:
                             peaks_error_function += 1
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
-                            weights_to_return, bias_to_return = self.get_weights()
-                elif not (train_error > all_train_errors[-1]) and precedent_error_increased: # in previous iteration error function was in max
+                            weights_to_return, bias_to_return = self.get_current_weights()
+                elif not (train_loss > train_losses[-1]) and precedent_error_increased: # in previous iteration error function was in max
                     max_error = epoch
                     if (max_error - min_error) <= 10:
-                        if (train_error - all_train_errors[min_error]) > 2*self.tol:
+                        if (train_loss - train_losses[min_error]) > 2*self.tol:
                             peaks_error_function += 1   
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
-                            weights_before_peaks, bias_before_peaks = self.get_weights()                    
-                precedent_error_increased =  train_error > all_train_errors[-1]
+                            weights_before_peaks, bias_before_peaks = self.get_current_weights()                    
+                precedent_error_increased =  train_loss > train_losses[-1]
 
                 if error_below_tol: # if we've already converged (error near 0)
                     stopping = -1
@@ -386,7 +386,7 @@ class Network:
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
-                    weights_to_return, bias_to_return = self.get_weights()  
+                    weights_to_return, bias_to_return = self.get_current_weights()  
                     self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
 
             
@@ -403,32 +403,32 @@ class Network:
                         % (epoch+1, self.epochs, train_loss, val_error, evaluation_score))
                 else:
                     print('epoch %d/%d   train error=%f' 
-                        % (epoch+1, self.epochs, train_error))
+                        % (epoch+1, self.epochs, train_loss))
             
             if stopping <= 0: # stopping criteria satisfied
                 if stopping == 0: # error function is increasing              
                     if self.early_stopping: # remove values ​​that do not satisfy the criteria
-                        all_val_errors[-self.stopping_patience:] = []
-                        all_evalution_scores[-self.stopping_patience:] = []
-                    all_train_errors[-self.stopping_patience:] = []
-                    all_train_score[-self.stopping_patience:] = []
+                        val_errors[-self.stopping_patience:] = []
+                        val_scores[-self.stopping_patience:] = []
+                    train_losses[-self.stopping_patience:] = []
+                    train_scores[-self.stopping_patience:] = []
                 if stopping == -1: # error function has already converged (error near 0)
-                    weights_to_return, bias_to_return = self.get_weights() # set wheights and bias of the last iteration
+                    weights_to_return, bias_to_return = self.get_current_weights() # set wheights and bias of the last iteration
                 if stopping == -2: # error function is instable
-                    surplus = len(all_train_errors) - start_peaks_epoch # remove values ​​that do not satisfy the criteria
+                    surplus = len(train_losses) - start_peaks_epoch # remove values ​​that do not satisfy the criteria
                     if self.early_stopping:
-                        all_val_errors[-surplus:] = []
-                        all_evalution_scores[-surplus:] = []
-                    all_train_errors[-surplus:] = []
-                    all_train_score[-surplus:] = []
+                        val_errors[-surplus:] = []
+                        val_scores[-surplus:] = []
+                    train_losses[-surplus:] = []
+                    train_scores[-surplus:] = []
                     weights_to_return = weights_before_peaks # set wheights and bias of the last iteration
                     bias_to_return = bias_before_peaks
                 break
 
         #show stats
-        # plt.plot(all_train_errors, label="training", color="blue")
-        # plt.plot(all_val_errors, label= "validation", color="green")
-        # plt.plot(all_evalution_scores, label="score",color="red")
+        # plt.plot(train_losses, label="training", color="blue")
+        # plt.plot(val_errors, label= "validation", color="green")
+        # plt.plot(val_scores, label="score",color="red")
         # plt.legend(loc="upper right")
         # plt.show()
 
