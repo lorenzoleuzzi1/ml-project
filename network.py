@@ -7,6 +7,7 @@ from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
 from layer import *
+from copy import deepcopy
 
 class Network:
     def __init__(
@@ -88,8 +89,9 @@ class Network:
             "Supported learning rate schedules are %s." % (params['learning_rate'], ["fixed", "linear_decay"]))
         if params['learning_rate_init'] <= 0.0:
             raise ValueError("learning_rate_init must be > 0, got %s. " % params['learning_rate_init'] )
-        if params['tau']  <= 0 or params['tau'] > params['epochs']:
-            raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
+        if params['learning_rate'] == "linear_decay":
+            if params['tau']  <= 0 or params['tau'] > params['epochs']:
+                raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
         if params['batch_size']  <= 0:
             raise ValueError("batch_size must be > 0, got %s." % params['batch_size'])
         if params['lambd'] < 0.0:
@@ -254,7 +256,6 @@ class Network:
         val_scores = []
 
         stopping = self.stopping_patience 
-
         #-----training loop-----
         # loop max-epoch times
         #   for each bacth       
@@ -342,9 +343,11 @@ class Network:
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
+                    self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
             
             train_losses.append(train_loss)
             train_scores.append(train_score)
+
             if self.early_stopping:
                 val_errors.append(val_error)
                 val_scores.append(evaluation_score)
@@ -359,12 +362,11 @@ class Network:
             if stopping <= 0: break
 
         #show stats
-        plt.plot(train_losses, label="training loss", color="blue")
-        if self.early_stopping: 
-            plt.plot(val_errors, label= "validation loss", color="green")
-            plt.plot(val_scores, label="validation score",color="red")
-        plt.legend(loc="upper right")
-        plt.show()
+        # plt.plot(all_train_errors, label="training", color="blue")
+        # plt.plot(all_val_errors, label= "validation", color="green")
+        # plt.plot(all_evalution_scores, label="score",color="red")
+        # plt.legend(loc="upper right")
+        # plt.show()
 
         if self.early_stopping:
             return train_losses, val_errors, train_scores, val_scores
