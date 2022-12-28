@@ -75,4 +75,7 @@ class Layer():
         delta_w = np.outer(self.input, delta) 
         self.deltas_weights += delta_w
         self.deltas_bias += delta 
+
         return delta_i
+
+    

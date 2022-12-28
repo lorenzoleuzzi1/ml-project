@@ -22,7 +22,7 @@ class Network:
         epochs : int = 200,
         learning_rate : str = 'fixed',
         learning_rate_init : float = 0.0001,
-        tau : int = 100,
+        tau : int = 200,
         batch_size : int or float = 1, # 1 = stochastic, 1.0 = un batch
         lambd : float = 0.0001,
         alpha : float = 0.9,
@@ -171,20 +171,15 @@ class Network:
             self.learning_rate_curr = self.learning_rate_init
         
         if self.learning_rate == "linear_decay":
+            alfa = epoch / self.tau
+            eta = (1 - alfa) * self.learning_rate_init + alfa * self.learning_rate_fin
+            
             if epoch == 0:
                 self.learning_rate_curr = self.learning_rate_init
-                return 
-            if epoch >= self.tau:
-                self.learning_rate_curr = self.learning_rate_fin
-                return
-            
-            theta = epoch / self.tau
-            lr = (1 - theta) * self.learning_rate_init + theta * self.learning_rate_fin
-            
-            if (lr < self.learning_rate_fin):
+            elif epoch >= self.tau or eta < self.learning_rate_fin:
                 self.learning_rate_curr = self.learning_rate_fin
             else:
-                self.learning_rate_curr = lr
+                self.learning_rate_curr = eta
 
     def compose(self, input_size, output_size):
         self.layers = []
@@ -210,14 +205,6 @@ class Network:
         self.first_fit = False
 
     def fit(self, X_train, Y_train): 
-        # se Y_train ha due sole etichette
-        # vogliamo una sola output unit
-        # prima di usare le loss dobbiamo usare una soglia per 
-
-        # multiclasse
-        # un'unità per classe 
-
-
 
         # NOTE: ora Y deve essere una matrice. 
         # Prima accettava anche array ad 1 dim ma sicoome predict deve ritornare matrici 
@@ -247,9 +234,6 @@ class Network:
                     stratify=Y_train,
                     random_state=self.random_state
                 )
-                #label = unique_labels(Y_train)
-                #validation_size = max(int(len(X_train)/100 * self.validation_size), len(label))
-                #X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=validation_size, shuffle=True, stratify=Y_train)
             else:
                 X_train, X_val, Y_train, Y_val = train_test_split(
                     X_train,
@@ -258,18 +242,6 @@ class Network:
                     shuffle=True,
                     random_state=self.random_state
                 )
-                #validation_size = max(int(len(X_train)/100 * self.validation_size), 1)
-                #X_train, X_val, Y_train, Y_val = train_test_split(X_train, Y_train, test_size=validation_size, shuffle=True)
-                
-        # #shuffle the whole training set 
-        # X_train, Y_train = unison_shuffle(X_train, Y_train)
-        
-        # #split training set for validation
-        # validation_size = max(int(len(X_train)/100 * self.validation_size), 1)
-        # X_val = X_train[:validation_size]
-        # Y_val = Y_train[:validation_size]
-        # X_train = X_train[validation_size:]
-        # Y_train = Y_train[validation_size:]
         
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
@@ -326,6 +298,7 @@ class Network:
         #       end for
         #   adjust weights and bias deltas using accumulated deltas
         # end loop
+        
         for epoch in range(self.epochs):
             train_loss = 0
             train_score = 0
@@ -480,22 +453,6 @@ class Network:
                     bias_to_return = bias_before_peaks
                     self.set_weights(weights_to_return, bias_to_return)
                 break
-        
-        #show stats
-        # plt.plot(train_losses, label="training", color="blue")
-        # plt.plot(val_errors, label= "validation", color="green")
-        # plt.plot(val_scores, label="score",color="red")
-        # plt.legend(loc="upper right")
-        # plt.show()
-
-        """pred = self.predict(X_train)
-        train_error = self.loss(y_true=Y_train, y_pred=pred)
-        print("Y train")
-        print(Y_train)
-        print("pred")
-        print(pred)
-        print("train error")
-        print(train_error)"""
 
         if self.early_stopping:
             return train_losses, val_errors, train_scores, val_scores
