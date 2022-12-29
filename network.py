@@ -337,10 +337,12 @@ class Network:
                         weights = layer.weights.ravel()
                         reg_term += np.dot(weights, weights)
                     train_loss += self.lambd*reg_term
-                    # NOTE: se evaluation_metric == mse avrà valori diversi dalla loss perchè in quest'ultima sommiamo il reg. term
+
                     if self.evaluation_metric == 'accuracy':
-                        output = self.outputs_to_labels(output)
-                    train_score += self.evaluation_metric(y_true=y, y_pred=output)
+                        pred_label = self.outputs_to_labels(output)
+                    else:
+                        pred_label = output
+                    train_score += self.evaluation_metric(y_true=y, y_pred=pred_label) # TODO: if mse add reg term?
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output) # REVIEW: no need add l2 term (in layer update)
@@ -371,11 +373,13 @@ class Network:
             #-----validation-----
             if self.early_stopping:
                 if (epoch % self.validation_frequency) == 0:
-                    Y_val_pred = self.predict_outputs(X_val)
-                    val_error = self.loss(y_true=Y_val, y_pred=Y_val_pred)
-                    if self.evaluation_metric == 'accuracy':
-                        Y_val_pred = self.outputs_to_labels(Y_val_pred)
-                    evaluation_score = self.evaluation_metric(Y_val, Y_val_pred)
+                    pred_outputs = self.predict_outputs(X_val)
+                    val_error = self.loss(y_true=Y_val, y_pred=pred_outputs)
+                    if self.evaluation_metric == "accuracy":
+                        pred_labels = self.outputs_to_labels(pred_outputs)
+                    else:
+                        pred_labels = pred_outputs
+                    evaluation_score = self.evaluation_metric(Y_val, pred_labels)
             
             # average on all samples 
             train_loss /= X_train.shape[0]
