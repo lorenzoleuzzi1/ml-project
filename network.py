@@ -327,7 +327,7 @@ class Network:
                         reg_term += np.dot(weights, weights)
                     train_loss += self.lambd*reg_term
                     # TODO: y è continuo, se evaluation_metric è accuracy attualmente non funziona
-                    train_score += self.evaluation_metric(y_true=y, y_pred=output) # TODO: if mse add reg term?
+                    train_score += self.evaluation_metric(y_true=y, y_pred=self.predict_to_labels(output)) # TODO: if mse add reg term?
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output) # REVIEW: no need add l2 term (in layer update)
@@ -360,7 +360,8 @@ class Network:
                 if (epoch % self.validation_frequency) == 0:
                     predict_val = self.predict(X_val)
                     val_error = self.loss(y_true=Y_val, y_pred=predict_val)
-                    evaluation_score = self.evaluation_metric(Y_val, predict_val)
+
+                    evaluation_score = self.evaluation_metric(Y_val, self.predict_to_labels(predict_val))
             
             # average on all samples 
             train_loss /= X_train.shape[0]
@@ -454,11 +455,16 @@ class Network:
                     self.set_weights(weights_to_return, bias_to_return)
                 break
 
+        # plt.plot(train_losses, label="training", color="blue")
+        # plt.plot(val_errors, label= "validation", color="green")
+        # plt.plot(val_scores, label="score",color="red")
+        # plt.legend(loc="upper right")
+        # plt.show()
         if self.early_stopping:
             return train_losses, val_errors, train_scores, val_scores
         else:
             return train_losses, train_scores
-        # TODO: return weights_to_return, bias_to_return
+
 
     def get_init_weights(self):
         init_weights = []
