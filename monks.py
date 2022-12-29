@@ -42,11 +42,7 @@ net = Network(activation_out='tanh', classification=True, activation_hidden='tan
     learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000)
 tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
-labels = net.predict_to_labels(pred)
-#pred_backtracked = net.backtracked_network.predict(X_test)
-print(accuracy_score(y_true=y_test, y_pred=labels))
-#print(accuracy(y_true=y_test, y_pred=pred))
-#print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
+print(accuracy_score(y_true=y_test, y_pred=pred))
 
 plt.plot(tr_errors, label="training", color="blue")
 #plt.plot(val_errors, label= "validation", color="green")

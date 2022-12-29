@@ -126,8 +126,16 @@ class Network:
     def add(self, layer):
         self.layers.append(layer)
 
-    # predict output for given input
     def predict(self, X):
+        outputs = self.predict_outputs(X)
+        if self.classification:
+            labels = self.outputs_to_labels(outputs)
+        else:
+            labels = outputs
+        return labels
+
+    # predict output for given input
+    def predict_outputs(self, X):
         if self.n_targets == None:
             raise ValueError("Net has not been fitted yet.")
 
@@ -144,26 +152,29 @@ class Network:
         Y = Y.reshape(Y.shape[0], Y.shape[2])
         return Y
 
-    def predict_to_labels(self, Y):
-        if self.classification:
-            if self.n_classes == 2 and self.activation_out != 'softmax':
-                if self.activation_out == 'tanh':
-                    threshold = 0
-                    neg_label = -1.0
-                else:
-                    threshold = 0.5
-                    neg_label = 0.0
-                Y = np.where(Y > threshold, 1.0, neg_label)
+    def outputs_to_labels(self, Y):
+        if not self.classification:
+            raise ValueError('For regression tasks network\'s'
+                'outputs are already labels.')
+        
+        if self.n_classes == 2 and self.activation_out != 'softmax':
+            if self.activation_out == 'tanh':
+                threshold = 0
+                neg_label = -1.0
             else:
-                # TODO: da sistemare
-                Y_new = []
-                B = np.max(Y, axis=1)
-                for i in range(Y.shape[0]):
-                    Y_new.append(np.where(Y[i] < B[i], neg_label, 1.0))
-                Y = np.array(Y_new)
-                # TODO: gestire più massimi
-            Y = self.binarizer.inverse_transform(Y).astype(np.float64)
-            Y = Y.reshape(Y.shape[0], 1)
+                threshold = 0.5
+                neg_label = 0.0
+            Y = np.where(Y > threshold, 1.0, neg_label)
+        else:
+            # TODO: da sistemare
+            Y_new = []
+            B = np.max(Y, axis=1)
+            for i in range(Y.shape[0]):
+                Y_new.append(np.where(Y[i] < B[i], neg_label, 1.0))
+            Y = np.array(Y_new)
+            # TODO: gestire più massimi
+        Y = self.binarizer.inverse_transform(Y).astype(np.float64)
+        Y = Y.reshape(Y.shape[0], 1)
         return Y
 
     def update_learning_rate(self, epoch):
@@ -171,15 +182,15 @@ class Network:
             self.learning_rate_curr = self.learning_rate_init
         
         if self.learning_rate == "linear_decay":
-            alfa = epoch / self.tau
-            eta = (1 - alfa) * self.learning_rate_init + alfa * self.learning_rate_fin
+            a = epoch / self.tau
+            lr = (1 - a) * self.learning_rate_init + a * self.learning_rate_fin
             
             if epoch == 0:
                 self.learning_rate_curr = self.learning_rate_init
-            elif epoch >= self.tau or eta < self.learning_rate_fin:
+            elif epoch >= self.tau or lr < self.learning_rate_fin:
                 self.learning_rate_curr = self.learning_rate_fin
             else:
-                self.learning_rate_curr = eta
+                self.learning_rate_curr = lr
 
     def compose(self, input_size, output_size):
         self.layers = []
@@ -326,8 +337,10 @@ class Network:
                         weights = layer.weights.ravel()
                         reg_term += np.dot(weights, weights)
                     train_loss += self.lambd*reg_term
-                    # TODO: y è continuo, se evaluation_metric è accuracy attualmente non funziona
-                    train_score += self.evaluation_metric(y_true=y, y_pred=output) # TODO: if mse add reg term?
+                    # NOTE: se evaluation_metric == mse avrà valori diversi dalla loss perchè in quest'ultima sommiamo il reg. term
+                    if self.evaluation_metric == 'accuracy':
+                        output = self.outputs_to_labels(output)
+                    train_score += self.evaluation_metric(y_true=y, y_pred=output)
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output) # REVIEW: no need add l2 term (in layer update)
@@ -358,9 +371,11 @@ class Network:
             #-----validation-----
             if self.early_stopping:
                 if (epoch % self.validation_frequency) == 0:
-                    predict_val = self.predict(X_val)
-                    val_error = self.loss(y_true=Y_val, y_pred=predict_val)
-                    evaluation_score = self.evaluation_metric(Y_val, predict_val)
+                    Y_val_pred = self.predict_outputs(X_val)
+                    val_error = self.loss(y_true=Y_val, y_pred=Y_val_pred)
+                    if self.evaluation_metric == 'accuracy':
+                        Y_val_pred = self.outputs_to_labels(Y_val_pred)
+                    evaluation_score = self.evaluation_metric(Y_val, Y_val_pred)
             
             # average on all samples 
             train_loss /= X_train.shape[0]
