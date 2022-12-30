@@ -186,8 +186,13 @@ class Network:
             B = np.max(Y, axis=1)
             for i in range(Y.shape[0]):
                 Y_new.append(np.where(Y[i] < B[i], self.neg_label, self.pos_label))
+                j = 0
+                s = int(sum(Y_new[i]) - 1)
+                for j in range(s):
+                        if Y_new[i][j] == 1.0:
+                            Y_new[i][j] = self.neg_label
+                        j += 1
             Y = np.array(Y_new)
-            # TODO: gestire più massimi
         Y = self.binarizer.inverse_transform(Y).astype(np.float64)
         Y = Y.reshape(Y.shape[0], 1)
         return Y
@@ -411,7 +416,7 @@ class Network:
                    
                 if (train_loss > train_losses[-1]) and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
-                    if (min_error - max_error) <= 10: #TODO: parametrico? 
+                    if (min_error - max_error) <= 3: #TODO: parametrico? 
                         if (train_losses[max_error] - train_loss) > 2*self.tol:
                             peaks_error_function += 1
                         else: 
@@ -420,7 +425,7 @@ class Network:
                             weights_to_return, bias_to_return = self.get_current_weights()
                 elif not (train_loss > train_losses[-1]) and precedent_error_increased: # in previous iteration error function was in max
                     max_error = epoch
-                    if (max_error - min_error) <= 10:
+                    if (max_error - min_error) <= 3:
                         if (train_loss - train_losses[min_error]) > 2*self.tol:
                             peaks_error_function += 1   
                         else: 
