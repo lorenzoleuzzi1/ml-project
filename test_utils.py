@@ -19,14 +19,6 @@ def test_tanh():
     print("TANH_PRIME(INPUT):")
     print(f_prime)
 
-def test_sigmoid():
-    f_net = sigmoid(input)
-    print("SIGMOID(INPUT):")
-    print(f_net)
-    f_prime = sigmoid_prime(input)
-    print("SIGMOID_PRIME(INPUT):")
-    print(f_prime)
-
 def test_relu():
     f_net = relu(input)
     print("RELU(INPUT):")
