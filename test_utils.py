@@ -68,21 +68,17 @@ def test_softmax():
     print(f_prime)
 
 def test_losses():
-    #pred = np.array([[1, 1], [3, 1]]) # mse flatten array (1 + 4 + 1)/4 == (1/2 + 5/2)/2 = 3/2 = 1.5
-    #true = np.array([[2, 1], [5, 2]]) # mee = (1+sqrt(5))/2
-    pred = np.array([[3,1]])
-    true = np.array([[5,2]])
-    print(pred.shape)
+    pred = np.array([[2,2]])
+    true = np.array([3,2])
+    print("--MEE prime--")
+    print(mee_prime(true, pred)) # (y_pred - y_true) / f
+    print("--MSE prime--")
+    print(mse_prime(true, pred)) # 2 * (y_pred - y_true) / y_true.size
     print("--MEE--")
     print(mee(true, pred))
-    print("--MSE--")
-    print(mse(true, pred))
-    from sklearn.metrics import mean_squared_error
-    print(mean_squared_error(y_pred=pred, y_true=true))
-    print("--MRMSE--")
-    print(mrmse(true, pred))
-    print("--LOGLOSS--")
-    print(logloss(true, pred))
-
+    #from sklearn.metrics import mean_squared_error
+    #print(mean_squared_error(y_pred=pred, y_true=true))
+    #print("--LOGLOSS--")
+    #print(logloss(true, pred))
 
 test_losses()

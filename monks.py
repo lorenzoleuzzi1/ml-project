@@ -3,9 +3,8 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import accuracy_score
 from network import Network
-from utils import flatten_pred, error_plot, accuracy_plot
-from cross_validation import cross_validation
 from utils import error_plot, accuracy_plot
+from cross_validation import cross_validation
 import matplotlib.pyplot as plt
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
@@ -39,7 +38,9 @@ import time
 start = time.time()
 
 net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
-    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000)
+    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy')
+#net = Network(activation_out='softmax', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
+#    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy', loss='logloss')
 tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
