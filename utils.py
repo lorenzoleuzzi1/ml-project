@@ -52,7 +52,7 @@ def softplus_prime(x):
     diag = 1 / (1 + np.exp(-x))
     return np.diagflat(diag)
 
-def softmax(x): # TODO: softmax può essere usata con numero unità output layer > 1 -> ho messo il messaggio di errore
+def softmax(x):
     x = normalize(x)
     return np.exp(x) / np.sum(np.exp(x))
 
@@ -80,6 +80,16 @@ ACTIVATIONS_DERIVATIVES = {
     'softmax': softmax_prime
 }
 
+ACTIVATIONS_THRESHOLDS = {
+    #'identity': 0,
+    #'relu': 0,
+    #'leaky_relu': 0,
+    'logistic': 0.5,
+    'tanh': 0,
+    #'softplus': ln(1+e^0)?,
+    'softmax': 0.5
+}
+
 #-----LOSSES AND METRICS-----
 # loss functions and their derivatives
 
@@ -88,7 +98,7 @@ def mse(y_true, y_pred):
     return np.mean(np.mean(np.power(y_true - y_pred, 2)))
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?"""
+    return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis])"""
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
@@ -99,17 +109,14 @@ def mse_prime(y_true, y_pred):
     return 2 * (y_pred - y_true) / y_true.shape[axis] # derivative w.r.t. y_pred"""
 
 # returns a scalar
-def mee(y_true, y_pred): # TODO: when used as a loss is equivalent to mse? 
+def mee(y_true, y_pred):
     axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis)))
 
-
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
     f = mee(y_true, y_pred)
-    axis = 1
-    if len(y_true.shape) == 1: axis = 0
     if f == 0: return np.zeros(y_true.shape)
     else : return (y_pred - y_true) / f
 
@@ -152,11 +159,6 @@ LOSSES_DERIVATIVES = {
     'logloss': logloss_prime
 }
 
-
-"""def accuracy(y_true, y_pred): # TODO: da rivedere sistemando la codifica dei target
-    threshold = 0 # per tanh, per softmax 0.5
-    return accuracy_score(y_true=y_true, y_pred=np.where(y_pred > threshold, 1, -1))"""
-
 EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
@@ -182,17 +184,6 @@ def validation_split(x_train, y_train, percentage):
     x_train = x_train[validation_size:]
     y_train = y_train[validation_size:]
     return x_train, y_train, x_val, y_val
-
-# utility temporary function
-def flatten_pred(pred): # TODO: per regressione multipla non funziona, 
-    # calcola flatten_pred solo per prima colonna e poi copia nelle successiva
-    flattened_pred = np.empty(pred.shape)
-    for i in range(len(pred)):
-        if pred[i][0] > 0:
-            flattened_pred[i] = 1
-        else:
-            flattened_pred[i] = -1
-    return flattened_pred
 
 def mean_and_std(data):
     mean = np.mean(data)

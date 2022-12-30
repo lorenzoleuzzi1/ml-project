@@ -3,6 +3,10 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ParameterGrid
 from validation import nested_cross_validation, cross_validation
 from network import Network
+# from utils import error_plot, accuracy_plot
+# from cross_validation import cross_validation
+# import matplotlib.pyplot as plt
+
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'
@@ -66,22 +70,20 @@ net = Network(activation_out='tanh', classification=True, activation_hidden='tan
 # import time
 # start = time.time()
 
-# net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
-#     learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000)
+
+net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
+    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy')
+#net = Network(activation_out='softmax', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
+#    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy', loss='logloss')
 tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
-labels = net.predict_to_labels(pred)
-print(net.evaluation_metric(y_true=y_test, y_pred=labels))
-# #pred_backtracked = net.backtracked_network.predict(X_test)
-# print(accuracy_score(y_true=y_test, y_pred=labels))
-# #print(accuracy(y_true=y_test, y_pred=pred))
-# #print(f"backtracked: {accuracy(y_true=y_test, y_pred=pred_backtracked)}")
+print(accuracy_score(y_true=y_test, y_pred=pred))
 
-# plt.plot(tr_errors, label="training", color="blue")
-# #plt.plot(val_errors, label= "validation", color="green")
-# plt.plot(val_accuracy, label="score",color="red")
-# plt.legend(loc="upper right")
-# plt.show()
-# end = time.time()
-# #print(end - start)
+plt.plot(tr_errors, label="training", color="blue")
+#plt.plot(val_errors, label= "validation", color="green")
+plt.plot(val_accuracy, label="score",color="red")
+plt.legend(loc="upper right")
+plt.show()
+#end = time.time()
+#print(end - start)
 
