@@ -150,7 +150,7 @@ class Network:
     def predict(self, X):
         outputs = self.predict_outputs(X)
         if self.classification:
-            labels = self.outputs_to_labels(outputs)
+            labels = self.outputs_to_labels(outputs, original_range=True)
         else:
             labels = outputs
         return labels
@@ -173,7 +173,7 @@ class Network:
         Y = Y.reshape(Y.shape[0], Y.shape[2])
         return Y
 
-    def outputs_to_labels(self, Y):
+    def outputs_to_labels(self, Y, original_range=False):
         if not self.classification:
             raise ValueError('For regression tasks network\'s'
                 'outputs are already labels.')
@@ -193,13 +193,14 @@ class Network:
                             Y_new[i][j] = self.neg_label
                         j += 1
             Y = np.array(Y_new)
-        Y = self.binarizer.inverse_transform(Y).astype(np.float64)
-        Y = Y.reshape(Y.shape[0], 1)
+        if original_range: 
+            Y = self.binarizer.inverse_transform(Y).astype(np.float64)
+            Y = Y.reshape(Y.shape[0], 1)
         return Y
 
     def evaluate(self, Y_true, Y_pred):
         if self.evaluation_metric == 'accuracy':
-            pred_labels = self.outputs_to_labels(Y_pred)
+            pred_labels = self.outputs_to_labels(Y_pred, original_range=False)
         else:
             pred_labels = Y_pred
         return EVALUATION_METRICS[self.evaluation_metric](y_true=Y_true, y_pred=pred_labels)
@@ -365,12 +366,12 @@ class Network:
                     # learning_rate e lambd devono essere scelti ipotizzando di avere 1 solo batch
                     # https://arxiv.org/pdf/1206.5533.pdf (come scalare gli iperparametri in base alla dim del batch)
                     layer.update(
-                        #learning_rate=self.learning_rate_curr*(X_batch.shape[0]/X_train.shape[0]),
-                        learning_rate=self.learning_rate_curr,
+                        learning_rate=self.learning_rate_curr*(X_batch.shape[0]),
+                        #learning_rate=self.learning_rate_curr,
                         batch_size=X_batch.shape[0],
                         alpha=self.alpha,
-                        lambd=self.lambd,
-                        #lambd=self.lambd*(X_batch.shape[0]/X_train.shape[0]),
+                        #lambd=self.lambd,
+                        lambd=self.lambd*(X_batch.shape[0]),
                         nesterov=self.nesterov
                     )
             

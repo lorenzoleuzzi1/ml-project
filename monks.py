@@ -4,9 +4,9 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.metrics import accuracy_score
 from validation import nested_cross_validation, cross_validation
 from network import Network
-# from utils import error_plot, accuracy_plot
-# from cross_validation import cross_validation
-# import matplotlib.pyplot as plt
+from utils import error_plot, accuracy_plot
+#from cross_validation import cross_validation
+import matplotlib.pyplot as plt
 
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
@@ -42,14 +42,14 @@ grid = ParameterGrid(
         'hidden_layer_sizes': [[3]],
         'loss': ['mse'],
         'evaluation_metric' : ['accuracy'], 
-        'epochs': [200],     
+        'epochs': [200],
         'learning_rate_init': [0.002], 
         'tau' : [200],
-        'lambd' : [0.0001],     
+        'lambd' : [0.0001],
         'alpha' : [0.9],
         'nesterov' : [True],
         'early_stopping' : [True],
-        'stopping_patience' : [20],    
+        'stopping_patience' : [20],
         'validation_size' : [0.1],
         'tol' : [0.0005], 
         'validation_frequency' : [4],
@@ -62,26 +62,25 @@ grid = ParameterGrid(
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-nested_cross_validation(grid, X_train, y_train, 3)
+#nested_cross_validation(grid, X_train, y_train, 3)
 #cross validation
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 200, batch_size = 32, 
-     learning_rate = "linear_decay", learning_rate_init=0.05, nesterov=True, 
-     early_stopping=True , evaluation_metric='accuracy', verbose=False)
+net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 500, batch_size = 32, 
+     learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, 
+     early_stopping=True , evaluation_metric='accuracy', verbose=True)
 #cross_validation(net, X_train, y_train, 3)
 # import time
 # start = time.time()
-
 #net = Network(activation_out='softmax', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
 #    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy', loss='logloss')
 tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
 
-"""plt.plot(tr_errors, label="training", color="blue")
-#plt.plot(val_errors, label= "validation", color="green")
+plt.plot(tr_errors, label="training", color="blue")
+plt.plot(val_errors, label= "validation", color="green")
 plt.plot(val_accuracy, label="score",color="red")
 plt.legend(loc="upper right")
-plt.show()"""
+plt.show()
 #end = time.time()
 #print(end - start)
 
