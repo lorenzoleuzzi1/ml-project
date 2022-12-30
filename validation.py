@@ -5,7 +5,7 @@ from network import Network
 from utils import write_json, read_json
 from multiprocessing import Process
 
-JSON_PATH = 'cv_results.json'
+JSON_PATH = 'monks_cv_results.json'
 
 def cross_validation(network, X_train, y_train, k):
     if k <= 1:
@@ -47,7 +47,7 @@ def cross_validation(network, X_train, y_train, k):
 
         # --------------fold validation--------------
         pred = network.predict(X_val_fold)
-        score = network.evaluation_metric(y_true=y_val_fold, y_pred=network.predict_to_labels(pred))
+        score = network.evaluate(Y_true=y_val_fold, Y_pred=pred)
         val_score_fold.append(score) 
         print("{} fold VL score = {}".format(i, score))    
         i+=1

@@ -252,13 +252,14 @@ class Network:
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size.")
 
+        dataset_changed = False
         if self.classification:
             self.binarizer = preprocessing.LabelBinarizer(
                 pos_label=self.pos_label, 
                 neg_label=self.neg_label
             )
             self.binarizer.fit(Y_train)
-            if not self.first_fit and self.binarizer.classes_ != self.labels:
+            if not self.first_fit and (self.binarizer.classes_ != self.labels).all():
                 dataset_changed = True
             self.labels = self.binarizer.classes_
             self.n_classes = len(self.binarizer.classes_)

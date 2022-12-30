@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ParameterGrid
+from sklearn.metrics import accuracy_score
 from validation import nested_cross_validation, cross_validation
 from network import Network
 # from utils import error_plot, accuracy_plot
@@ -70,20 +71,17 @@ net = Network(activation_out='tanh', classification=True, activation_hidden='tan
 # import time
 # start = time.time()
 
-
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
-    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy')
 #net = Network(activation_out='softmax', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
 #    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy', loss='logloss')
 tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
 
-plt.plot(tr_errors, label="training", color="blue")
+"""plt.plot(tr_errors, label="training", color="blue")
 #plt.plot(val_errors, label= "validation", color="green")
 plt.plot(val_accuracy, label="score",color="red")
 plt.legend(loc="upper right")
-plt.show()
+plt.show()"""
 #end = time.time()
 #print(end - start)
 
