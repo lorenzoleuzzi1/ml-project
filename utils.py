@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import floor
 from sklearn.metrics import accuracy_score
+import json
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
@@ -94,13 +95,14 @@ ACTIVATIONS_THRESHOLDS = {
 
 # returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2))
+    return np.mean(np.mean(np.power(y_true - y_pred, 2)))
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis])"""
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
+    # GIULIA: mettere controllo sugli assi, le derivate sono uguali
     return 2 * (y_pred - y_true) / y_true.size
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
@@ -122,6 +124,7 @@ def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis))) #TODO: sqrt(n)?????
+    #return np.mean(np.sqrt(mse(y_true, y_pred)))
 
 def mrmse_prime(y_true, y_pred):
     return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
@@ -193,6 +196,18 @@ def normalize(data):
 
 def check_inputs():
     pass
+
+def write_json(data: dict, file_path: str):
+    with open(file_path, 'r+') as f:
+        file_data = json.load(f)
+        file_data['results'].append(data)
+        f.seek(0)
+        json.dump(file_data, f, indent = 4)
+
+def read_json(file_path: str):
+    with open(file_path) as json_file:
+        data = json.load(json_file)
+    return data['results']
 
 #-----PLOT-----
 def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
