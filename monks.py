@@ -49,7 +49,7 @@ grid = ParameterGrid(
         'tol' : [0.0005], 
         'validation_frequency' : [4],
         #---to tune
-        'learning_rate': ['fixed'],
+        'learning_rate': ['fixed', 'linear_decay'],
         'batch_size': [1, 32],
     }
 )

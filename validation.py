@@ -106,7 +106,7 @@ def cross_validation(network, X_train, y_train, k):
 
 def nested_cross_validation(grid, X_train, y_train, k):
     
-    #inner kfold
+    # inner kfold
     # per multiprocessing dividere la griglia in n parti ogni parte va ad un Process
     # Process(target=grid_search_cv, args=(grid, X_train, y_train, k))
     # n_processi = 3
