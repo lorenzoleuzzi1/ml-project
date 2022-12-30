@@ -30,11 +30,11 @@ class Network:
         nesterov : bool = False,
         early_stopping : bool = True,
         stopping_patience : int = 20, 
-        validation_size : float = 0.1, 
+        validation_size : int or float = 0.1, # as for batch size
         tol : float = 0.0005,
         validation_frequency : int = 4,
-        random_state = None, # TODO: check
-        reinit_weights : bool = True # TODO: check
+        random_state = None,
+        reinit_weights : bool = True
         ):
        
         self.check_params(locals())
@@ -46,7 +46,7 @@ class Network:
         self.loss = LOSSES[loss]
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
-        self.evaluation_metric = EVALUATION_METRICS[evaluation_metric]
+        self.evaluation_metric = evaluation_metric
         self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
@@ -63,75 +63,104 @@ class Network:
         self.tol = tol
         self.validation_frequency = validation_frequency
         self.classification = classification
-        self.random_state = random_state #TODO: check
+        self.random_state = random_state
         self.reinit_weights = reinit_weights
-        self.n_targets = None
+        self.n_outputs = None
+        self.labels = None
+        if self.activation_out == 'tanh': self.neg_label = -1.0
+        else: self.neg_label = 0.0
+        self.pos_label = 1.0
 
     def check_params(self, params):
         if (params['activation_out'] not in ACTIVATIONS):
-            raise ValueError("Unrecognized activation_out '%s'. "
-                "Supported activation functions are %s." % (params['activation_out'], list(ACTIVATIONS)))
+            raise ValueError("Unrecognized activation_out. "
+                "Supported activation functions are %s." % list(ACTIVATIONS))
         if (params['activation_hidden'] not in ACTIVATIONS):
-            raise ValueError("Unrecognize activation_hidden '%s'. "
-                "Supported activation functions are %s."% (params['activation_hidden'], list(ACTIVATIONS)))
+            raise ValueError("Unrecognize activation_hidden. "
+                "Supported activation functions are %s." % list(ACTIVATIONS))
         if not isinstance(params['hidden_layer_sizes'], list):
-            raise ValueError("hidden_layer_sizes must be a list of integers")
+            raise ValueError("hidden_layer_sizes must be a list of integers.")
         if any(size <= 0 for size in params['hidden_layer_sizes']):
-            raise ValueError("hidden_layer_sizes must be > 0, got %s." % params['hidden_layer_sizes'])
+            raise ValueError("hidden_layer_sizes must be > 0.")
         if params['loss'] not in LOSSES:
-            raise ValueError("Unrecognized loss.")
+            raise ValueError("Unrecognized loss. "
+                "Supported losses functions are %s." % list(LOSSES))
+        if not isinstance(params['classification'], bool):
+            raise ValueError("classification must be a boolean.")
         if params['classification'] == False and params['loss'] == 'logloss':
-            raise ValueError("Classification == True required to use logloss as loss function")
-        if not (params['loss'] == 'logloss' and params['activation_out'] == 'softmax') and \
+            raise ValueError("Cannot use logloss for a regression task.")
+        if params['loss'] == 'logloss' and params['activation_out'] != 'softmax':
+            raise ValueError("logloss must be used with activation_out='softmax'.")
+        # TODO: ?
+        """if not (params['loss'] == 'logloss' and params['activation_out'] == 'softmax') and \
             not (params['loss'] != 'logloss' and params['activation_out'] != 'softmax'):
-            raise ValueError("Softmax activation function and logloss loss function must be used together")
+            raise ValueError("Softmax activation function and logloss loss function must be used together.")"""
+        if params['classification'] == True and params['activation_out'] in ['identity', 'relu', 'leaky_relu', 'sofplus']:
+            raise ValueError("Cannot use activation_out='%s' for a classification task." % params['activation_out'])
+        # TODO: per regressione è possibile usare relu? (magari i target sono tutti positivi?)
+        if params['classification'] == False and params['activation_out'] in ['logistic', 'tanh', 'softmax']:
+            raise ValueError("Cannot use activation_out='%s' for a regression task." % params['activation_out'])
         if params['epochs'] <= 0:
-            raise ValueError("epochs must be > 0, got %s. " % params['epochs'])
+            raise ValueError("epochs must be > 0.")
         if params['evaluation_metric'] not in EVALUATION_METRICS:
-            raise ValueError ("Unrecognized evaluation metric '%s'. "
-                "Supported evaluation metrics are %s."% (params['evaluation_metric'], list(EVALUATION_METRICS)))
+            raise ValueError("Unrecognized evaluation metric. "
+                "Supported evaluation metrics are %s."% list(EVALUATION_METRICS))
+        if params['evaluation_metric'] == 'accuracy' and params['classification'] == False:
+            raise ValueError("accuracy metric can be used only for classification tasks.")
         if params['learning_rate'] not in ["fixed", "linear_decay"]:
-            raise ValueError("Unrecognized learning_rate_schedule '%s'. "
-            "Supported learning rate schedules are %s." % (params['learning_rate'], ["fixed", "linear_decay"]))
+            raise ValueError("Unrecognized learning_rate_schedule. "
+            "Supported learning rate schedules are %s." % ["fixed", "linear_decay"])
         if params['learning_rate_init'] <= 0.0:
-            raise ValueError("learning_rate_init must be > 0, got %s. " % params['learning_rate_init'] )
+            raise ValueError("learning_rate_init must be > 0.")
         if params['learning_rate'] == "linear_decay":
             if params['tau']  <= 0 or params['tau'] > params['epochs']:
-                raise ValueError("tau must be > 0 and <= epochs, got %s." % params['tau'] )
+                raise ValueError("tau must be > 0 and <= epochs.")
         if params['batch_size']  <= 0:
-            raise ValueError("batch_size must be > 0, got %s." % params['batch_size'])
+            raise ValueError("batch_size must be > 0.")
         if params['lambd'] < 0.0:
-            raise ValueError("lambd must be >= 0, got %s." % params['lambd'])       
+            raise ValueError("lambd must be >= 0.")
         if params['alpha'] > 1 or params['alpha'] < 0:
-            raise ValueError("alpha must be >= 0 and <= 1, got %s" % params['alpha'])     
+            raise ValueError("alpha must be >= 0 and <= 1.")
         if not isinstance(params['verbose'], bool):
-            raise ValueError("verbose must be a boolean, got %s" % params['verbose'])
+            raise ValueError("verbose must be a boolean.")
         if not isinstance(params['nesterov'], bool):
-            raise ValueError("nesterov must be a boolean, got %s" % params['nesterov'])     
+            raise ValueError("nesterov must be a boolean.")
         if params['stopping_patience'] > params['epochs'] or params['stopping_patience']  <= 0:
-            raise ValueError("patience must be between 1 and max epochs %s, got %s" % (params['epochs'], params['stopping_patience'] ))
+            raise ValueError("patience must be between 1 and max epochs %s." % (params['epochs']))
         if not isinstance(params['early_stopping'] , bool):
-            raise ValueError("ealry stopping must be a boolean, got %s" % params['early_stopping'])      
-        if params['validation_size']  > 100 or params['validation_size']  < 0:
-            raise ValueError("validation size must be between 0 and 100 (%), got %s" % params['validation_size'] )   
-        if params['tol']  < 0 or params['tol']  > 0.5:
-            raise ValueError("tolerance must be > 0 and < 0.5, got %s" % params['tol'] )
+            raise ValueError("ealry_stopping must be a boolean.")
+        if params['validation_size'] <= 0:
+            raise ValueError("validation_size must be > 0.")
+        if params['tol'] < 0 or params['tol'] > 0.5:
+            raise ValueError("tol must be > 0 and < 0.5")
         if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
-            raise ValueError("validation frequency must be between 1 and max epochs %s, got %s" % (params['epochs'], params['validation_frequency']))
-        if not isinstance(params['classification'], bool):
-            raise ValueError("classification must be a boolean, got %s" % params['classification'])
-        # TODO: fare i check che nel caso di classificazione l'output activation function sia softmax/tanh/logistic
+            raise ValueError("validation_frequency must be between 1 and max epochs %s." % (params['epochs']))
+        if params['random_state'] != None and not isinstance(['random_state'], int):
+            raise ValueError("random_state must be an integer.")
+        if not isinstance(params['reinit_weights'], bool):
+            raise ValueError("reinit_weights must be a boolean.")
+        # TODO: ?
+        """if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and self.n_targets == 1:
+            raise ValueError("More than two output units are required to use the chosen loss function.")"""
         
     # add layer to network
     def add(self, layer):
         self.layers.append(layer)
 
-    # predict output for given input
     def predict(self, X):
-        if self.n_targets == None:
+        outputs = self.predict_outputs(X)
+        if self.classification:
+            labels = self.outputs_to_labels(outputs)
+        else:
+            labels = outputs
+        return labels
+
+    # predict output for given input
+    def predict_outputs(self, X):
+        if self.n_outputs == None:
             raise ValueError("Net has not been fitted yet.")
 
-        Y = np.empty((X.shape[0], 1, self.n_targets))
+        Y = np.empty((X.shape[0], 1, self.n_outputs))
 
         # run network over all samples
         for i in range(X.shape[0]):
@@ -144,49 +173,46 @@ class Network:
         Y = Y.reshape(Y.shape[0], Y.shape[2])
         return Y
 
-    def predict_to_labels(self, Y):
-        if self.classification:
-            if self.n_classes == 2 and self.activation_out != 'softmax':
-                if self.activation_out == 'tanh':
-                    threshold = 0
-                    neg_label = -1.0
-                else:
-                    threshold = 0.5
-                    neg_label = 0.0
-                Y = np.where(Y > threshold, 1.0, neg_label)
-            else:                
-                Y_new = []
-                B = np.max(Y, axis=1)
-                for i in range(Y.shape[0]):
-                    Y_new.append(np.where(Y[i] < B[i], neg_label, 1.0))
-                    
-                    j = 0
-                    s = int(sum(Y_new[i]) - 1)
-                    for j in range(s):
-                        if Y_new[i][j] == 1.0:
-                            Y_new[i][j] = neg_label
-                        j += 1
-                Y = np.array(Y_new)
-                
-                # TODO: gestire più massimi
-            Y = self.binarizer.inverse_transform(Y).astype(np.float64)
-            Y = Y.reshape(Y.shape[0], 1)
+    def outputs_to_labels(self, Y):
+        if not self.classification:
+            raise ValueError('For regression tasks network\'s'
+                'outputs are already labels.')
+        
+        if self.n_classes == 2 and self.activation_out != 'softmax':
+            Y = np.where(Y > ACTIVATIONS_THRESHOLDS[self.activation_out], self.pos_label, self.neg_label)
+        else:
+            # TODO: da sistemare
+            Y_new = []
+            B = np.max(Y, axis=1)
+            for i in range(Y.shape[0]):
+                Y_new.append(np.where(Y[i] < B[i], self.neg_label, self.pos_label))
+            Y = np.array(Y_new)
+            # TODO: gestire più massimi
+        Y = self.binarizer.inverse_transform(Y).astype(np.float64)
+        Y = Y.reshape(Y.shape[0], 1)
         return Y
+
+    def evaluate(self, Y_true, Y_pred):
+        if self.evaluation_metric == 'accuracy':
+            pred_labels = self.outputs_to_labels(Y_pred)
+        else:
+            pred_labels = Y_pred
+        return EVALUATION_METRICS[self.evaluation_metric](y_true=Y_true, y_pred=pred_labels)
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
             self.learning_rate_curr = self.learning_rate_init
         
         if self.learning_rate == "linear_decay":
-            alfa = epoch / self.tau
-            eta = (1 - alfa) * self.learning_rate_init + alfa * self.learning_rate_fin
+            a = epoch / self.tau
+            lr = (1 - a) * self.learning_rate_init + a * self.learning_rate_fin
             
             if epoch == 0:
                 self.learning_rate_curr = self.learning_rate_init
-            elif epoch >= self.tau or eta < self.learning_rate_fin:
+            elif epoch >= self.tau or lr < self.learning_rate_fin:
                 self.learning_rate_curr = self.learning_rate_fin
             else:
-                self.learning_rate_curr = eta
+                self.learning_rate_curr = lr
 
     def compose(self, input_size, output_size):
         self.layers = []
@@ -212,82 +238,63 @@ class Network:
         self.first_fit = False
 
     def fit(self, X_train, Y_train): 
-
-        # NOTE: ora Y deve essere una matrice. 
-        # Prima accettava anche array ad 1 dim ma sicoome predict deve ritornare matrici 
-        # il chiamante deve comunque occuparsi delle dimensioni dei target per invocare le metriche,
-        # almeno adesso accetta Y nel formato in cui lo predice.
         if len(X_train.shape) != 2:
             raise ValueError("X_train must be a 2-dimensional array")
         if len(Y_train.shape) != 2:
             raise ValueError("Y_train must be a 2-dimensional array")
+        if self.classification and Y_train.shape[1] > 1:
+            raise ValueError("Multilabel classification is not supported.")
+        if self.batch_size > X_train.shape[0]:
+            raise ValueError("batch_size must not be larger than sample size.")
 
         if self.classification:
-            if self.activation_out == 'tanh':
-                neg_label = -1.0
-            else:
-                neg_label = 0.0
-            self.binarizer = preprocessing.LabelBinarizer(pos_label=1.0, neg_label=neg_label)
-            """if Y_train.shape[1] == 1:
-                self.binarizer = preprocessing.LabelBinarizer(pos_label=1.0, neg_label=neg_label)
-            else: # multioutput
-                self.binarizer = preprocessing.MultiLabelBinarizer(classes=None, sparse_output=False)""" 
-            # TODO: quando viene fatto it più volte??
+            self.binarizer = preprocessing.LabelBinarizer(
+                pos_label=self.pos_label, 
+                neg_label=self.neg_label
+            )
             self.binarizer.fit(Y_train)
+            if not self.first_fit and self.binarizer.classes_ != self.labels:
+                dataset_changed = True
+            self.labels = self.binarizer.classes_
+            self.n_classes = len(self.binarizer.classes_)
+            self.n_outputs = self.n_classes
+            if self.n_classes == 2 and self.activation_out != 'softmax':
+                self.n_outputs = 1
             Y_train = self.binarizer.transform(Y_train).astype(np.float64)
-        
+        else:
+            self.n_outputs = Y_train.shape[1]
+
+        if not self.first_fit and not \
+            (self.layers[0].fan_in == X_train.shape[-1] and \
+            self.layers[-1].fan_out == self.n_outputs):
+            dataset_changed = True
+
         if self.early_stopping:
             if self.classification:
-                X_train, X_val, Y_train, Y_val = train_test_split(
-                    X_train,
-                    Y_train,
-                    test_size=self.validation_size,
-                    shuffle=True,
-                    stratify=Y_train,
-                    random_state=self.random_state
-                )
+                stratify = Y_train
             else:
-                X_train, X_val, Y_train, Y_val = train_test_split(
-                    X_train,
-                    Y_train,
-                    test_size=self.validation_size,
-                    shuffle=True,
-                    random_state=self.random_state
-                )
-        
-        if self.batch_size > X_train.shape[0]:
-            raise ValueError("batch_size must not be larger than sample size, got %s." % self.batch_size)
+                stratify = None
+            X_train, X_val, Y_train, Y_val = train_test_split(
+                X_train,
+                Y_train,
+                test_size=self.validation_size,
+                shuffle=True,
+                stratify=stratify,
+                random_state=self.random_state
+            )
         
         # not needed if in layer we use outer
         #X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
+
+        if not self.first_fit and dataset_changed and not self.reinit_weights:
+            print("Warning: previous weights won't be used, the type of dataset has changed.")
         
-        # check if current net structure is compatible with the dataset to fit
-        if not self.first_fit and (self.layers[0].fan_in == X_train.shape[-1] and \
-                            self.layers[-1].fan_out == Y_train.shape[1]):
-            # eventually reinitialize weights
-            if self.reinit_weights:
-                for layer in self.layers:
-                    layer.weights_init()
-        else:
-            if not self.first_fit and self.reinit_weights == False:
-                raise ValueError("Cannot use current weights. "
-                "Net structure is not compatible with the dataset to fit.")
-            if self.classification:
-                self.n_classes = len(self.binarizer.classes_)
-                if self.n_classes == 2 and self.activation_out != 'softmax':
-                    n_output_units = 1
-                else:
-                    n_output_units = self.n_classes
-            else:
-                n_output_units = Y_train.shape[1]
-            self.compose(X_train.shape[-1], n_output_units) # TODO: in realtà basta cambiare primo e ultimo layer
-
-        self.n_targets = Y_train.shape[1]
-        if self.activation_out == 'softmax' and self.n_targets == 1:
-            raise ValueError("Two or more output units are required to use softmax as activation function.")
-        if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and self.n_targets == 1:
-            raise ValueError("More than two output units are required to use the chosen loss function.")
-
+        if self.first_fit or dataset_changed:
+            self.compose(input_size=X_train.shape[-1], output_size=self.n_outputs)
+        elif self.reinit_weights:
+            for layer in self.layers:
+                layer.weights_init()
+        
         # divide training set into batches
         if isinstance(self.batch_size, int):
             n_batches = ceil(X_train.shape[0] / self.batch_size)
@@ -295,7 +302,7 @@ class Network:
             n_batches = floor(1 / self.batch_size)
 
         train_losses = []
-        val_errors = []
+        val_losses = []
         train_scores = []
         val_scores = []
 
@@ -326,23 +333,22 @@ class Network:
                 for x, y in zip(X_batch, Y_batch):
                     output = x
                     
-                    
                     # forward propagation
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
                       
-                    # compute loss and evaluation metric (for display)
+                    """# compute loss and evaluation metric (for display)
                     train_loss += self.loss(y_true=y, y_pred=output)
+                    # forse non si somma per tutti i pattern
                     reg_term = 0
                     for layer in self.layers:
                         weights = layer.weights.ravel()
                         reg_term += np.dot(weights, weights)
                     train_loss += self.lambd*reg_term
-                    # TODO: y è continuo, se evaluation_metric è accuracy attualmente non funziona
-                    train_score += self.evaluation_metric(y_true=y, y_pred=self.predict_to_labels(output)) # TODO: if mse add reg term?
+                    train_score += self.evaluation(Y_true=y, Y_pred=output)"""
                     
                     # backward propagation
-                    delta = self.loss_prime(y_true=y, y_pred=output) # REVIEW: no need add l2 term (in layer update)
+                    delta = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         delta = layer.backward_propagation(delta)
 
@@ -362,22 +368,25 @@ class Network:
                         nesterov=self.nesterov
                     )
             
-            # REVIEW: di solito si acculumano gli error pattern per pattern, così risparmiamo anche sui tempi di computazione
-            #predict_tr = self.predict(X_train)
-            #train_score = self.evaluation_metric(Y_train, predict_tr)
-            #train_loss = self.loss(y_true=Y_train, y_pred=predict_tr)
+            Y_train_output = self.predict_outputs(X_train)
+            train_score = self.evaluate(Y_true=Y_train, Y_pred=Y_train_output)
+            train_loss = self.loss(y_true=Y_train, y_pred=Y_train_output)
+            reg_term = 0
+            for layer in self.layers:
+                weights = layer.weights.ravel()
+                reg_term += np.dot(weights, weights)
+            reg_term = self.lambd * reg_term
+            train_loss += reg_term
             
             #-----validation-----
-            if self.early_stopping:
-                if (epoch % self.validation_frequency) == 0:
-                    predict_val = self.predict(X_val)
-                    val_error = self.loss(y_true=Y_val, y_pred=predict_val)
-
-                    evaluation_score = self.evaluation_metric(Y_val, self.predict_to_labels(predict_val))
+            if self.early_stopping and (epoch % self.validation_frequency) == 0:
+                Y_val_output = self.predict_outputs(X_val)
+                val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
+                val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
             
             # average on all samples 
-            train_loss /= X_train.shape[0]
-            train_score /= X_train.shape[0]
+            #train_loss /= X_train.shape[0]
+            #train_score /= X_train.shape[0]
             
             #-----stopping-----
             if epoch == 10: #init
@@ -390,10 +399,10 @@ class Network:
 
             if epoch >= 10: # TODO: valutare se incrementare (minimo 30 epoche se errore cresce sempre)
                 if self.early_stopping:
-                        error_below_tol = val_error <= self.tol
-                        rel_error_decrease = (val_errors[-1] - val_error) / val_errors[-1]
-                        error_increased = val_error > val_errors[-1]
-                        # REVIEW: loss deve essere tale che valore minore => migliore
+                    error_below_tol = val_loss <= self.tol
+                    rel_error_decrease = (val_losses[-1] - val_loss) / val_losses[-1]
+                    error_increased = val_loss > val_losses[-1]
+                    # REVIEW: loss deve essere tale che valore minore => migliore
                 else:
                     error_below_tol = train_loss <= self.tol
                     rel_error_decrease = (train_losses[-1] - train_loss) / train_losses[-1]
@@ -402,7 +411,7 @@ class Network:
                    
                 if (train_loss > train_losses[-1]) and not precedent_error_increased: # in previous iteration error function was in min
                     min_error = epoch
-                    if (min_error - max_error) <= 3: #TODO: parametrico? 
+                    if (min_error - max_error) <= 10: #TODO: parametrico? 
                         if (train_losses[max_error] - train_loss) > 2*self.tol:
                             peaks_error_function += 1
                         else: 
@@ -411,7 +420,7 @@ class Network:
                             weights_to_return, bias_to_return = self.get_current_weights()
                 elif not (train_loss > train_losses[-1]) and precedent_error_increased: # in previous iteration error function was in max
                     max_error = epoch
-                    if (max_error - min_error) <= 3:
+                    if (max_error - min_error) <= 10:
                         if (train_loss - train_losses[min_error]) > 2*self.tol:
                             peaks_error_function += 1   
                         else: 
@@ -436,13 +445,13 @@ class Network:
             train_scores.append(train_score)
 
             if self.early_stopping:
-                val_errors.append(val_error)
-                val_scores.append(evaluation_score)
+                val_losses.append(val_loss)
+                val_scores.append(val_score)
             
             if self.verbose:
                 if self.early_stopping:
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
-                        % (epoch+1, self.epochs, train_loss, val_error, evaluation_score))
+                        % (epoch+1, self.epochs, train_loss, val_loss, val_score))
                 else:
                     print('epoch %d/%d   train error=%f' 
                         % (epoch+1, self.epochs, train_loss))
@@ -450,7 +459,7 @@ class Network:
             if stopping <= 0: # stopping criteria satisfied
                 if stopping == 0: # error function is increasing              
                     if self.early_stopping: # remove values ​​that do not satisfy the criteria
-                        val_errors[-self.stopping_patience:] = []
+                        val_losses[-self.stopping_patience:] = []
                         val_scores[-self.stopping_patience:] = []
                     train_losses[-self.stopping_patience:] = []
                     train_scores[-self.stopping_patience:] = []
@@ -458,7 +467,7 @@ class Network:
                 if stopping == -2: # error function is instable
                     surplus = len(train_losses) - start_peaks_epoch # remove values ​​that do not satisfy the criteria
                     if self.early_stopping:
-                        val_errors[-surplus:] = []
+                        val_losses[-surplus:] = []
                         val_scores[-surplus:] = []
                     train_losses[-surplus:] = []
                     train_scores[-surplus:] = []
@@ -467,16 +476,11 @@ class Network:
                     self.set_weights(weights_to_return, bias_to_return)
                 break
 
-        # plt.plot(train_losses, label="training", color="blue")
-        # plt.plot(val_errors, label= "validation", color="green")
-        # plt.plot(val_scores, label="score",color="red")
-        # plt.legend(loc="upper right")
-        # plt.show()
         if self.early_stopping:
-            return train_losses, val_errors, train_scores, val_scores
+            return train_losses, val_losses, train_scores, val_scores
         else:
             return train_losses, train_scores
-
+        # TODO: return weights_to_return, bias_to_return
 
     def get_init_weights(self):
         init_weights = []
