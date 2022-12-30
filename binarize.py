@@ -24,5 +24,12 @@ B = np.max(Y, axis=1)
 Y_new = []
 for i in range(len(Y)):
     Y_new.append(np.where(Y[i] < B[i], 0.0, 1.0))
-    
+    j = 0
+    s = int(sum(Y_new[i]) - 1)
+    if s > 0:
+        for j in range(s):
+            if Y_new[i][j] == 1.0:
+                Y_new[i][j] = 0.0
+                j += 1
+        
 print(Y_new)

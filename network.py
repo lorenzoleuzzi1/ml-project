@@ -159,6 +159,13 @@ class Network:
                 B = np.max(Y, axis=1)
                 for i in range(Y.shape[0]):
                     Y_new.append(np.where(Y[i] < B[i], neg_label, 1.0))
+                    
+                    j = 0
+                    s = int(sum(Y_new[i]) - 1)
+                    for j in range(s):
+                        if Y_new[i][j] == 1.0:
+                            Y_new[i][j] = neg_label
+                        j += 1
                 Y = np.array(Y_new)
                 
                 # TODO: gestire più massimi

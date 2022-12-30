@@ -84,13 +84,14 @@ ACTIVATIONS_DERIVATIVES = {
 
 # returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.power(y_true - y_pred, 2))
+    return np.mean(np.mean(np.power(y_true - y_pred, 2)))
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis]) # TODO: use scikit learn?"""
 
 # returns a numpy array with shape (1, #units_output)
 def mse_prime(y_true, y_pred):
+    # GIULIA: mettere controllo sugli assi, le derivate sono uguali
     return 2 * (y_pred - y_true) / y_true.size
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
@@ -115,6 +116,7 @@ def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis))) #TODO: sqrt(n)?????
+    #return np.mean(np.sqrt(mse(y_true, y_pred)))
 
 def mrmse_prime(y_true, y_pred):
     return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
