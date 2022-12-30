@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from math import floor
 from sklearn.metrics import accuracy_score
+import json
 
 #-----ACTIVATIONS----- 
 # activation functions and their derivatives
@@ -204,6 +205,18 @@ def normalize(data):
 
 def check_inputs():
     pass
+
+def write_json(data: dict, file_path: str):
+    with open(file_path, 'r+') as f:
+        file_data = json.load(f)
+        file_data['results'].append(data)
+        f.seek(0)
+        json.dump(file_data, f, indent = 4)
+
+def read_json(file_path: str):
+    with open(file_path) as json_file:
+        data = json.load(json_file)
+    return data['results']
 
 #-----PLOT-----
 def fold_plot(type, tr_results, val_results, avg_tr, avg_val):
