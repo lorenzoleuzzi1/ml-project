@@ -7,7 +7,7 @@ from multiprocessing import Process
 
 JSON_PATH = 'monks_cv_results.json'
 
-def cross_validation(network, X_train, y_train, k):
+def kfold_cross_validation(network, X_train, y_train, k):
     if k <= 1:
         print('Number of folds k must be more than 1')
         raise ValueError("k must be more than 1")
@@ -30,9 +30,9 @@ def cross_validation(network, X_train, y_train, k):
         
 
         # --------------fold train--------------
-        tr_error, val_error, tr_score, val_score = network.fit(X_train_fold, y_train_fold)
-        
-        #difference between max epochs and epochs actually done (because early stopping)
+        tr_error, val_error, tr_score, val_score = network.fit(X_train_fold, y_train_fold) # TODO: if net.early_stopping ogni volta?
+        # se early stopping è false val = tr oppure vuoto. funzionerebbe sempre ma memoria sprecata 
+        # difference between max epochs and epochs actually done (because early stopping)
         epoches_difference = network.epochs - len(tr_error) 
         if epoches_difference > 0:
             tr_error.extend(np.zeros(epoches_difference))
@@ -82,8 +82,6 @@ def cross_validation(network, X_train, y_train, k):
     # avg_es_val_error, dev_val_error = mean_std_dev(np.array(es_val_error_fold))
     # avg_tr_score, dev_tr_score = mean_std_dev(np.array(tr_score_fold))
     # avg_es_val_score, dev_val_score = mean_std_dev(np.array(es_val_score_fold))
-
-
     # # plot results
     # fold_plot("error", tr_error_fold, es_val_error_fold, avg_tr_error, avg_es_val_error) 
     # fold_plot("score", tr_score_fold, es_val_score_fold, avg_tr_score, avg_es_val_score) 
@@ -125,7 +123,7 @@ def nested_cross_validation(grid, X_train, y_train, k):
         #outerfold
         print(f"{i}/{len(grid)}")
         network = config_to_network(config.get("config"))
-        nested_results = cross_validation(network, X_train, y_train, k)
+        nested_results = kfold_cross_validation(network, X_train, y_train, k)
         print("------")
         print(config)
         print(f"outer score: {nested_results.get('val_score')} +/- {nested_results.get('val_score_dev')}")
@@ -138,7 +136,7 @@ def grid_search_cv(grid, X_train, y_train, k):
     for config in grid:
         print(f"{i}/{len(grid)}")
         network = config_to_network(config)
-        cv_results = cross_validation(network, X_train, y_train, k)
+        cv_results = kfold_cross_validation(network, X_train, y_train, k)
         cv_results.update({'config' : config})
         write_json(cv_results, JSON_PATH)
         i += 1

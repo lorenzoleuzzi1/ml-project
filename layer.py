@@ -49,6 +49,8 @@ class Layer():
     def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size
+        learning_rate *= batch_size # scaling of eta and lambd assuming that were passed values for each pattern
+        lambd *= batch_size
  
         # weights and bias update
         velocity_w =  alpha * self.velocity_w - learning_rate * self.deltas_weights
@@ -63,6 +65,7 @@ class Layer():
 
         self.velocity_w  = velocity_w
         self.velocity_b = velocity_b
+        
         self.deltas_weights.fill(0)
         self.deltas_bias.fill(0)
 
