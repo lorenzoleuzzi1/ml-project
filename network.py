@@ -47,6 +47,7 @@ class Network:
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
         self.evaluation_metric = evaluation_metric
+        self.evaluation_metric_fun = EVALUATION_METRICS[evaluation_metric]
         self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
@@ -131,7 +132,7 @@ class Network:
             raise ValueError("tol must be > 0 and < 0.5")
         if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
             raise ValueError("validation_frequency must be between 1 and max epochs %s." % (params['epochs']))
-        if params['random_state'] != None and not isinstance(['random_state'], int):
+        if params['random_state'] != None and not isinstance(params['random_state'], int):
             raise ValueError("random_state must be an integer.")
         if not isinstance(params['reinit_weights'], bool):
             raise ValueError("reinit_weights must be a boolean.")
@@ -152,7 +153,7 @@ class Network:
     def predict(self, X):
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
-        if len(X.shape) != 2:
+        if X.ndim != 2:
             raise ValueError("X must be a 2-dimensional array")
         if self.layers[0].fan_in != X.shape[1]:
             raise ValueError("X has a different number of features "
@@ -183,9 +184,13 @@ class Network:
                 self.pos_label,
                 self.neg_label)
         else:
-            max_idxs = np.argmax(Y, axis=1)
             Y_disc = np.full_like(Y, self.neg_label)
-            Y_disc[np.indices(max_idxs.shape)[0], max_idxs] = self.pos_label
+            if Y.ndim == 1:
+                max_idxs = np.argmax(Y)
+                Y_disc[max_idxs] = self.pos_label
+            else:
+                max_idxs = np.argmax(Y, axis=1)
+                Y_disc[np.indices(max_idxs.shape)[0], max_idxs] = self.pos_label
         return Y_disc
 
     def outputs_to_labels(self, Y):
@@ -199,9 +204,10 @@ class Network:
     def evaluate(self, Y_true, Y_pred):
         if self.evaluation_metric == 'accuracy':
             Y = self.discretize_outputs(Y_pred)
+            # TODO: se lasciamo bias con 2 dim occorre fare reshape
         else:
             Y = Y_pred
-        return EVALUATION_METRICS[self.evaluation_metric](y_true=Y_true, y_pred=Y)
+        return self.evaluation_metric_fun(y_true=Y_true, y_pred=Y)
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -263,9 +269,9 @@ class Network:
         return Y_train
 
     def fit(self, X_train, Y_train):
-        if len(X_train.shape) != 2:
+        if X_train.ndim != 2:
             raise ValueError("X_train must be a 2-dimensional array")
-        if len(Y_train.shape) != 2:
+        if Y_train.ndim != 2:
             raise ValueError("Y_train must be a 2-dimensional array")
         if self.classification and Y_train.shape[1] > 1:
             raise ValueError("Multilabel classification is not supported.")
@@ -324,8 +330,8 @@ class Network:
         stopping = self.stopping_patience 
 
         #-----training loop-----
-        # loop max-epoch times
-        #   for each bacth       
+        # for each epoch
+        #   for each batch
         #       for each item in the batch
         #           compute weights and bias deltas for curr item
         #           accumulate the deltas
@@ -352,20 +358,22 @@ class Network:
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
                       
-                    """# compute loss and evaluation metric (for display)
+                    # compute loss and evaluation metric (for display)
                     train_loss += self.loss(y_true=y, y_pred=output)
-                    # forse non si somma per tutti i pattern
-                    reg_term = 0
-                    for layer in self.layers:
-                        weights = layer.weights.ravel()
-                        reg_term += np.dot(weights, weights)
-                    train_loss += self.lambd*reg_term
-                    train_score += self.evaluation(Y_true=y, Y_pred=output)"""
+                    train_score += self.evaluate(Y_true=y, Y_pred=output)
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         delta = layer.backward_propagation(delta)
+
+                # add l2 regularization term to the loss
+                reg_term = 0
+                for layer in self.layers:
+                    weights = layer.weights.ravel()
+                    reg_term += np.dot(weights, weights)
+                reg_term = self.lambd * reg_term
+                train_loss += reg_term
 
                 # new learning rate
                 self.update_learning_rate(epoch)
@@ -383,7 +391,7 @@ class Network:
                         nesterov=self.nesterov
                     )
             
-            Y_train_output = self.predict_outputs(X_train)
+            """Y_train_output = self.predict_outputs(X_train)
             train_score = self.evaluate(Y_true=Y_train, Y_pred=Y_train_output)
             train_loss = self.loss(y_true=Y_train, y_pred=Y_train_output)
             reg_term = 0
@@ -391,7 +399,7 @@ class Network:
                 weights = layer.weights.ravel()
                 reg_term += np.dot(weights, weights)
             reg_term = self.lambd * reg_term
-            train_loss += reg_term
+            train_loss += reg_term"""
             
             #-----validation-----
             if self.early_stopping and (epoch % self.validation_frequency) == 0:
@@ -400,8 +408,8 @@ class Network:
                 val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
             
             # average on all samples 
-            #train_loss /= X_train.shape[0]
-            #train_score /= X_train.shape[0]
+            train_loss /= X_train.shape[0]
+            train_score /= X_train.shape[0]
             
             #-----stopping-----
             if epoch == 10: #init

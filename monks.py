@@ -64,37 +64,43 @@ X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
-    hidden_layer_sizes=[3, 3],
+    hidden_layer_sizes=[3],
     activation_out='softmax',
     classification=True,
     activation_hidden='tanh',
     epochs = 200, 
-    batch_size = 32, 
-    lambd = 0.0001,
+    batch_size = 1.0,
+    lambd=0,
+    #lambd = 0.0001,
     learning_rate = "fixed",
     learning_rate_init=0.001,
-    nesterov=True, 
+    #nesterov=True, 
     early_stopping=False,
     evaluation_metric='accuracy',
     verbose=True,
     loss='logloss',
     validation_frequency=1,
+    validation_size=0.1,
     tol=1e-4,
-    weights_dist='uniform',
-    weights_bound=0.4)
-tr_loss,tr_score = net.fit(X_train, y_train) 
+    random_state=0)
+tr_loss, tr_score = net.fit(X_train, y_train) # no early stopping
+#tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
 plt.plot(tr_loss, label="training loss", color="blue")
+#plt.plot(tr_score, label="training score", color="green")
+#plt.plot(val_loss, label="validation loss", color="red")
+#plt.plot(val_score, label="validation score", color="black")
 plt.legend(loc="upper right")
 plt.title("OUR")
 plt.show()
 
 scikit_net = MLPClassifier(
-    hidden_layer_sizes=(3, 3),
+    hidden_layer_sizes=(4,),
     activation='tanh', # for hidden layers
     solver='sgd', 
-    alpha=0.0001, # our lambd
+    alpha=0,
+    #alpha=0.0001, # our lambd
     batch_size=32, 
     learning_rate='constant', 
     learning_rate_init=0.002, 
@@ -102,8 +108,10 @@ scikit_net = MLPClassifier(
     shuffle=True, 
     tol=0.0005,
     momentum=0.9, # our alpha
-    nesterovs_momentum=True,
-    early_stopping=False
+    nesterovs_momentum=False,
+    validation_fraction=0.2,
+    early_stopping=False,
+    random_state = 0,
     )
 y_train = y_train.reshape(y_train.shape[0])
 y_test = y_test.reshape(y_test.shape[0])
