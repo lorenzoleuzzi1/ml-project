@@ -301,28 +301,35 @@ class Network:
 
         return Y_train
 
-    def check_early_stopping(self, stopping, epoch, train_losses, val_losses):
+    def check_early_stopping(self, no_improvement_count, epoch, train_losses, val_scores):
 
         if epoch >= 10: 
             if self.early_stopping:
-                error_below_tol = val_losses[-1] <= self.tol
-                rel_error_decrease = (val_losses[-2] - val_losses[-1]) / val_losses[-2]
-                error_increased = val_losses[-1] > val_losses[-2]
+                if self.evaluation_metric=='accuracy':
+                    metric_decline = val_scores[-1] < val_scores[-2]
+                    converge = val_scores[-1] > 1-self.tol
+                else:
+                    metric_decline = val_scores[-1] > val_scores[-2]
+                    converge = val_scores[-1] <= self.tol
+                metric_delta = abs(val_scores[-2] - val_scores[-1]) / val_scores[-2]
             else:
-                error_below_tol = train_losses[-1] <= self.tol
-                rel_error_decrease = (train_losses[-2] - train_losses[-1]) / train_losses[-2]
-                error_increased = train_losses[-1] > train_losses[-2]
+                converge = train_losses[-1] <= self.tol
+                metric_delta = (train_losses[-2] - train_losses[-1]) / train_losses[-2]
+                metric_decline = train_losses[-1] > train_losses[-2]
 
-            if error_below_tol: 
-                stopping = 0 # if we've already converged (error near 0)            
-            elif error_increased or rel_error_decrease < 0.1/100:                  
-                stopping -= 1 # if no more significant error decreasing (less than 0.1%) or we are not converging 
+            if converge: 
+                no_improvement_count = self.stopping_patience # if we've already converged (error near 0)
+                self.best_weights, self.best_bias = self.get_current_weights()
+            elif metric_decline or metric_delta < 0.1/100:
+                no_improvement_count += 1 # if no more significant error decreasing (less than 0.1%) or we are not converging 
             else:
-                stopping = self.stopping_patience
-                weights_to_return, bias_to_return = self.get_current_weights()
+                no_improvement_count = 0
+                self.best_weights, self.best_bias = self.get_current_weights()
+        else:
+            self.best_weights, self.best_bias= self.get_current_weights()
 
 
-        return stopping, weights_to_return, bias_to_return
+        return no_improvement_count
 
     def fit(self, X_train, Y_train):
         Y_train = self.set_fitting(X_train, Y_train)
@@ -382,7 +389,7 @@ class Network:
         self.train_scores = []
         self.val_scores = []
 
-        stopping = self.stopping_patience 
+        no_improvement_count = 0
  
         for epoch in range(self.epochs):
             train_loss = 0
@@ -437,7 +444,7 @@ class Network:
             #-----validation-----
             if self.early_stopping and (epoch % self.validation_frequency) == 0:
                 Y_val_output = self.predict_outputs(X_val)
-                val_loss = self.evaluation(y_true=Y_val, y_pred=Y_val_output)
+                val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
                 val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
             
             # average on all samples 
@@ -454,8 +461,8 @@ class Network:
             #-----stopping-----
             #check early stopping conditions
             if self.early_stopping:
-                stopping, weights_backtracked, bias_backtracked =\
-                     self.check_early_stopping(stopping, self.train_losses, self.val_losses)
+                no_improvement_count = \
+                    self.check_early_stopping(no_improvement_count, epoch, self.train_losses, self.val_scores)
 
             if self.verbose:
                 if self.early_stopping:
@@ -465,13 +472,13 @@ class Network:
                     print('epoch %d/%d   train error=%f' 
                         % (epoch+1, self.epochs, train_loss))
             
-            if stopping <= 0: # stopping criteria satisfied
-                if self.early_stopping:    
+            if no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
+                if self.early_stopping:
                     self.val_losses[-self.stopping_patience:] = []
                     self.val_scores[-self.stopping_patience:] = []
                 self.train_losses[-self.stopping_patience:] = [] 
                 self.train_scores[-self.stopping_patience:] = []
-                self.set_weights(weights_backtracked, bias_backtracked)
+                self.set_weights(self.best_weights, self.best_bias)
                 break # jump out the for loop
 
 
