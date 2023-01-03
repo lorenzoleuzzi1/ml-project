@@ -13,15 +13,11 @@ def cross_validation(network, X_train, y_train, k):
         raise ValueError("k must be more than 1")
 
     skf = StratifiedKFold(n_splits=k, shuffle=True) 
-    network.verbose = False
-    # init error and score vectors    
-    tr_error_fold = []
-    es_val_error_fold = []
-    tr_score_fold = []
-    es_val_score_fold = []
-    val_score_fold = []
+    
+    folds_metrics = []
     i = 1
     for train_index, validation_index in skf.split(X_train, y_train):
+        metrics = []
         print("{} fold".format(i))
        
         #-----stratified K-fold split-----
@@ -31,77 +27,68 @@ def cross_validation(network, X_train, y_train, k):
 
         # --------------fold train--------------
         network.fit(X_train_fold, y_train_fold)
+        metrics.append(network.train_losses)
+        metrics.append(network.train_scores)
+        
+        if network.early_stopping == True:
+            metrics.append(network.val_losses)
+            metrics.append(network.val_scores)
         
         #difference between max epochs and epochs actually done (because early stopping)
-        epoches_difference = network.epochs - len(tr_error) 
-        if epoches_difference > 0:
-            tr_error.extend(np.zeros(epoches_difference))
-            val_error.extend(np.zeros(epoches_difference))
-            tr_score.extend(np.zeros(epoches_difference))
-            val_score.extend(np.zeros(epoches_difference))    
-
-        tr_error_fold.append(tr_error)        
-        es_val_error_fold.append(val_error)
-        tr_score_fold.append(tr_score)      
-        es_val_score_fold.append(val_score) 
+        # epoches_difference = network.epochs - len(network.train_losses) 
+        # if epoches_difference > 0:
+        #     for metric in metrics: 
+        #         metric.extend(np.zeros(epoches_difference))
 
         # --------------fold validation--------------
         pred = network.predict(X_val_fold)
         score = network.evaluate(Y_true=y_val_fold, Y_pred=pred)
-        val_score_fold.append(score) 
+        metrics.append(score) 
         print("{} fold VL score = {}".format(i, score))    
+
+        folds_metrics.append(metrics)
         i+=1
     
     
     # --------------results--------------
-    
-    last_tr_error = []
-    last_es_val_error = []
-    last_tr_score = []
-    last_es_val_score = []
-    last_val_score = []
-    
-    # create an array of the last results for each K-fold
-    for tr_error, val_error, tr_score, val_score, test_score \
-        in zip(tr_error_fold, es_val_error_fold, tr_score_fold, es_val_score_fold, val_score_fold):       
-        last_tr_error.append(np.trim_zeros(tr_error, 'b')[-1])
-        last_es_val_error.append(np.trim_zeros(val_error, 'b')[-1])
-        last_tr_score.append(np.trim_zeros(tr_score, 'b')[-1])
-        last_es_val_score.append(np.trim_zeros(val_score, 'b')[-1])
-        last_val_score.append(test_score)
+    # fold metrics contains for every fold in this order:
+    #   - train losses and score 
+    #   - if early stopping validation loss and score 
+    #   - test score 
+    best_metrics = np.zeros(shape = (len(folds_metrics[0]), k))
+    # retrive the best (at the end of epoch) value for every fold
+    for i, fold in enumerate(folds_metrics):    
+        for j, values in enumerate(fold):
+            if isinstance(values, list):
+                # best_metrics[j][i] = np.trim_zeros(values, 'b')[-1] # a list of values, take the last one
+                best_metrics[j][i] = values[-1]
+            else:           
+                best_metrics[j][i] = values #single value
 
-    # mean and std dev of the last results (of each K-fold) 
-    mean_tr_error, std_tr_error = mean_and_std(last_tr_error) 
-    mean_es_val_error, std_es_val_error = mean_and_std(last_es_val_error)
-    mean_tr_score, std_tr_score = mean_and_std(last_tr_score)
-    mean_es_val_score, std_es_val_score = mean_and_std(last_es_val_score)
-    mean_val_score, std_val_score = mean_and_std(last_val_score)
+    # means and stds contains in this order mean and std of the following metrics over the fold:
+    #   - train losses (pos [0])
+    #   - train scores (pos [1])
+    #   - if early stopping internal validation losses
+    #   - if ealry stopping internal validation scores
+    #   - validation score (last position)
+    means = []
+    stds = []
 
-    # # average of the learning curve  TODO: rename
-    # avg_tr_error, dev_tr_error = mean_std_dev(np.array(tr_error_fold))
-    # avg_es_val_error, dev_val_error = mean_std_dev(np.array(es_val_error_fold))
-    # avg_tr_score, dev_tr_score = mean_std_dev(np.array(tr_score_fold))
-    # avg_es_val_score, dev_val_score = mean_std_dev(np.array(es_val_score_fold))
-
-
-    # # plot results
-    # fold_plot("error", tr_error_fold, es_val_error_fold, avg_tr_error, avg_es_val_error) 
-    # fold_plot("score", tr_score_fold, es_val_score_fold, avg_tr_score, avg_es_val_score) 
-    
-    #-----print results-----
-    print("-----CV-----")
-    print("TR error - mean: {} std: {}  \nES VL error - mean {} std: {}"
-        .format(mean_tr_error, std_tr_error, mean_es_val_error, std_es_val_error))
-    print("TR score - mean: {} std: {}  \nES VL score - mean {} std: {}"
-        .format(mean_tr_score, std_tr_score, mean_es_val_score, std_es_val_score))
-    print("VL score - mean: {} std: {}".format(mean_val_score, std_val_score))
+    for best_metric in best_metrics:
+        means.append(np.mean(best_metric))
+        stds.append(np.std(best_metric))
 
     results = {
-        'tr_loss' : mean_tr_error,
-        'tr_loss_std' : std_tr_error,
-        'val_score' : mean_val_score,
-        'val_score_dev' : std_val_score
+        'tr_loss_mean' : means[0],
+        'tr_loss_dev' : stds[0],
+        'val_score_mean' : means[-1],
+        'val_score_dev' : stds[-1]
     }
+
+    print("---K-fold results---")
+    for k, v in zip(results.keys(), results.values()):
+        print(f"{k} : {v}")
+
     return results
 
 def nested_cross_validation(grid, X_train, y_train, k):

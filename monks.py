@@ -65,38 +65,38 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
     hidden_layer_sizes=[3],
-    activation_out='softmax',
+    activation_out='tanh',
     classification=True,
     activation_hidden='tanh',
-    epochs = 200, 
-    batch_size = 1.0,
+    epochs = 100, 
+    batch_size = 1,
     lambd=0,
     #lambd = 0.0001,
     learning_rate = "fixed",
     learning_rate_init=0.001,
     #nesterov=True, 
-    early_stopping=False,
+    early_stopping=True,
     evaluation_metric='accuracy',
     verbose=True,
-    loss='logloss',
+    loss='mse',
     validation_frequency=1,
     validation_size=0.1,
     tol=1e-4,
     random_state=0)
 
-net.fit(X_train, y_train) # no early stopping
-#tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
-pred = net.predict(X_test)
-print(accuracy_score(y_true=y_test, y_pred=pred))
-print(net.get_current_weights())
-plt.plot(net.train_losses, label="training loss", color="blue")
-#plt.plot(tr_score, label="training score", color="green")
-#plt.plot(val_loss, label="validation loss", color="red")
-#plt.plot(val_score, label="validation score", color="black")
-plt.legend(loc="upper right")
-plt.title("OUR")
-plt.show()
-
+# net.fit(X_train, y_train) # no early stopping
+# #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
+# pred = net.predict(X_test)
+# print(accuracy_score(y_true=y_test, y_pred=pred))
+# print(net.get_current_weights())
+# plt.plot(net.train_losses, label="training loss", color="blue")
+# #plt.plot(tr_score, label="training score", color="green")
+# #plt.plot(val_loss, label="validation loss", color="red")
+# #plt.plot(val_score, label="validation score", color="black")
+# plt.legend(loc="upper right")
+# plt.title("OUR")
+# plt.show()
+cross_validation(net, X_train, y_train, 2)
 scikit_net = MLPClassifier(
     hidden_layer_sizes=(4,),
     activation='tanh', # for hidden layers
@@ -112,7 +112,7 @@ scikit_net = MLPClassifier(
     momentum=0.9, # our alpha
     nesterovs_momentum=False,
     validation_fraction=0.2,
-    early_stopping=False,
+    early_stopping=True,
     random_state = 0,
     )
 y_train = y_train.reshape(y_train.shape[0])
