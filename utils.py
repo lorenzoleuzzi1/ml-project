@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import xlogy
 import matplotlib.pyplot as plt
 from math import floor
 from sklearn.metrics import accuracy_score
@@ -53,12 +54,14 @@ def softplus_prime(x):
     return np.diagflat(diag)
 
 def softmax(x):
-    x = normalize(x)
-    return np.exp(x) / np.sum(np.exp(x))
+    exps = np.exp(x - np.max(x)) # subtracting the maximum avoids overflow
+    return exps / np.sum(exps)
 
 def softmax_prime(x):
-    f = softmax(x) 
-    return np.diagflat(f) - np.dot(np.transpose(f), f)
+    f = softmax(x)
+    return np.diagflat(f) - np.outer(f, f)
+    """f = softmax(x) 
+    return np.diagflat(f) - np.dot(np.transpose(f), f)"""
 
 ACTIVATIONS = {
     'identity': identity,
@@ -95,7 +98,7 @@ ACTIVATIONS_THRESHOLDS = {
 
 # returns a scalar
 def mse(y_true, y_pred):
-    return np.mean(np.mean(np.power(y_true - y_pred, 2)))
+    return np.mean(np.power(y_true - y_pred, 2))
     """axis = 1
     if len(y_true.shape) == 1: axis = 0
     return np.mean(np.sum(np.power(y_true - y_pred, 2), axis=axis) / y_true.shape[axis])"""
@@ -110,15 +113,18 @@ def mse_prime(y_true, y_pred):
 
 # returns a scalar
 def mee(y_true, y_pred):
-    axis = 1
-    if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=axis)))
+    if len(y_true.shape) == 1:
+        return np.sqrt(np.sum(np.power(y_true.reshape(y_true.shape[0]) - y_pred, 2)))
+    else:
+        return np.mean(np.sqrt(np.sum(np.power(y_true - y_pred, 2), axis=1)))
 
 # returns a numpy array with shape (1, #units_output)
 def mee_prime(y_true, y_pred):
     f = mee(y_true, y_pred)
-    if f == 0: return np.zeros(y_true.shape)
-    else : return (y_pred - y_true) / f
+    if f == 0: 
+        return np.zeros(y_true.shape)
+    else : 
+        return (y_pred - y_true) / f
 
 def mrmse(y_true, y_pred): # mean root mean square error
     axis = 1
@@ -130,8 +136,6 @@ def mrmse_prime(y_true, y_pred):
     return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
     #TODO: (y_pred - y_true) / (y_true.size * mrmse(y_true, y_pred))
 
-
-# link above, somewhere
 def logloss(y_true, y_pred):
     p = logistic(y_pred)
     return np.mean( -sum(y_true * np.log(p)) )
@@ -145,25 +149,33 @@ def logloss_prime(y_true, y_pred):
     inv = 1/p
     return -(y_true * inv)
 
+def log_loss(y_true, y_pred):
+    eps = np.finfo(y_pred.dtype).eps  # machine precision for that type
+    y_pred = np.clip(y_pred, eps, 1 - eps) # if lower than eps replaced with eps, if higher than 1-eps replaced with 1-eps
+    return -xlogy(y_true, y_pred).sum() / y_pred.shape[0]
+
+def log_loss_prime(y_true, y_pred):
+    return - y_true / y_pred # TODO: if prob has a comp. near 0? (/0)
+
 LOSSES = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse,
-    'logloss': logloss
+    'logloss': log_loss # logloss
 }
 
 LOSSES_DERIVATIVES = {
     'mse': mse_prime,
     'mee': mee_prime,
     'mrmse': mrmse_prime,
-    'logloss': logloss_prime
+    'logloss': log_loss_prime # logloss_prime
 }
 
 EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
     'mrmse': mrmse,
-    'logloss': logloss,
+    'logloss': log_loss, # logloss,
     'accuracy': accuracy_score
 } # REVIEW: devono essere tutte "medie"
 

@@ -5,6 +5,7 @@ from sklearn.metrics import accuracy_score
 from validation import nested_cross_validation, cross_validation
 from network import Network
 from utils import error_plot, accuracy_plot
+from sklearn.neural_network import MLPClassifier
 #from cross_validation import cross_validation
 import matplotlib.pyplot as plt
 
@@ -62,25 +63,61 @@ grid = ParameterGrid(
 X_train, y_train = read_monks(TRAIN_PATH)
 X_test, y_test = read_monks(TEST_PATH)
 
-#nested_cross_validation(grid, X_train, y_train, 3)
-#cross validation
-net = Network(activation_out='tanh', classification=True, activation_hidden='tanh', epochs = 500, batch_size = 32, 
-     learning_rate = "linear_decay", learning_rate_init=0.002, nesterov=True, 
-     early_stopping=True , evaluation_metric='accuracy', verbose=True)
-#cross_validation(net, X_train, y_train, 3)
-# import time
-# start = time.time()
-#net = Network(activation_out='softmax', classification=True, activation_hidden='tanh', epochs = 1000, batch_size = 32, 
-#    learning_rate = "fixed", learning_rate_init=0.05, nesterov=True, early_stopping=True, stopping_patience = 1000, evaluation_metric='accuracy', loss='logloss')
-tr_errors, tr_accuracy, val_errors, val_accuracy = net.fit(X_train, y_train) 
+net = Network(
+    hidden_layer_sizes=[3],
+    activation_out='softmax',
+    classification=True,
+    activation_hidden='tanh',
+    epochs = 200, 
+    batch_size = 1.0,
+    lambd=0,
+    #lambd = 0.0001,
+    learning_rate = "fixed",
+    learning_rate_init=0.001,
+    #nesterov=True, 
+    early_stopping=False,
+    evaluation_metric='accuracy',
+    verbose=True,
+    loss='logloss',
+    validation_frequency=1,
+    validation_size=0.1,
+    tol=1e-4,
+    random_state=0)
+tr_loss, tr_score = net.fit(X_train, y_train) # no early stopping
+#tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
-
-plt.plot(tr_errors, label="training", color="blue")
-plt.plot(val_errors, label= "validation", color="green")
-plt.plot(val_accuracy, label="score",color="red")
+plt.plot(tr_loss, label="training loss", color="blue")
+#plt.plot(tr_score, label="training score", color="green")
+#plt.plot(val_loss, label="validation loss", color="red")
+#plt.plot(val_score, label="validation score", color="black")
 plt.legend(loc="upper right")
+plt.title("OUR")
 plt.show()
-#end = time.time()
-#print(end - start)
 
+scikit_net = MLPClassifier(
+    hidden_layer_sizes=(4,),
+    activation='tanh', # for hidden layers
+    solver='sgd', 
+    alpha=0,
+    #alpha=0.0001, # our lambd
+    batch_size=32, 
+    learning_rate='constant', 
+    learning_rate_init=0.002, 
+    max_iter=200,
+    shuffle=True, 
+    tol=0.0005,
+    momentum=0.9, # our alpha
+    nesterovs_momentum=False,
+    validation_fraction=0.2,
+    early_stopping=False,
+    random_state = 0,
+    )
+y_train = y_train.reshape(y_train.shape[0])
+y_test = y_test.reshape(y_test.shape[0])
+scikit_net.fit(X_train, y_train)
+plt.plot(scikit_net.loss_curve_, label="training loss", color="blue")
+plt.title("SCIKIT LEARN")
+plt.show()
+pred = scikit_net.predict(X_test)
+print(accuracy_score(y_true=y_test, y_pred=pred))

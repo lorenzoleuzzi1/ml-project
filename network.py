@@ -3,11 +3,9 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-from utils import unison_shuffle
 from math import floor, ceil
 from utils import *
 from layer import *
-from copy import deepcopy
 from sklearn import preprocessing
 
 class Network:
@@ -19,7 +17,7 @@ class Network:
         hidden_layer_sizes = [3], 
         loss : str ='mse', 
         evaluation_metric : str = 'mse',
-        epochs : int = 200,
+        epochs : int = 200, # TODO: rename with max_epochs
         learning_rate : str = 'fixed',
         learning_rate_init : float = 0.0001,
         tau : int = 200,
@@ -34,7 +32,9 @@ class Network:
         tol : float = 0.0005,
         validation_frequency : int = 4,
         random_state = None,
-        reinit_weights : bool = True
+        reinit_weights : bool = True,
+        weights_dist : str = None,
+        weights_bound : float = None,
         ):
        
         self.check_params(locals())
@@ -47,6 +47,7 @@ class Network:
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
         self.evaluation_metric = evaluation_metric
+        self.evaluation_metric_fun = EVALUATION_METRICS[evaluation_metric]
         self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
@@ -65,8 +66,8 @@ class Network:
         self.classification = classification
         self.random_state = random_state
         self.reinit_weights = reinit_weights
-        self.n_outputs = None
-        self.labels = None
+        self.weights_dist = weights_dist # None, 'normal' or 'uniform'
+        self.weights_bound = weights_bound # if 'normal' is the std, if 'uniform' in [-weights_bound, weights_bound]
         if self.activation_out == 'tanh': self.neg_label = -1.0
         else: self.neg_label = 0.0
         self.pos_label = 1.0
@@ -91,10 +92,6 @@ class Network:
             raise ValueError("Cannot use logloss for a regression task.")
         if params['loss'] == 'logloss' and params['activation_out'] != 'softmax':
             raise ValueError("logloss must be used with activation_out='softmax'.")
-        # TODO: ?
-        """if not (params['loss'] == 'logloss' and params['activation_out'] == 'softmax') and \
-            not (params['loss'] != 'logloss' and params['activation_out'] != 'softmax'):
-            raise ValueError("Softmax activation function and logloss loss function must be used together.")"""
         if params['classification'] == True and params['activation_out'] in ['identity', 'relu', 'leaky_relu', 'sofplus']:
             raise ValueError("Cannot use activation_out='%s' for a classification task." % params['activation_out'])
         # TODO: per regressione è possibile usare relu? (magari i target sono tutti positivi?)
@@ -113,9 +110,9 @@ class Network:
         if params['learning_rate_init'] <= 0.0:
             raise ValueError("learning_rate_init must be > 0.")
         if params['learning_rate'] == "linear_decay":
-            if params['tau']  <= 0 or params['tau'] > params['epochs']:
+            if params['tau'] <= 0 or params['tau'] > params['epochs']:
                 raise ValueError("tau must be > 0 and <= epochs.")
-        if params['batch_size']  <= 0:
+        if params['batch_size'] <= 0:
             raise ValueError("batch_size must be > 0.")
         if params['lambd'] < 0.0:
             raise ValueError("lambd must be >= 0.")
@@ -135,33 +132,41 @@ class Network:
             raise ValueError("tol must be > 0 and < 0.5")
         if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
             raise ValueError("validation_frequency must be between 1 and max epochs %s." % (params['epochs']))
-        if params['random_state'] != None and not isinstance(['random_state'], int):
+        if params['random_state'] != None and not isinstance(params['random_state'], int):
             raise ValueError("random_state must be an integer.")
         if not isinstance(params['reinit_weights'], bool):
             raise ValueError("reinit_weights must be a boolean.")
-        # TODO: ?
-        """if (self.loss == LOSSES['mee'] or self.loss == LOSSES['mrmse']) and self.n_targets == 1:
-            raise ValueError("More than two output units are required to use the chosen loss function.")"""
+        if params['weights_dist'] != None and not isinstance(params['weights_dist'], str):
+            raise ValueError("weights_dist must be a string.")
+        if params['weights_dist'] != None and not params['weights_dist'] in ['uniform', 'normal']:
+            raise ValueError("Unrecognized weights_dist. "
+            "Supported weights distributions are ['uniform', 'normal'].")
+        if params['weights_bound'] != None and \
+            not isinstance(params['weights_bound'], int) and \
+            not isinstance(params['weights_bound'], float):
+            raise ValueError("weights_bound must be an int or a float.")
         
     # add layer to network
     def add(self, layer):
         self.layers.append(layer)
 
     def predict(self, X):
-        outputs = self.predict_outputs(X)
+        if self.first_fit:
+            raise ValueError("fit has not been called yet.")
+        if X.ndim != 2:
+            raise ValueError("X must be a 2-dimensional array")
+        if self.layers[0].fan_in != X.shape[1]:
+            raise ValueError("X has a different number of features "
+                "from the one of the dataset the net has been trained on.")
+        
+        Y = self.predict_outputs(X)
         if self.classification:
-            labels = self.outputs_to_labels(outputs, original_range=True)
-        else:
-            labels = outputs
-        return labels
+            Y = self.outputs_to_labels(Y)
+        return Y
 
     # predict output for given input
     def predict_outputs(self, X):
-        if self.n_outputs == None:
-            raise ValueError("Net has not been fitted yet.")
-
         Y = np.empty((X.shape[0], 1, self.n_outputs))
-
         # run network over all samples
         for i in range(X.shape[0]):
             # forward propagation
@@ -169,41 +174,40 @@ class Network:
             for layer in self.layers:
                 output = layer.forward_propagation(output)
             Y[i] = output
-
         Y = Y.reshape(Y.shape[0], Y.shape[2])
         return Y
-
-    def outputs_to_labels(self, Y, original_range=False):
-        if not self.classification:
-            raise ValueError('For regression tasks network\'s'
-                'outputs are already labels.')
-        
+    
+    def discretize_outputs(self, Y):
         if self.n_classes == 2 and self.activation_out != 'softmax':
-            Y = np.where(Y > ACTIVATIONS_THRESHOLDS[self.activation_out], self.pos_label, self.neg_label)
+            Y_disc = np.where(
+                Y > ACTIVATIONS_THRESHOLDS[self.activation_out],
+                self.pos_label,
+                self.neg_label)
         else:
-            # TODO: da sistemare
-            Y_new = []
-            B = np.max(Y, axis=1)
-            for i in range(Y.shape[0]):
-                Y_new.append(np.where(Y[i] < B[i], self.neg_label, self.pos_label))
-                j = 0
-                s = int(sum(Y_new[i]) - 1)
-                for j in range(s):
-                        if Y_new[i][j] == 1.0:
-                            Y_new[i][j] = self.neg_label
-                        j += 1
-            Y = np.array(Y_new)
-        if original_range: 
-            Y = self.binarizer.inverse_transform(Y).astype(np.float64)
-            Y = Y.reshape(Y.shape[0], 1)
-        return Y
+            Y_disc = np.full_like(Y, self.neg_label)
+            if Y.ndim == 1:
+                max_idxs = np.argmax(Y)
+                Y_disc[max_idxs] = self.pos_label
+            else:
+                max_idxs = np.argmax(Y, axis=1)
+                Y_disc[np.indices(max_idxs.shape)[0], max_idxs] = self.pos_label
+        return Y_disc
+
+    def outputs_to_labels(self, Y):
+        Y_lbl = self.discretize_outputs(Y)
+        if self.n_classes == 2 and self.activation_out == 'softmax':
+            Y_lbl = Y_lbl[:, 0]
+        Y_lbl = self.binarizer.inverse_transform(Y_lbl).astype(np.float64)
+        Y_lbl = Y_lbl.reshape(Y_lbl.shape[0], 1)
+        return Y_lbl
 
     def evaluate(self, Y_true, Y_pred):
         if self.evaluation_metric == 'accuracy':
-            pred_labels = self.outputs_to_labels(Y_pred, original_range=False)
+            Y = self.discretize_outputs(Y_pred)
+            # TODO: se lasciamo bias con 2 dim occorre fare reshape
         else:
-            pred_labels = Y_pred
-        return EVALUATION_METRICS[self.evaluation_metric](y_true=Y_true, y_pred=pred_labels)
+            Y = Y_pred
+        return self.evaluation_metric_fun(y_true=Y_true, y_pred=Y)
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -220,61 +224,83 @@ class Network:
             else:
                 self.learning_rate_curr = lr
 
-    def compose(self, input_size, output_size):
+    def compose(self):
         self.layers = []
         # Add first hidden layer
         self.add(Layer(
-            fan_in = input_size,
+            fan_in = self.n_features,
             fan_out = self.hidden_layer_sizes[0],
-            activation = self.activation_hidden
+            activation = self.activation_hidden,
+            weights_dist = self.weights_dist,
+            weights_bound = self.weights_bound
             ))
         # Add further hidden layers
         for i in range(len(self.hidden_layer_sizes)-1):
             self.add(Layer(
                 fan_in = self.hidden_layer_sizes[i],
                 fan_out = self.hidden_layer_sizes[i+1],
-                activation = self.activation_hidden
+                activation = self.activation_hidden,
+                weights_dist = self.weights_dist,
+                weights_bound = self.weights_bound
             ))
         # Add output layer
         self.add(Layer(
             fan_in = self.hidden_layer_sizes[-1],
-            fan_out = output_size,
-            activation = self.activation_out
+            fan_out = self.n_outputs,
+            activation = self.activation_out,
+            weights_dist = self.weights_dist,
+            weights_bound = self.weights_bound
         ))
-        self.first_fit = False
 
-    def fit(self, X_train, Y_train): 
-        if len(X_train.shape) != 2:
+    def encode_targets(self, Y_train):
+        self.binarizer = preprocessing.LabelBinarizer(
+            pos_label=self.pos_label,
+            neg_label=self.neg_label
+        )
+        self.binarizer.fit(Y_train)
+        if not self.first_fit and any(self.binarizer.classes_ != self.labels):
+            self.first_fit = True
+        self.labels = self.binarizer.classes_
+        self.n_classes = len(self.binarizer.classes_)
+        Y_train = self.binarizer.transform(Y_train).astype(np.float64)
+        if self.n_classes == 2 and self.activation_out == 'softmax':
+            Y_train = np.hstack((Y_train, 1 - Y_train))
+        
+        return Y_train
+
+    def fit(self, X_train, Y_train):
+        if X_train.ndim != 2:
             raise ValueError("X_train must be a 2-dimensional array")
-        if len(Y_train.shape) != 2:
+        if Y_train.ndim != 2:
             raise ValueError("Y_train must be a 2-dimensional array")
         if self.classification and Y_train.shape[1] > 1:
             raise ValueError("Multilabel classification is not supported.")
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size.")
 
-        dataset_changed = False
+        self.n_features = X_train.shape[1]
         if self.classification:
-            self.binarizer = preprocessing.LabelBinarizer(
-                pos_label=self.pos_label, 
-                neg_label=self.neg_label
-            )
-            self.binarizer.fit(Y_train)
-            if not self.first_fit and (self.binarizer.classes_ != self.labels).all():
-                dataset_changed = True
-            self.labels = self.binarizer.classes_
-            self.n_classes = len(self.binarizer.classes_)
+            Y_train = self.encode_targets(Y_train)
             self.n_outputs = self.n_classes
             if self.n_classes == 2 and self.activation_out != 'softmax':
                 self.n_outputs = 1
-            Y_train = self.binarizer.transform(Y_train).astype(np.float64)
         else:
             self.n_outputs = Y_train.shape[1]
 
         if not self.first_fit and not \
-            (self.layers[0].fan_in == X_train.shape[-1] and \
+            (self.layers[0].fan_in == self.n_features and \
             self.layers[-1].fan_out == self.n_outputs):
-            dataset_changed = True
+            self.first_fit = True
+
+        # not needed if in layer we use outer
+        #X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
+        
+        if self.first_fit:
+            self.compose()
+            self.first_fit = False
+        elif self.reinit_weights:
+            for layer in self.layers:
+                layer.weights_init( self.weights_dist, self.weights_bound)
 
         if self.early_stopping:
             if self.classification:
@@ -290,18 +316,6 @@ class Network:
                 random_state=self.random_state
             )
         
-        # not needed if in layer we use outer
-        #X_train = X_train.reshape(X_train.shape[0], 1, X_train.shape[1])
-
-        if not self.first_fit and dataset_changed and not self.reinit_weights:
-            print("Warning: previous weights won't be used, the type of dataset has changed.")
-        
-        if self.first_fit or dataset_changed:
-            self.compose(input_size=X_train.shape[-1], output_size=self.n_outputs)
-        elif self.reinit_weights:
-            for layer in self.layers:
-                layer.weights_init()
-        
         # divide training set into batches
         if isinstance(self.batch_size, int):
             n_batches = ceil(X_train.shape[0] / self.batch_size)
@@ -316,8 +330,8 @@ class Network:
         stopping = self.stopping_patience 
 
         #-----training loop-----
-        # loop max-epoch times
-        #   for each bacth       
+        # for each epoch
+        #   for each batch
         #       for each item in the batch
         #           compute weights and bias deltas for curr item
         #           accumulate the deltas
@@ -344,20 +358,22 @@ class Network:
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
                       
-                    """# compute loss and evaluation metric (for display)
+                    # compute loss and evaluation metric (for display)
                     train_loss += self.loss(y_true=y, y_pred=output)
-                    # forse non si somma per tutti i pattern
-                    reg_term = 0
-                    for layer in self.layers:
-                        weights = layer.weights.ravel()
-                        reg_term += np.dot(weights, weights)
-                    train_loss += self.lambd*reg_term
-                    train_score += self.evaluation(Y_true=y, Y_pred=output)"""
+                    train_score += self.evaluate(Y_true=y, Y_pred=output)
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output)
                     for layer in reversed(self.layers):
                         delta = layer.backward_propagation(delta)
+
+                # add l2 regularization term to the loss
+                reg_term = 0
+                for layer in self.layers:
+                    weights = layer.weights.ravel()
+                    reg_term += np.dot(weights, weights)
+                reg_term = self.lambd * reg_term
+                train_loss += reg_term
 
                 # new learning rate
                 self.update_learning_rate(epoch)
@@ -375,7 +391,7 @@ class Network:
                         nesterov=self.nesterov
                     )
             
-            Y_train_output = self.predict_outputs(X_train)
+            """Y_train_output = self.predict_outputs(X_train)
             train_score = self.evaluate(Y_true=Y_train, Y_pred=Y_train_output)
             train_loss = self.loss(y_true=Y_train, y_pred=Y_train_output)
             reg_term = 0
@@ -383,7 +399,7 @@ class Network:
                 weights = layer.weights.ravel()
                 reg_term += np.dot(weights, weights)
             reg_term = self.lambd * reg_term
-            train_loss += reg_term
+            train_loss += reg_term"""
             
             #-----validation-----
             if self.early_stopping and (epoch % self.validation_frequency) == 0:
@@ -392,8 +408,8 @@ class Network:
                 val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
             
             # average on all samples 
-            #train_loss /= X_train.shape[0]
-            #train_score /= X_train.shape[0]
+            train_loss /= X_train.shape[0]
+            train_score /= X_train.shape[0]
             
             #-----stopping-----
             if epoch == 10: #init
@@ -433,7 +449,7 @@ class Network:
                         else: 
                             peaks_error_function = 0 
                             start_peaks_epoch = epoch
-                            weights_before_peaks, bias_before_peaks = self.get_current_weights()                    
+                            weights_before_peaks, bias_before_peaks = self.get_current_weights()
                 precedent_error_increased =  train_loss > train_losses[-1]
 
                 if error_below_tol: # if we've already converged (error near 0)
@@ -444,7 +460,7 @@ class Network:
                     stopping -= 1
                 else:
                     stopping = self.stopping_patience
-                    weights_to_return, bias_to_return = self.get_current_weights()  
+                    weights_to_return, bias_to_return = self.get_current_weights()
                     #self.backtracked_network = deepcopy(self) # keeps track of the best model before early stopping (increasing error)
 
             
@@ -464,7 +480,7 @@ class Network:
                         % (epoch+1, self.epochs, train_loss))
             
             if stopping <= 0: # stopping criteria satisfied
-                if stopping == 0: # error function is increasing              
+                if stopping == 0: # error function is increasing
                     if self.early_stopping: # remove values ​​that do not satisfy the criteria
                         val_losses[-self.stopping_patience:] = []
                         val_scores[-self.stopping_patience:] = []
@@ -487,7 +503,6 @@ class Network:
             return train_losses, val_losses, train_scores, val_scores
         else:
             return train_losses, train_scores
-        # TODO: return weights_to_return, bias_to_return
 
     def get_init_weights(self):
         init_weights = []

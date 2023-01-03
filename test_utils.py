@@ -52,6 +52,7 @@ def test_softplus():
     print(f_prime)
 
 def test_softmax():
+    input = np.array([1, 2])
     f_net = softmax(input)
     print("SOFTMAX(INPUT):")
     print(f_net)
@@ -66,11 +67,20 @@ def test_losses():
     print(mee_prime(true, pred)) # (y_pred - y_true) / f
     print("--MSE prime--")
     print(mse_prime(true, pred)) # 2 * (y_pred - y_true) / y_true.size
+    print("--MSE --")
+    print(mse(true, pred))
     print("--MEE--")
     print(mee(true, pred))
     #from sklearn.metrics import mean_squared_error
     #print(mean_squared_error(y_pred=pred, y_true=true))
-    #print("--LOGLOSS--")
-    #print(logloss(true, pred))
 
 test_losses()
+# target    prob
+# 1         1
+# 1         0.7
+# 0         0.7
+# 1         1
+# - ((0)+(1*log(0.7))+(1*log(0.3))+(0))/4
+# -(log(0.7)+log(0.3))/4 = 
+#print(log_loss(y_true=np.array([[1,0], [1,0], [1,0], [1,0]]), y_prob=np.array([[1,0],[0.7, 0.3],[0.3,0.7],[1,0]])))
+#print(-(np.log(0.7)+np.log(0.3))/4)
