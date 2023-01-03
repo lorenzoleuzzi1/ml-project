@@ -30,7 +30,7 @@ def cross_validation(network, X_train, y_train, k):
         
 
         # --------------fold train--------------
-        tr_error, val_error, tr_score, val_score = network.fit(X_train_fold, y_train_fold)
+        network.fit(X_train_fold, y_train_fold)
         
         #difference between max epochs and epochs actually done (because early stopping)
         epoches_difference = network.epochs - len(tr_error) 

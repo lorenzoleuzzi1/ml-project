@@ -54,9 +54,10 @@ class Layer():
     def update(self, learning_rate, batch_size, alpha, lambd, nesterov):
         self.deltas_weights /= batch_size
         self.deltas_bias /= batch_size
+        # lambd *= batch_size
  
         # weights and bias update
-        velocity_w =  alpha * self.velocity_w - learning_rate * self.deltas_weights
+        velocity_w =  alpha * self.velocity_w - learning_rate * self.deltas_weights 
         velocity_b =  alpha * self.velocity_b - learning_rate * self.deltas_bias
         self.weights -= 2 * lambd * self.weights
         if nesterov:

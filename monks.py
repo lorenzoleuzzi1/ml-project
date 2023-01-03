@@ -83,11 +83,13 @@ net = Network(
     validation_size=0.1,
     tol=1e-4,
     random_state=0)
-tr_loss, tr_score = net.fit(X_train, y_train) # no early stopping
+
+net.fit(X_train, y_train) # no early stopping
 #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
 pred = net.predict(X_test)
 print(accuracy_score(y_true=y_test, y_pred=pred))
-plt.plot(tr_loss, label="training loss", color="blue")
+print(net.get_current_weights())
+plt.plot(net.train_losses, label="training loss", color="blue")
 #plt.plot(tr_score, label="training score", color="green")
 #plt.plot(val_loss, label="validation loss", color="red")
 #plt.plot(val_score, label="validation score", color="black")

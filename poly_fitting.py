@@ -57,12 +57,13 @@ X_train, X_test, y_train, y_test = train_test_split(
 
 # fit our net and get predictions for test points
 net = Network(
-    hidden_layer_sizes=[3, 3],
+    hidden_layer_sizes=[10, 10],
     activation_out='identity',
     classification=False,
     activation_hidden='tanh',
-    lambd=0.0001,#1,#0.1
-    batch_size=1,
+    lambd=0,#1,#0.1
+    batch_size=1.0,
+    epochs = 800,
     learning_rate='fixed',
     learning_rate_init=0.001,
     alpha=0.9
@@ -74,21 +75,9 @@ our_mse = mse(y_test, y_pred)
 our_mee = mee(y_test, y_pred)
 
 weights, bias = net.get_current_weights()
-visualize_weights(weights, bias)
-net = Network(
-    hidden_layer_sizes=[3, 3],
-    activation_out='identity',
-    classification=False,
-    activation_hidden='tanh',
-    lambd=1, # high labda, weights should be smaller...
-    batch_size=1,
-    learning_rate='fixed',
-    learning_rate_init=0.001,
-    alpha=0.9
-    )
-net.fit(X_train, y_train.reshape(y_train.shape[0], 1))
+# visualize_weights(weights, bias)
 weights, bias = net.get_current_weights()
-visualize_weights(weights, bias)
+# visualize_weights(weights, bias)
 
 # fit scikit-learn net and get predictions for test points
 scikit_net = MLPRegressor(
