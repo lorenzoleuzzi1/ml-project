@@ -225,33 +225,43 @@ class Network:
                 self.learning_rate_curr = lr
 
     def compose(self):
-        self.layers = []
-        # Add first hidden layer
-        self.add(Layer(
-            fan_in = self.n_features,
-            fan_out = self.hidden_layer_sizes[0],
-            activation = self.activation_hidden,
-            weights_dist = self.weights_dist,
-            weights_bound = self.weights_bound
-            ))
-        # Add further hidden layers
-        for i in range(len(self.hidden_layer_sizes)-1):
+        if not self.first_fit and not \
+            (self.layers[0].fan_in == self.n_features and \
+            self.layers[-1].fan_out == self.n_outputs):
+            self.first_fit = True
+        
+        if self.first_fit:
+            self.layers = []
+            # Add first hidden layer
             self.add(Layer(
-                fan_in = self.hidden_layer_sizes[i],
-                fan_out = self.hidden_layer_sizes[i+1],
+                fan_in = self.n_features,
+                fan_out = self.hidden_layer_sizes[0],
                 activation = self.activation_hidden,
                 weights_dist = self.weights_dist,
                 weights_bound = self.weights_bound
-            ))
-        # Add output layer
-        self.add(Layer(
-            fan_in = self.hidden_layer_sizes[-1],
-            fan_out = self.n_outputs,
-            activation = self.activation_out,
-            weights_dist = self.weights_dist,
-            weights_bound = self.weights_bound
-        ))
-
+                ))
+            # Add further hidden layers
+            for i in range(len(self.hidden_layer_sizes)-1):
+                self.add(Layer(
+                    fan_in = self.hidden_layer_sizes[i],
+                    fan_out = self.hidden_layer_sizes[i+1],
+                    activation = self.activation_hidden,
+                    weights_dist = self.weights_dist,
+                    weights_bound = self.weights_bound
+                ))
+            # Add output layer
+            self.add(Layer(
+                fan_in = self.hidden_layer_sizes[-1],
+                fan_out = self.n_outputs,
+                activation = self.activation_out,
+                weights_dist = self.weights_dist,
+                weights_bound = self.weights_bound
+                ))
+            self.first_fit = False
+        elif self.reinit_weights:
+            for layer in self.layers:
+                layer.weights_init( self.weights_dist, self.weights_bound)
+    
     def encode_targets(self, Y_train):
         self.binarizer = preprocessing.LabelBinarizer(
             pos_label=self.pos_label,
@@ -268,7 +278,7 @@ class Network:
         
         return Y_train
 
-    def set_fitting(self, X_train, Y_train):
+    def fit_preprocessing(self, X_train, Y_train):
         if X_train.ndim != 2:
             raise ValueError("X_train must be a 2-dimensional array")
         if Y_train.ndim != 2:
@@ -286,18 +296,6 @@ class Network:
                 self.n_outputs = 1
         else:
             self.n_outputs = Y_train.shape[1]
-
-        if not self.first_fit and not \
-            (self.layers[0].fan_in == self.n_features and \
-            self.layers[-1].fan_out == self.n_outputs):
-            self.first_fit = True
-        
-        if self.first_fit:
-            self.compose()
-            self.first_fit = False
-        elif self.reinit_weights:
-            for layer in self.layers:
-                layer.weights_init( self.weights_dist, self.weights_bound)
 
         return Y_train
 
@@ -335,37 +333,9 @@ class Network:
             self.best_weights, self.best_bias = self.get_current_weights()
 
     def fit(self, X_train, Y_train):
-        Y_train = self.set_fitting(X_train, Y_train)
+        Y_train = self.fit_preprocessing(X_train, Y_train)
+        self.compose()
         n_samples = X_train.shape[0]
-        # if X_train.ndim != 2:
-        #     raise ValueError("X_train must be a 2-dimensional array")
-        # if Y_train.ndim != 2:
-        #     raise ValueError("Y_train must be a 2-dimensional array")
-        # if self.classification and Y_train.shape[1] > 1:
-        #     raise ValueError("Multilabel classification is not supported.")
-        # if self.batch_size > X_train.shape[0]:
-        #     raise ValueError("batch_size must not be larger than sample size.")
-
-        # self.n_features = X_train.shape[1]
-        # if self.classification:
-        #     Y_train = self.encode_targets(Y_train)
-        #     self.n_outputs = self.n_classes
-        #     if self.n_classes == 2 and self.activation_out != 'softmax':
-        #         self.n_outputs = 1
-        # else:
-        #     self.n_outputs = Y_train.shape[1]
-
-        # if not self.first_fit and not \
-        #     (self.layers[0].fan_in == self.n_features and \
-        #     self.layers[-1].fan_out == self.n_outputs):
-        #     self.first_fit = True
-        
-        # if self.first_fit:
-        #     self.compose()
-        #     self.first_fit = False
-        # elif self.reinit_weights:
-        #     for layer in self.layers:
-        #         layer.weights_init( self.weights_dist, self.weights_bound)
 
         # early stopping validation split
         if self.early_stopping:
