@@ -35,6 +35,7 @@ class Network:
         reinit_weights : bool = True,
         weights_dist : str = None,
         weights_bound : float = None,
+        metric_decrease_tol : float = 0.001/100,
         ):
        
         self.check_params(locals())
@@ -68,6 +69,7 @@ class Network:
         self.reinit_weights = reinit_weights
         self.weights_dist = weights_dist # None, 'normal' or 'uniform'
         self.weights_bound = weights_bound # if 'normal' is the std, if 'uniform' in [-weights_bound, weights_bound]
+        self.metric_decrease_tol = metric_decrease_tol # TODO: checks
         if self.activation_out == 'tanh': self.neg_label = -1.0
         else: self.neg_label = 0.0
         self.pos_label = 1.0
@@ -306,7 +308,7 @@ class Network:
             self.best_weights, self.best_bias = self.get_current_weights()
             return
         
-        if self.early_stopping:
+        if self.early_stopping and (epoch % self.validation_frequency):
             metric_delta = abs(val_scores[-2] - val_scores[-1]) / val_scores[-2]
             if self.evaluation_metric == 'accuracy':
                 converged = val_scores[-1] >= 1-self.tol
@@ -314,17 +316,19 @@ class Network:
             else:
                 converged = val_scores[-1] <= self.tol
                 metric_declined = val_scores[-1] > val_scores[-2]
-        else:
+        elif not self.early_stopping:
             metric_delta = (train_losses[-2] - train_losses[-1]) / train_losses[-2]
             converged = train_losses[-1] <= self.tol
             metric_declined = train_losses[-1] > train_losses[-2]
+        else:
+            return
 
         if converged:
             self.no_improvement_count = self.stopping_patience # if we've already converged (error near 0)
             self.best_epoch = epoch
             self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
             self.best_weights, self.best_bias = self.get_current_weights()
-        elif metric_declined or metric_delta < 0.001/100: # TODO: configurabile?
+        elif metric_declined or metric_delta < self.metric_decrease_tol:
             self.no_improvement_count += 1 # if no more significant error decreasing (less than 0.1%) or we are not converging 
         else:
             self.no_improvement_count = 0
@@ -431,7 +435,7 @@ class Network:
             self.train_scores.append(train_score)
 
             if self.verbose:
-                if self.early_stopping:
+                if self.early_stopping and (epoch % self.validation_frequency):
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
                         % (epoch+1, self.epochs, train_loss, val_loss, val_score))
                 else:
@@ -442,12 +446,6 @@ class Network:
             self.update_no_improvement_count(epoch, self.train_losses, self.val_scores)
 
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
-                # TODO: lasciare o stampare una 'x' sul grafico?
-                """if self.early_stopping:
-                    self.val_losses[-self.stopping_patience:] = []
-                    self.val_scores[-self.stopping_patience:] = []
-                self.train_losses[-self.stopping_patience:] = [] 
-                self.train_scores[-self.stopping_patience:] = []"""
                 self.set_weights(self.best_weights, self.best_bias)
                 break # jump out the for loop
 

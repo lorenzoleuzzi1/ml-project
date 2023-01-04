@@ -126,16 +126,6 @@ def mee_prime(y_true, y_pred):
     else : 
         return (y_pred - y_true) / f
 
-def mrmse(y_true, y_pred): # mean root mean square error
-    axis = 1
-    if len(y_true.shape) == 1: axis = 0
-    return np.mean(np.sqrt(np.mean(np.power(y_true - y_pred, 2), axis=axis))) #TODO: sqrt(n)?????
-    #return np.mean(np.sqrt(mse(y_true, y_pred)))
-
-def mrmse_prime(y_true, y_pred):
-    return (y_pred - y_true) / np.sqrt(mrmse(y_true, y_pred))
-    #TODO: (y_pred - y_true) / (y_true.size * mrmse(y_true, y_pred))
-
 def logloss(y_true, y_pred):
     p = logistic(y_pred)
     return np.mean( -sum(y_true * np.log(p)) )
@@ -160,21 +150,18 @@ def log_loss_prime(y_true, y_pred):
 LOSSES = {
     'mse': mse,
     'mee': mee,
-    'mrmse': mrmse,
     'logloss': log_loss # logloss
 }
 
 LOSSES_DERIVATIVES = {
     'mse': mse_prime,
     'mee': mee_prime,
-    'mrmse': mrmse_prime,
     'logloss': log_loss_prime # logloss_prime
 }
 
 EVALUATION_METRICS = {
     'mse': mse,
     'mee': mee,
-    'mrmse': mrmse,
     'logloss': log_loss, # logloss,
     'accuracy': accuracy_score
 } # REVIEW: devono essere tutte "medie"
