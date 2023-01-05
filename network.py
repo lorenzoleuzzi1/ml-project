@@ -308,7 +308,7 @@ class Network:
             self.best_weights, self.best_bias = self.get_current_weights()
             return
         
-        if self.early_stopping and (epoch % self.validation_frequency):
+        if self.early_stopping and (epoch % self.validation_frequency) == 0:
             metric_delta = abs(val_scores[-2] - val_scores[-1]) / val_scores[-2]
             if self.evaluation_metric == 'accuracy':
                 converged = val_scores[-1] >= 1-self.tol
@@ -435,7 +435,7 @@ class Network:
             self.train_scores.append(train_score)
 
             if self.verbose:
-                if self.early_stopping and (epoch % self.validation_frequency):
+                if self.early_stopping and (epoch % self.validation_frequency) == 0:
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
                         % (epoch+1, self.epochs, train_loss, val_loss, val_score))
                 else:
