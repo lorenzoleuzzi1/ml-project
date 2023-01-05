@@ -368,7 +368,7 @@ for param1 in grid:
 file_parameters = open(FILE_PARAMETERS, 'w')
 i = 0
 for parameters in grid:
-    file_parameters.write('-------------CONFIGURATION %d-------------' % i)
+    file_parameters.write('----------------------------------------CONFIGURATION %d----------------------------------------' % i)
     file_parameters.write('\n')
     if i == 0:
         file_parameters.write('default value')
@@ -432,7 +432,6 @@ for parameters in grid:
     file_parameters.write('\n')
     file_parameters.write(str(parameters))
     file_parameters.write('\n \n')
-    file_parameters.write('------------------------------------------')
     i += 1
 file_parameters.close()
 
@@ -477,7 +476,7 @@ for parameters in grid:
     pred = net.predict(X_test)
     scores = net.train_scores
     
-    file_scores.write('-------------CONFIGURATION %d-------------' % i)
+    file_scores.write('----------------------------------------CONFIGURATION %d----------------------------------------' % i)
     file_scores.write('\n')
     file_scores.write(str(scores))
     file_scores.write('\n \n')
