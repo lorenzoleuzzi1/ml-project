@@ -1,12 +1,26 @@
 from sklearn.model_selection import ParameterGrid, train_test_split
 from sklearn.metrics import accuracy_score
+import pandas as pd
 from network import Network
-from cup import read_tr_cup, read_ts_cup
 
 CUP_TRAIN_PATH = './datasets/ML-CUP22-TR.csv'
 CUP_TEST_PATH = './datasets/ML-CUP22-TS.csv'
 FILE_PARAMETERS = 'parameters.csv'
 FILE_CONFIGURATION_ACCURACY = 'configuration_accuracy.csv'
+
+def read_tr_cup(path):
+    data = pd.read_csv(path, sep=",", header=None, comment='#')
+    data.drop(data.columns[0], axis=1, inplace=True)
+    targets = data[data.columns[-2:]].to_numpy()
+    data.drop(data.columns[-2:], axis=1, inplace=True)
+    data = data.to_numpy()
+    return (data, targets)
+
+def read_ts_cup(path):
+    data = pd.read_csv(path, sep=",", header=None, comment='#')
+    data.drop(data.columns[0], axis=1, inplace=True)
+    data = data.to_numpy()
+    return data
 
 """ 
 DEFAULT VALUE:
@@ -334,36 +348,10 @@ grid = ParameterGrid([
         'metric_decrease_tol': [0.1/100],
         'batch_size': [1],
         'learning_rate_init': [0.0001, 0.0005]
-    },
-    {
-        'activation_out': ['identity'],
-        'classification': [False],
-        'activation_hidden': ['tanh'],
-        'hidden_layer_sizes': [[10, 10]],
-        'loss': ['mse'],
-        'evaluation_metric': ['mee'],
-        'epochs': [500],
-        'tau': [200],
-        'tol': [0.0001],
-        'learning_rate': ['linear_decay'],
-        'lambd': [0.0001],
-        'alpha': [0.5],
-        'verbose': [False],
-        'nesterov': [False],
-        'early_stopping': [False],
-        'stopping_patience': [5],
-        'validation_size': [0.1],
-        'validation_frequency': [5],
-        'random_state': [None],
-        'reinit_weights': [True],
-        'weights_dist': [None],
-        'metric_decrease_tol': [0.1/100],
-        'batch_size': [32],
-        'learning_rate_init': [0.01]
     }
 ])
 
-
+"""
 print(len(grid))
 i = 0
 for param1 in grid:
@@ -375,15 +363,15 @@ for param1 in grid:
             #print(param2)
         j += 1
     i += 1
-    print('---------------------')
+    print('---------------------')"""
 
-"""
 file_parameters = open(FILE_PARAMETERS, 'w')
 i = 0
 for parameters in grid:
     file_parameters.write('-------------CONFIGURATION %d-------------' % i)
+    file_parameters.write('\n')
     if i == 0:
-        file_parameters.write(parameters)
+        file_parameters.write('default value')
     elif i == 1:
         file_parameters.write('activation_hidden = logistic')
     elif i == 2:
@@ -418,38 +406,32 @@ for parameters in grid:
         file_parameters.write('lambd = 0.1')
     elif i == 17:
         file_parameters.write('alpha = 0.5')
-    elif i == 17:
-        file_parameters.write('alpha = 0.7')
-    elif i == 17:
-        file_parameters.write('alpha = 0.9')
-    elif i == 17:
-        file_parameters.write('nesterov = True')
     elif i == 18:
-        file_parameters.write('early_stopping = True')
+        file_parameters.write('alpha = 0.7')
     elif i == 19:
-        file_parameters.write('batch_size = 1')
+        file_parameters.write('alpha = 0.9')
     elif i == 20:
-        file_parameters.write('batch_size = 32')
+        file_parameters.write('nesterov = True')
     elif i == 21:
-        file_parameters.write('batch_size = 256')
+        file_parameters.write('early_stopping = True')
     elif i == 22:
-        file_parameters.write('learning_rate_init = 0.1, with batch_size = 1.0')
+        file_parameters.write('batch_size = 1')
     elif i == 23:
-        file_parameters.write('learning_rate_init = 0.01, with batch_size = 1.0')
+        file_parameters.write('batch_size = 32')
     elif i == 24:
+        file_parameters.write('batch_size = 256')
+    elif i == 25:
+        file_parameters.write('learning_rate_init = 0.1, with batch_size = 1.0')
+    elif i == 26:
+        file_parameters.write('learning_rate_init = 0.01, with batch_size = 1.0')
+    elif i == 27:
         file_parameters.write('learning_rate_init = 0.0001, with batch_size = 1')
-    elif i == 23:
+    elif i == 28:
         file_parameters.write('learning_rate_init = 0.0005, with batch_size = 1')
-    elif i == 23:
-        file_parameters.write('learning_rate_init = 0.01, with batch_size = 32')
-    elif i == 23:
-        file_parameters.write('learning_rate_init = 0.01 , with batch_size = 1.0')
-    elif i == 23:
-        file_parameters.write('learning_rate_init = 0.01 , with batch_size = 1.0')
     
     file_parameters.write('\n')
-    file_parameters.write(parameters)
-    file_parameters.write('\n')
+    file_parameters.write(str(parameters))
+    file_parameters.write('\n \n')
     file_parameters.write('------------------------------------------')
     i += 1
 file_parameters.close()
@@ -459,7 +441,9 @@ X_train, y_train = read_tr_cup(CUP_TRAIN_PATH)
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.33, random_state=42)
 file_accuracy = open(FILE_CONFIGURATION_ACCURACY, 'w')
 
+i = 0
 for parameters in grid:
+    print('start configuration %d in [0, 28]' %i)
     net = Network( 
         activation_out = parameters['activation_out'],
         classification = parameters['classification'],
@@ -487,10 +471,14 @@ for parameters in grid:
         metric_decrease_tol = parameters['metric_decrease_tol']
         )
     
+    print('net configuration %d in [0, 28] initialized' %i)
     net.fit(X_train, y_train)
     pred = net.predict(X_test)
     accuracy = accuracy_score(y_true=y_test, y_pred=pred)
     
     file_accuracy.write('-------------CONFIGURATION %d-------------' % i)
     file_accuracy.write(accuracy)
-    file_accuracy.write('\n')"""
+    file_accuracy.write('\n')
+    
+    print('configuration %d in [0, 28] done' %i)
+    i += 1
