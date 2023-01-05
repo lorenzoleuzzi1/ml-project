@@ -381,7 +381,7 @@ class Network:
             # for every batch in the set loop
             for X_batch, Y_batch in zip(X_train_batched, Y_train_batched):
                 # for every pattern in the batch loop
-                for x, y in zip(X_batch, Y_batch):
+                for i, (x, y) in enumerate(zip(X_batch, Y_batch)):
                     batch_size = X_batch.shape[0]
                     output = x
                     
@@ -416,7 +416,9 @@ class Network:
                         learning_rate=self.learning_rate_curr,
                         batch_size=batch_size,
                         alpha=self.alpha,
-                        lambd=self.lambd,
+                        #lambd = self.lambd,
+                        lambd = self.lambd*(batch_size/n_samples),
+                        #lambd = self.lambd*(1/(i+1)) if batch_size == 1 else self.lambd*(batch_size/n_samples),
                         nesterov=self.nesterov
                     )
             
