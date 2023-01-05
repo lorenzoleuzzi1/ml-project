@@ -472,6 +472,7 @@ for parameters in grid:
         )
     
     print('net configuration %d in [0, 28] initialized' %i)
+    
     net.fit(X_train, y_train)
     pred = net.predict(X_test)
     accuracy = accuracy_score(y_true=y_test, y_pred=pred)
