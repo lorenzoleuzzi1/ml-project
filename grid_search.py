@@ -7,7 +7,7 @@ grid = ParameterGrid([
         'classification': [False],
         'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
         # 32,16 # 20, 100, 30,30, 100,100
-        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
         'loss': ['mse'],
         'evaluation_metric': ['mee'],
         'epochs': [500, 1000],
@@ -34,7 +34,7 @@ grid = ParameterGrid([
         'activation_out': ['identity'],
         'classification': [False],
         'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
-        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
         'loss': ['mse'],
         'evaluation_metric': ['mee'],
         'epochs': [500, 1000],
@@ -89,7 +89,7 @@ grid = ParameterGrid([
         'activation_out': ['identity'],
         'classification': [False],
         'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
-        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
         'loss': ['mse'],
         'evaluation_metric': ['mee'],
         'epochs': [500, 1000],
@@ -116,7 +116,7 @@ grid = ParameterGrid([
         'activation_out': ['identity'],
         'classification': [False],
         'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
-        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
         'loss': ['mse'],
         'evaluation_metric': ['mee'],
         'epochs': [500, 1000],
