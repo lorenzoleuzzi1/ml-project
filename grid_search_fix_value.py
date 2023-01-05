@@ -6,7 +6,7 @@ from network import Network
 CUP_TRAIN_PATH = './datasets/ML-CUP22-TR.csv'
 CUP_TEST_PATH = './datasets/ML-CUP22-TS.csv'
 FILE_PARAMETERS = 'parameters.csv'
-FILE_CONFIGURATION_ACCURACY = 'configuration_accuracy.csv'
+FILE_SCORES = 'scores.csv'
 
 def read_tr_cup(path):
     data = pd.read_csv(path, sep=",", header=None, comment='#')
@@ -439,7 +439,7 @@ file_parameters.close()
 X_train, y_train = read_tr_cup(CUP_TRAIN_PATH)
 #X_blind_test = read_ts_cup(CUP_TEST_PATH)
 X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=0.33, random_state=42)
-file_accuracy = open(FILE_CONFIGURATION_ACCURACY, 'w')
+file_scores = open(FILE_SCORES, 'w')
 
 i = 0
 for parameters in grid:
@@ -469,17 +469,20 @@ for parameters in grid:
         reinit_weights = parameters['reinit_weights'],
         weights_dist = parameters['weights_dist'],
         metric_decrease_tol = parameters['metric_decrease_tol']
-        )
+    )
     
     print('net configuration %d in [0, 28] initialized' %i)
     
     net.fit(X_train, y_train)
     pred = net.predict(X_test)
-    accuracy = accuracy_score(y_true=y_test, y_pred=pred)
+    scores = net.train_scores
     
-    file_accuracy.write('-------------CONFIGURATION %d-------------' % i)
-    file_accuracy.write(accuracy)
-    file_accuracy.write('\n')
+    file_scores.write('-------------CONFIGURATION %d-------------' % i)
+    file_scores.write('\n')
+    file_scores.write(str(scores))
+    file_scores.write('\n \n')
     
     print('configuration %d in [0, 28] done' %i)
     i += 1
+    
+file_scores.close()
