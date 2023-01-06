@@ -3,6 +3,7 @@ from utils import error_plot, accuracy_plot
 from sklearn.model_selection import train_test_split
 from network import Network
 import matplotlib.pyplot as plt
+import time
 
 CUP_TRAIN_PATH = './datasets/ML-CUP22-TR.csv'
 CUP_TEST_PATH = './datasets/ML-CUP22-TS.csv'
@@ -39,8 +40,11 @@ net = Network(
     stopping_patience=10,
     early_stopping=False
     )
+start = time.time()
 net.fit(X_train, y_train)
 pred = net.predict(X_test)
+end = time.time()
+print(end - start)
 
 plt.scatter(y_test[:,0], pred[:, 0])
 plt.xlabel("True y1")
