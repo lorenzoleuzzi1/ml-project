@@ -265,3 +265,56 @@ def accuracy_plot(tr_accuracy, val_accuracy):
     plt.title("Training and validation score on monks 1 dataset")
     fig_name = "ml_project_score_plot"
     plt.savefig(fig_name)
+
+def regression2_plots(true, pred):
+    import numpy as np
+    from scipy.stats import gaussian_kde
+    xy = np.vstack([true[:,0],  pred[:, 0]])
+    z = gaussian_kde(xy)(xy)
+    plt.scatter(true[:,0], pred[:, 0], c=z)
+    plt.xlabel("True y1")
+    plt.ylabel("Predicted y1")
+    xpoints = ypoints = plt.xlim()
+    plt.plot(xpoints, ypoints)
+    plt.show()
+
+    xy = np.vstack([true[:,0], true[:,0]-pred[:, 0]])
+    z = gaussian_kde(xy)(xy)
+    plt.scatter(true[:,0], true[:,0]-pred[:, 0], c=z)
+    plt.xlabel("True y1")
+    plt.ylabel("True y1 - Pred y1")
+    plt.axhline(y=0)
+    plt.show()
+
+    xy = np.vstack([true[:,1], pred[:, 1]])
+    z = gaussian_kde(xy)(xy)
+    plt.scatter(true[:,1], pred[:, 1], c=z)
+    plt.xlabel("True y2")
+    plt.ylabel("Predicted y2")
+    xpoints = ypoints = plt.xlim()
+    plt.plot(xpoints, ypoints)
+    plt.show()
+
+    xy = np.vstack([true[:,1],true[:,1]-pred[:, 1]])
+    z = gaussian_kde(xy)(xy)
+    plt.scatter(true[:,1], true[:,1]-pred[:, 1], c=z)
+    plt.xlabel("True y2")
+    plt.ylabel("True y2 - Pred y2")
+    plt.axhline(y=0)
+    plt.show()
+
+    _, axes = plt.subplots(nrows=1, ncols=2, figsize=(5, 3))
+    for i in range(10):
+        axes[0].scatter(true[i,0], pred[i, 0])
+        axes[0].annotate(str(i), (true[i,0], pred[i, 0]))
+        xpoints = ypoints = axes[0].get_xlim()
+        axes[0].plot(xpoints, ypoints)
+        axes[0].set_xlabel("True y1")
+        axes[0].set_ylabel("Predicted y1")
+        axes[1].scatter(true[i,1], pred[i, 1])
+        axes[1].annotate(str(i), (true[i, 1], pred[i, 1]))
+        xpoints = ypoints = axes[1].get_xlim()
+        axes[1].plot(xpoints, ypoints)
+        axes[1].set_xlabel("True y2")
+        axes[1].set_ylabel("Predicted y2")
+    plt.show()
