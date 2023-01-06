@@ -40,7 +40,7 @@ hidden_layer_size = [100, 100]
  
 ----------------------------------------CONFIGURATION 10----------------------------------------
 epochs = 100
-{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 100, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 200, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
  
 ----------------------------------------CONFIGURATION 11----------------------------------------
 epochs = 1000

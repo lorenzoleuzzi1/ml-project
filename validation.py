@@ -1,6 +1,6 @@
 import numpy as np
 from utils import fold_plot, mean_and_std
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 from network import Network
 from utils import write_json, read_json
 from multiprocessing import Process
@@ -12,11 +12,14 @@ def cross_validation(network, X_train, y_train, k):
         print('Number of folds k must be more than 1')
         raise ValueError("k must be more than 1")
 
-    skf = StratifiedKFold(n_splits=k, shuffle=True) 
+    if network.classification == True:
+        kf = StratifiedKFold(n_splits=k, shuffle=True) 
+    else:
+        kf = KFold(n_splits=k, shuffle=True)   
     
     folds_metrics = []
     i = 1
-    for train_index, validation_index in skf.split(X_train, y_train):
+    for train_index, validation_index in kf.split(X_train, y_train):
         metrics = []
         print("{} fold".format(i))
        

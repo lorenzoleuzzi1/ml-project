@@ -2,6 +2,7 @@ from sklearn.model_selection import ParameterGrid, train_test_split
 from sklearn.metrics import accuracy_score
 import pandas as pd
 from network import Network
+from validation import cross_validation
 
 CUP_TRAIN_PATH = './datasets/ML-CUP22-TR.csv'
 CUP_TEST_PATH = './datasets/ML-CUP22-TS.csv'
@@ -52,7 +53,7 @@ DEFAULT VALUE:
     }
 """
 
-grid = ParameterGrid([
+fixed_grid = ParameterGrid([
     # ---------------------'activation_hidden'---------------------
     {
         'activation_out': ['identity'],
@@ -115,7 +116,7 @@ grid = ParameterGrid([
         'hidden_layer_sizes': [[10, 10]],
         'loss': ['mse'],
         'evaluation_metric': ['mee'],
-        'epochs': [100, 1000],
+        'epochs': [200, 1000],
         'tau': [200],
         'tol': [0.0001],
         'learning_rate': ['linear_decay'],
@@ -367,7 +368,7 @@ for param1 in grid:
 
 file_parameters = open(FILE_PARAMETERS, 'w')
 i = 0
-for parameters in grid:
+for parameters in fixed_grid:
     file_parameters.write('----------------------------------------CONFIGURATION %d----------------------------------------' % i)
     file_parameters.write('\n')
     if i == 0:
@@ -441,7 +442,7 @@ X_train, X_test, y_train, y_test = train_test_split(X_train, y_train, test_size=
 file_scores = open(FILE_SCORES, 'w')
 
 i = 0
-for parameters in grid:
+for parameters in fixed_grid:
     print('start configuration %d in [0, 28]' %i)
     net = Network( 
         activation_out = parameters['activation_out'],
@@ -472,9 +473,11 @@ for parameters in grid:
     
     print('net configuration %d in [0, 28] initialized' %i)
     
-    net.fit(X_train, y_train)
-    pred = net.predict(X_test)
-    scores = net.train_scores
+    # net.fit(X_train, y_train)
+    # pred = net.predict(X_test)
+    # scores = net.train_scores
+    
+    scores = cross_validation(net, X_train, y_train, 3)
     
     file_scores.write('----------------------------------------CONFIGURATION %d----------------------------------------' % i)
     file_scores.write('\n')
