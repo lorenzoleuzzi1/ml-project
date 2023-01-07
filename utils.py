@@ -13,8 +13,8 @@ def identity(x):
     return x
 
 def identity_prime(x):
-    diag = np.ones(x.shape)
-    return np.diagflat(diag)
+    return np.ones(x.shape)
+    #return np.diagflat(diag)
 
 def relu(x):
     return np.maximum(0, x)
@@ -43,8 +43,8 @@ def tanh(x):
 
 def tanh_prime(x):
     t = tanh(x)
-    diag = 1 - t**2
-    return np.diagflat(diag)
+    return  1 - t**2
+    #return np.diagflat(diag)
 
 def softplus(x):
     return np.log(1 + np.exp(x))

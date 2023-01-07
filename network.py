@@ -368,13 +368,15 @@ class Network:
         self.val_scores = []
 
         self.no_improvement_count = 0
- 
+   
         for epoch in range(self.epochs):
             train_loss = 0
             train_score = 0
+
             X_train, Y_train = shuffle(X_train, Y_train, random_state=self.random_state)
             X_train_batched = np.array_split(X_train, n_batches)
             Y_train_batched = np.array_split(Y_train, n_batches)
+            
             # X_train_batched = [X_train[i:i + self.batch_size] for i in range(0, len(X_train), self.batch_size)]
             # Y_train_batched = [Y_train[i:i + self.batch_size] for i in range(0, len(Y_train), self.batch_size)]
             

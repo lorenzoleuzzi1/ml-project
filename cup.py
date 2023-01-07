@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from network import Network
 import matplotlib.pyplot as plt
 import time
+import cProfile
 
 CUP_TRAIN_PATH = './datasets/ML-CUP22-TR.csv'
 CUP_TEST_PATH = './datasets/ML-CUP22-TS.csv'
@@ -33,7 +34,7 @@ net = Network(
     hidden_layer_sizes=[100],
     activation_hidden='tanh',
     loss='mse',
-    epochs=500,
+    epochs=100,
     batch_size=256, 
     learning_rate = "fixed",
     learning_rate_init=0.01,
@@ -44,14 +45,15 @@ net = Network(
     validation_frequency=1
     )
 
-start = time.time()
-net.fit(X_train, y_train)
-end = time.time()
+cProfile.run('net.fit(X_train, y_train)', sort="cumtime")
+# start = time.time()
+# net.fit(X_train, y_train)
+# end = time.time()
 
 
-pred = net.predict(X_test)
-print(mee(y_test, pred))
-print(end - start)
+# pred = net.predict(X_test)
+# print(mee(y_test, pred))
+# print(end - start)
 # plt.scatter(y_test[:,0], pred[:, 0])
 # plt.xlabel("True y1")
 # plt.ylabel("Predicted y1")

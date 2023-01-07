@@ -65,7 +65,7 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
     hidden_layer_sizes=[3],
-    activation_out='tanh',
+    activation_out='softmax',
     classification=True,
     activation_hidden='tanh',
     epochs = 100, 
@@ -78,7 +78,7 @@ net = Network(
     early_stopping=True,
     evaluation_metric='accuracy',
     verbose=True,
-    loss='mse',
+    loss='logloss',
     validation_frequency=1,
     validation_size=0.1,
     tol=1e-4,

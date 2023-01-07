@@ -81,12 +81,30 @@ class Layer():
         return self.output
 
     def backward_propagation(self, delta_j): 
-        delta = np.dot(delta_j, self.activation_prime(self.net))
-        delta_i = np.dot(delta, np.transpose(self.weights)) 
-        #weights_error = np.dot(np.transpose(self.input), delta) 
+        #delta = np.dot(delta_j, self.activation_prime(self.net))
+        a = self.activation_prime(self.net)
+        delta = self.activation_prime(self.net) * delta_j 
+        delta_i = np.dot(delta, np.transpose(self.weights))
+
+
+        #self.deltas_weights += np.dot(np.transpose(self.input), delta) 
         #delta_w = np.outer(self.input, delta) 
         #self.deltas_weights += delta_w
+        
         self.deltas_weights += np.outer(self.input, delta)
+        #self.deltas_weights = np.add(self.deltas_weights, np.outer(self.input, delta))
         self.deltas_bias += delta 
+        #self.deltas_bias = np.add(self.deltas_bias, delta)
 
         return delta_i
+
+    # def backward_propagation(self, error):
+    #     delta = self.activation_prime(self.net) * error
+    #     sum_w_delta = np.dot(delta, self.weights.T)
+    #     weights_error = np.dot(self.input.T, delta)  # dE/dW
+    #     # dBias = delta
+
+    #     self.deltas_weights += weights_error
+    #     self.deltas_bias += delta 
+
+    #     return sum_w_delta, weights_error, delta
