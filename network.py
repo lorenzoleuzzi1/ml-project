@@ -309,32 +309,28 @@ class Network:
             return
         
         if self.early_stopping and (epoch % self.validation_frequency) == 0:
-            metric_delta = abs(val_scores[-2] - val_scores[-1]) / val_scores[-2]
             if self.evaluation_metric == 'accuracy':
                 converged = val_scores[-1] >= 1-self.tol
-                metric_declined = val_scores[-1] < val_scores[-2]
+                best_metric_delta = val_scores[-1] - self.best_metric
             else:
                 converged = val_scores[-1] <= self.tol
-                metric_declined = val_scores[-1] > val_scores[-2]
+                best_metric_delta = self.best_metric - val_scores[-1]
         elif not self.early_stopping:
-            metric_delta = (train_losses[-2] - train_losses[-1]) / train_losses[-2]
             converged = train_losses[-1] <= self.tol
-            metric_declined = train_losses[-1] > train_losses[-2]
+            best_metric_delta = self.best_metric - train_losses[-1]
         else:
-            return
+            return # miss the best?
 
+        if best_metric_delta > 0: # if = 0 do not save epoch and weights?
+            self.best_epoch = epoch
+            self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
+            self.best_weights, self.best_bias = self.get_current_weights()
         if converged:
             self.no_improvement_count = self.stopping_patience # if we've already converged (error near 0)
-            self.best_epoch = epoch
-            self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
-            self.best_weights, self.best_bias = self.get_current_weights()
-        elif metric_declined or metric_delta < self.metric_decrease_tol:
-            self.no_improvement_count += 1 # if no more significant error decreasing (less than 0.1%) or we are not converging 
+        elif best_metric_delta < self.metric_decrease_tol:
+            self.no_improvement_count += 1 # if no significant improvement
         else:
             self.no_improvement_count = 0
-            self.best_epoch = epoch
-            self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
-            self.best_weights, self.best_bias = self.get_current_weights()
 
     def fit(self, X_train, Y_train):
         Y_train = self.fit_preprocessing(X_train, Y_train)

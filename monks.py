@@ -65,38 +65,38 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
     hidden_layer_sizes=[3],
-    activation_out='tanh',
+    activation_out='softmax',
     classification=True,
     activation_hidden='tanh',
-    epochs = 100, 
-    batch_size = 1,
+    epochs = 400, 
+    batch_size = 64,
     lambd=0,
     #lambd = 0.0001,
     learning_rate = "fixed",
-    learning_rate_init=0.001,
+    learning_rate_init=0.01,
     #nesterov=True, 
-    early_stopping=True,
-    evaluation_metric='accuracy',
+    early_stopping=False,
+    evaluation_metric='logloss',
     verbose=True,
-    loss='mse',
+    loss='logloss',
     validation_frequency=1,
     validation_size=0.1,
     tol=1e-4,
     random_state=0)
 
-# net.fit(X_train, y_train) # no early stopping
+net.fit(X_train, y_train) # no early stopping
 # #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
-# pred = net.predict(X_test)
-# print(accuracy_score(y_true=y_test, y_pred=pred))
+pred = net.predict(X_test)
+print(accuracy_score(y_true=y_test, y_pred=pred))
 # print(net.get_current_weights())
-# plt.plot(net.train_losses, label="training loss", color="blue")
+plt.plot(net.train_losses, label="training loss", color="blue")
 # #plt.plot(tr_score, label="training score", color="green")
 # #plt.plot(val_loss, label="validation loss", color="red")
 # #plt.plot(val_score, label="validation score", color="black")
 # plt.legend(loc="upper right")
 # plt.title("OUR")
-# plt.show()
-cross_validation(net, X_train, y_train, 2)
+plt.show()
+"""cross_validation(net, X_train, y_train, 2)
 scikit_net = MLPClassifier(
     hidden_layer_sizes=(4,),
     activation='tanh', # for hidden layers
@@ -122,4 +122,4 @@ plt.plot(scikit_net.loss_curve_, label="training loss", color="blue")
 plt.title("SCIKIT LEARN")
 plt.show()
 pred = scikit_net.predict(X_test)
-print(accuracy_score(y_true=y_test, y_pred=pred))
+print(accuracy_score(y_true=y_test, y_pred=pred))"""
