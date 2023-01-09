@@ -3,6 +3,7 @@ from utils import fold_plot, mean_and_std
 from sklearn.model_selection import StratifiedKFold
 from network import Network
 from utils import write_json, read_json
+from scipy.stats import rankdata
 from multiprocessing import Process
 import pandas as pd
 
@@ -76,17 +77,19 @@ def cross_validation(network, X_train, y_train, k):
         means.append(np.mean(best_metric))
         stds.append(np.std(best_metric))
 
-
     results = {
-        'tr_losses' : list(best_metrics[0]),
-        'tr_scores' : list(best_metrics[1]),
         'tr_loss_mean' : means[0],
         'tr_loss_dev' : stds[0],
-        'val_scores' : list(best_metrics[-2]),
+        'tr_score_mean': means[1],
+        'tr_score_dev': stds[1],
         'val_score_mean' : means[-2],
-        'val_score_dev' : stds[-2],
-        'best_epoch' : list(best_metrics[-1])
+        'val_score_dev' : stds[-2]
     }
+    for i in range(k):
+        results['split%d_tr_loss'%i] = best_metrics[0][i]
+        results['split%d_tr_score'%i] = best_metrics[1][i]
+        results['split%d_val_score'%i] = best_metrics[-2][i]
+        results['split%d_best_epoch'%i] = best_metrics[-1][i]
 
     print("---K-fold results---")
     for k, v in zip(results.keys(), results.values()):
@@ -123,37 +126,45 @@ def nested_cross_validation(grid, X_train, y_train, k):
         i += 1
 
 def grid_search_cv(grid, X_train, y_train, k):
+    metric = None
+    for param in grid:
+        if metric==None:
+            metric = param['evaluation_metric']
+        elif param['evaluation_metric'] != metric:
+            raise ValueError("Evaluation metric must be the same for each configuration.")
     print(f"starting grid search - exploring {len(grid)} configs")
-    i = 1
-    #df_scores =  pd.DataFrame(columns=[])
-    for config in grid:
+    df_scores = pd.DataFrame(columns=[])
+    for i, config in enumerate(grid):
         print(f"{i}/{len(grid)}")
         network = Network(**config)
         cv_results = cross_validation(network, X_train, y_train, k)
-        cv_results.update({'config' : config})
-        #df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
-
-        write_json(cv_results, JSON_PATH)
-
-        i += 1
-
-    #     'tr_losses' : list(best_metrics[0]),
-    #     'tr_scores' : list(best_metrics[1]),
-    #     'tr_loss_mean' : means[0],
-    #     'tr_loss_dev' : stds[0],
-    #     'val_scores' : list(best_metrics[-2]),
-    #     'val_score_mean' : means[-2],
-    #     'val_score_dev' : stds[-2],
-    #     'best_epoch' : list(best_metrics[-1])
-    # df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
-    # df_scores['tr_loss_rel_dev'] = rankdata(df_scores['tr_loss_rel_dev'], method='dense')
-    # df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
-    # df_scores['val_score_rel_dev'] = rankdata(df_scores['val_score_rel_dev'], method='dense')
-    # df_scores['params'] = params_list
-
-    # df_scores.to_csv('scores_df.csv')
-    # df_params.drop(['classification', 'verbose'], axis=1) # drop also random state, reinit weights... (?)
-    # df_params.to_csv('params_df.csv')
+        cv_results['params'] = config
+        df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
+    if config['evaluation_metric'] == 'accuracy':
+        df_scores['val_score_mean_rank'] = rankdata(1-df_scores['val_score_mean'], method='dense')
+        df_scores['tr_score_mean_rank'] = rankdata(1-df_scores['tr_score_mean'], method='dense')
+    else:
+        df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
+        df_scores['tr_score_mean_rank'] = rankdata(df_scores['tr_score_mean'], method='dense')
+    
+    df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
+    columns_order = [
+        'val_score_mean',
+        'val_score_mean_rank',
+        'tr_loss_mean',
+        'tr_loss_mean_rank',
+        'tr_score_mean',
+        'tr_score_mean_rank'
+    ]
+    for i in range(k):
+        columns_order.append('split%d_val_score'%i)
+        columns_order.append('split%d_tr_loss'%i)
+        columns_order.append('split%d_tr_score'%i)
+        columns_order.append('split%d_best_epoch'%i)
+    columns_order.append('params')
+    df_scores = df_scores[columns_order]
+    df_scores.sort_values(by=['val_score_mean_rank'])
+    df_scores.to_csv('scores.csv')
 
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""
