@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ParameterGrid
 from sklearn.metrics import accuracy_score
-from validation import nested_cross_validation, cross_validation
+from validation import nested_cross_validation, cross_validation, grid_search_cv
 from network import Network
 from utils import error_plot, accuracy_plot
 from sklearn.neural_network import MLPClassifier
@@ -43,9 +43,9 @@ grid = ParameterGrid(
         'hidden_layer_sizes': [[3]],
         'loss': ['mse'],
         'evaluation_metric' : ['accuracy'], 
-        'epochs': [200],
+        'epochs': [50],
         'learning_rate_init': [0.002], 
-        'tau' : [200],
+        'tau' : [10],
         'lambd' : [0.0001],
         'alpha' : [0.9],
         'nesterov' : [True],
@@ -53,9 +53,9 @@ grid = ParameterGrid(
         'stopping_patience' : [20],
         'validation_size' : [0.1],
         'tol' : [0.0005], 
-        'validation_frequency' : [4],
+        #'validation_frequency' : [4],
         #---to tune
-        'learning_rate': ['fixed', 'linear_decay'],
+        'learning_rate': ['fixed'],
         'batch_size': [1, 32],
     }
 )
@@ -65,10 +65,10 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
     hidden_layer_sizes=[3],
-    activation_out='softmax',
+    activation_out='tanh',
     classification=True,
     activation_hidden='tanh',
-    epochs = 400, 
+    epochs = 100, 
     batch_size = 64,
     lambd=0,
     #lambd = 0.0001,
@@ -76,25 +76,28 @@ net = Network(
     learning_rate_init=0.01,
     #nesterov=True, 
     early_stopping=False,
-    evaluation_metric='logloss',
+    evaluation_metric='mse',
     verbose=True,
-    loss='logloss',
-    validation_frequency=1,
+    loss='mee',
+    #validation_frequency=1,
     validation_size=0.1,
     tol=1e-4,
     random_state=0)
 
-net.fit(X_train, y_train) # no early stopping
-# #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
-pred = net.predict(X_test)
-print(accuracy_score(y_true=y_test, y_pred=pred))
-# print(net.get_current_weights())
-plt.plot(net.train_losses, label="training loss", color="blue")
-# #plt.plot(tr_score, label="training score", color="green")
-# #plt.plot(val_loss, label="validation loss", color="red")
-# #plt.plot(val_score, label="validation score", color="black")
-# plt.legend(loc="upper right")
-# plt.title("OUR")
+grid_search_cv(grid, X_train=X_train, y_train=y_train, k=3)
+# results = cross_validation(net, X_train, y_train, 3)
+# print(results)
+# net.fit(X_train, y_train) # no early stopping
+# # #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
+# pred = net.predict(X_test)
+# print(accuracy_score(y_true=y_test, y_pred=pred))
+# # print(net.get_current_weights())
+# plt.plot(net.train_losses, label="training loss", color="blue")
+# # #plt.plot(tr_score, label="training score", color="green")
+# # #plt.plot(val_loss, label="validation loss", color="red")
+# # #plt.plot(val_score, label="validation score", color="black")
+# # plt.legend(loc="upper right")
+# # plt.title("OUR")
 plt.show()
 """cross_validation(net, X_train, y_train, 2)
 scikit_net = MLPClassifier(

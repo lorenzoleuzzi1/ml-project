@@ -30,7 +30,7 @@ class Network:
         stopping_patience : int = 20, 
         validation_size : int or float = 0.1, # as for batch size
         tol : float = 0.0005,
-        validation_frequency : int = 4,
+        #validation_frequency : int = 4,
         random_state = None,
         reinit_weights : bool = True,
         weights_dist : str = None,
@@ -63,7 +63,7 @@ class Network:
         self.early_stopping = early_stopping
         self.validation_size = validation_size
         self.tol = tol
-        self.validation_frequency = validation_frequency
+        #self.validation_frequency = validation_frequency
         self.classification = classification
         self.random_state = random_state
         self.reinit_weights = reinit_weights
@@ -132,8 +132,8 @@ class Network:
             raise ValueError("validation_size must be > 0.")
         if params['tol'] < 0 or params['tol'] > 0.5:
             raise ValueError("tol must be > 0 and < 0.5")
-        if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
-            raise ValueError("validation_frequency must be between 1 and max epochs %s." % (params['epochs']))
+        # if params['validation_frequency'] > params['epochs'] or params['validation_frequency'] <= 0:
+        #     raise ValueError("validation_frequency must be between 1 and max epochs %s." % (params['epochs']))
         if params['random_state'] != None and not isinstance(params['random_state'], int):
             raise ValueError("random_state must be an integer.")
         if not isinstance(params['reinit_weights'], bool):
@@ -309,18 +309,18 @@ class Network:
             self.best_weights, self.best_bias = self.get_current_weights()
             return
         
-        if self.early_stopping and (epoch % self.validation_frequency) == 0:
+        if self.early_stopping: #and (epoch % self.validation_frequency) == 0:
             if self.evaluation_metric == 'accuracy':
                 converged = val_scores[-1] >= 1-self.tol
                 best_metric_delta = val_scores[-1] - self.best_metric
             else:
                 converged = val_scores[-1] <= self.tol
                 best_metric_delta = self.best_metric - val_scores[-1]
-        elif not self.early_stopping:
+        else:
             converged = train_losses[-1] <= self.tol
             best_metric_delta = self.best_metric - train_scores[-1]
-        else:
-            return # could miss the best
+        # else:
+        #     return # could miss the best
 
         if best_metric_delta > 0:
             self.best_epoch = epoch
@@ -421,7 +421,7 @@ class Network:
                     )
             
             #-----validation-----
-            if self.early_stopping and (epoch % self.validation_frequency) == 0:
+            if self.early_stopping: # and (epoch % self.validation_frequency) == 0:
                 Y_val_output = self.predict_outputs(X_val)
                 val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
                 val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
@@ -435,7 +435,7 @@ class Network:
             self.train_scores.append(train_score)
 
             if self.verbose:
-                if self.early_stopping and (epoch % self.validation_frequency) == 0:
+                if self.early_stopping: # and (epoch % self.validation_frequency) == 0:
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
                         % (epoch+1, self.epochs, train_loss, val_loss, val_score))
                 else:

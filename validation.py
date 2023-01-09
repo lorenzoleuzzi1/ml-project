@@ -34,12 +34,6 @@ def cross_validation(network, X_train, y_train, k):
             metrics.append(network.val_losses)
             metrics.append(network.val_scores)
         
-        #difference between max epochs and epochs actually done (because early stopping)
-        # epoches_difference = network.epochs - len(network.train_losses) 
-        # if epoches_difference > 0:
-        #     for metric in metrics: 
-        #         metric.extend(np.zeros(epoches_difference))
-
         # --------------fold validation--------------
         pred = network.predict(X_val_fold)
         score = network.evaluate(Y_true=y_val_fold, Y_pred=pred)
@@ -50,21 +44,21 @@ def cross_validation(network, X_train, y_train, k):
 
         folds_metrics.append(metrics)
         i+=1
-    
-    # training loss migliore, training score migliore, epoca migiore, (val loss e score migliori) di ciascun fold 
-
+     
     # --------------results--------------
     # fold metrics contains for every fold in this order:
     #   - train losses and scores
     #   - if early stopping validation loss and score 
-    #   - test score 
+    #   - test score
+    #   - best epoch 
     best_metrics = np.zeros(shape = (len(folds_metrics[0]), k))
     # retrive the best (at the end of epoch) value for every fold
-    for i, fold in enumerate(folds_metrics):    
+    for i, fold in enumerate(folds_metrics):  
+        best_epoch = fold[-1]  
         for j, values in enumerate(fold):
             if isinstance(values, list):
                 # best_metrics[j][i] = np.trim_zeros(values, 'b')[-1] # a list of values, take the last one
-                best_metrics[j][i] = values[-1]
+                best_metrics[j][i] = values[best_epoch]
             else:           
                 best_metrics[j][i] = values #single value
 
@@ -73,7 +67,8 @@ def cross_validation(network, X_train, y_train, k):
     #   - train scores (pos [1])
     #   - if early stopping internal validation losses
     #   - if ealry stopping internal validation scores
-    #   - validation score (last position)
+    #   - validation score [-2]
+    #   - epoch [-1]
     means = []
     stds = []
 
@@ -81,11 +76,16 @@ def cross_validation(network, X_train, y_train, k):
         means.append(np.mean(best_metric))
         stds.append(np.std(best_metric))
 
+
     results = {
+        'tr_losses' : list(best_metrics[0]),
+        'tr_scores' : list(best_metrics[1]),
         'tr_loss_mean' : means[0],
         'tr_loss_dev' : stds[0],
-        'val_score_mean' : means[-1],
-        'val_score_dev' : stds[-1]
+        'val_scores' : list(best_metrics[-2]),
+        'val_score_mean' : means[-2],
+        'val_score_dev' : stds[-2],
+        'best_epoch' : best_metrics[-1]
     }
 
     print("---K-fold results---")
@@ -127,7 +127,7 @@ def grid_search_cv(grid, X_train, y_train, k):
     i = 1
     for config in grid:
         print(f"{i}/{len(grid)}")
-        network = config_to_network(config)
+        network = Network(**config)
         cv_results = cross_validation(network, X_train, y_train, k)
         cv_results.update({'config' : config})
         write_json(cv_results, JSON_PATH)

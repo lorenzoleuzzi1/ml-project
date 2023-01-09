@@ -1,4 +1,90 @@
 {
     "results": [
+        {
+            "tr_losses": [
+                0.4181972716900028,
+                0.5179319539149523,
+                0.298556029193473
+            ],
+            "tr_scores": [
+                0.7926829268292683,
+                0.7228915662650602,
+                0.8192771084337349
+            ],
+            "tr_loss_mean": 0.41156175159947606,
+            "tr_loss_dev": 0.0896826690132301,
+            "val_scores": [
+                0.8571428571428571,
+                0.6829268292682927,
+                0.7560975609756098
+            ],
+            "val_score_mean": 0.7653890824622532,
+            "val_score_dev": 0.07142621073877718,
+            "config": {
+                "activation_hidden": "tanh",
+                "activation_out": "tanh",
+                "alpha": 0.9,
+                "batch_size": 1,
+                "classification": true,
+                "early_stopping": true,
+                "epochs": 50,
+                "evaluation_metric": "accuracy",
+                "hidden_layer_sizes": [
+                    3
+                ],
+                "lambd": 0.0001,
+                "learning_rate": "fixed",
+                "learning_rate_init": 0.002,
+                "loss": "mse",
+                "nesterov": true,
+                "stopping_patience": 20,
+                "tau": 10,
+                "tol": 0.0005,
+                "validation_size": 0.1
+            }
+        },
+        {
+            "tr_losses": [
+                0.9641844377020224,
+                0.6826306596410814,
+                0.6312814303268998
+            ],
+            "tr_scores": [
+                0.45121951219512196,
+                0.6626506024096386,
+                0.6867469879518072
+            ],
+            "tr_loss_mean": 0.7593655092233346,
+            "tr_loss_dev": 0.14633814935543069,
+            "val_scores": [
+                0.4523809523809524,
+                0.7560975609756098,
+                0.7560975609756098
+            ],
+            "val_score_mean": 0.6548586914440573,
+            "val_score_dev": 0.1431733823308418,
+            "config": {
+                "activation_hidden": "tanh",
+                "activation_out": "tanh",
+                "alpha": 0.9,
+                "batch_size": 32,
+                "classification": true,
+                "early_stopping": true,
+                "epochs": 50,
+                "evaluation_metric": "accuracy",
+                "hidden_layer_sizes": [
+                    3
+                ],
+                "lambd": 0.0001,
+                "learning_rate": "fixed",
+                "learning_rate_init": 0.002,
+                "loss": "mse",
+                "nesterov": true,
+                "stopping_patience": 20,
+                "tau": 10,
+                "tol": 0.0005,
+                "validation_size": 0.1
+            }
+        }
     ]
 }
