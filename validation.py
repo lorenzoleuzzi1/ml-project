@@ -1,6 +1,6 @@
 import numpy as np
 from utils import fold_plot, mean_and_std
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, KFold
 from network import Network
 from utils import write_json, read_json
 from scipy.stats import rankdata
@@ -9,16 +9,19 @@ import pandas as pd
 
 JSON_PATH = 'monks_cv_results.json'
 
-def cross_validation(network, X_train, y_train, k):
+def k_fold_cross_validation(network, X_train, y_train, k):
     if k <= 1:
         print('Number of folds k must be more than 1')
         raise ValueError("k must be more than 1")
 
-    skf = StratifiedKFold(n_splits=k, shuffle=True) 
+    if network.classification:
+        kf = StratifiedKFold(n_splits=k, shuffle=True) 
+    else:
+        kf = KFold(n_splits=k, shuffle=True)
     
     folds_metrics = []
     i = 1
-    for train_index, validation_index in skf.split(X_train, y_train):
+    for train_index, validation_index in kf.split(X_train, y_train): # TODO: farlo con numpy? (possiamoe eliminare stratified)
         metrics = []
         print("{} fold".format(i))
        
@@ -118,7 +121,7 @@ def nested_cross_validation(grid, X_train, y_train, k):
         #outerfold
         print(f"{i}/{len(grid)}")
         network = config_to_network(config.get("config"))
-        nested_results = cross_validation(network, X_train, y_train, k)
+        nested_results = k_fold_cross_validation(network, X_train, y_train, k)
         print("------")
         print(config)
         print(f"outer score: {nested_results.get('val_score')} +/- {nested_results.get('val_score_dev')}")
@@ -137,7 +140,7 @@ def grid_search_cv(grid, X_train, y_train, k):
     for i, config in enumerate(grid):
         print(f"{i}/{len(grid)}")
         network = Network(**config)
-        cv_results = cross_validation(network, X_train, y_train, k)
+        cv_results = k_fold_cross_validation(network, X_train, y_train, k)
         cv_results['params'] = config
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
     if config['evaluation_metric'] == 'accuracy':

@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ParameterGrid
 from sklearn.metrics import accuracy_score
-from validation import nested_cross_validation, cross_validation, grid_search_cv
+from validation import nested_cross_validation, k_fold_cross_validation, grid_search_cv
 from network import Network
 from utils import error_plot, accuracy_plot
 from sklearn.neural_network import MLPClassifier

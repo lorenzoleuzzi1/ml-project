@@ -1,0 +1,116 @@
+----------------------------------------CONFIGURATION 0----------------------------------------
+default value
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 1----------------------------------------
+activation_hidden = logistic
+{'activation_hidden': 'logistic', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 2----------------------------------------
+activation_hidden = relu
+{'activation_hidden': 'relu', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 3----------------------------------------
+hidden_layer_size = [10]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 4----------------------------------------
+hidden_layer_size = [20]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [20], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 5----------------------------------------
+hidden_layer_size = [30, 30]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [30, 30], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 6----------------------------------------
+hidden_layer_size = [50]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [50], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 7----------------------------------------
+hidden_layer_size = [100]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [100], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 8----------------------------------------
+hidden_layer_size = [50, 50]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [50, 50], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 9----------------------------------------
+hidden_layer_size = [100, 100]
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [100, 100], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 10----------------------------------------
+epochs = 100
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 200, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 11----------------------------------------
+epochs = 1000
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 1000, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 12----------------------------------------
+learning_rate = fixed
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'fixed', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 13----------------------------------------
+lambd = 0
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 14----------------------------------------
+lambd = 0.001
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 15----------------------------------------
+lambd = 0.01
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.01, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 16----------------------------------------
+lambd = 0.1
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.1, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 17----------------------------------------
+alpha = 0.5
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 18----------------------------------------
+alpha = 0.7
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.7, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 19----------------------------------------
+alpha = 0.9
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.9, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 20----------------------------------------
+nesterov = True
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': True, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 21----------------------------------------
+early_stopping = True
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 32, 'classification': False, 'early_stopping': True, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 22----------------------------------------
+batch_size = 1
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 1, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.001, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 23----------------------------------------
+batch_size = 32
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 32, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.001, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 24----------------------------------------
+batch_size = 256
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 256, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.001, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 25----------------------------------------
+learning_rate_init = 0.1, with batch_size = 1.0
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 1.0, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.1, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 26----------------------------------------
+learning_rate_init = 0.01, with batch_size = 1.0
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 1.0, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.01, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 27----------------------------------------
+learning_rate_init = 0.0001, with batch_size = 1
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 1, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.0001, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
+----------------------------------------CONFIGURATION 28----------------------------------------
+learning_rate_init = 0.0005, with batch_size = 1
+{'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.5, 'batch_size': 1, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.0005, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_frequency': 5, 'validation_size': 0.1, 'verbose': False, 'weights_dist': None}
+ 
