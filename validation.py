@@ -143,30 +143,30 @@ def grid_search_cv(grid, X_train, y_train, k):
         cv_results = k_fold_cross_validation(network, X_train, y_train, k)
         cv_results['params'] = config
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
-    if config['evaluation_metric'] == 'accuracy':
-        df_scores['val_score_mean_rank'] = rankdata(1-df_scores['val_score_mean'], method='dense')
-        df_scores['tr_score_mean_rank'] = rankdata(1-df_scores['tr_score_mean'], method='dense')
-    else:
-        df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
-        df_scores['tr_score_mean_rank'] = rankdata(df_scores['tr_score_mean'], method='dense')
+    # if config['evaluation_metric'] == 'accuracy':
+    #     df_scores['val_score_mean_rank'] = rankdata(1-df_scores['val_score_mean'], method='dense')
+    #     df_scores['tr_score_mean_rank'] = rankdata(1-df_scores['tr_score_mean'], method='dense')
+    # else:
+    #     df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
+    #     df_scores['tr_score_mean_rank'] = rankdata(df_scores['tr_score_mean'], method='dense')
     
-    df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
-    columns_order = [
-        'val_score_mean',
-        'val_score_mean_rank',
-        'tr_loss_mean',
-        'tr_loss_mean_rank',
-        'tr_score_mean',
-        'tr_score_mean_rank'
-    ]
-    for i in range(k):
-        columns_order.append('split%d_val_score'%i)
-        columns_order.append('split%d_tr_loss'%i)
-        columns_order.append('split%d_tr_score'%i)
-        columns_order.append('split%d_best_epoch'%i)
-    columns_order.append('params')
-    df_scores = df_scores[columns_order]
-    df_scores.sort_values(by=['val_score_mean_rank'])
+    # df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
+    # columns_order = [
+    #     'val_score_mean',
+    #     'val_score_mean_rank',
+    #     'tr_loss_mean',
+    #     'tr_loss_mean_rank',
+    #     'tr_score_mean',
+    #     'tr_score_mean_rank'
+    # ]
+    # for i in range(k):
+    #     columns_order.append('split%d_val_score'%i)
+    #     columns_order.append('split%d_tr_loss'%i)
+    #     columns_order.append('split%d_tr_score'%i)
+    #     columns_order.append('split%d_best_epoch'%i)
+    # columns_order.append('params')
+    # df_scores = df_scores[columns_order]
+    # df_scores.sort_values(by=['val_score_mean_rank'])
     df_scores.to_csv('scores.csv')
 
 def mean_std_dev(data_fold):

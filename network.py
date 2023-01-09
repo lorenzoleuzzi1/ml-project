@@ -463,6 +463,9 @@ class Network:
             
             #-----stopping-----
             self.update_no_improvement_count(epoch, self.train_losses, self.train_scores, self.val_scores)
+            
+            if train_loss > 10000:
+                break
 
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)

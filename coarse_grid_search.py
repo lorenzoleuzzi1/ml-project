@@ -1,4 +1,5 @@
 from sklearn.model_selection import ParameterGrid
+import numpy as np
 
 grid = ParameterGrid([
     {
@@ -53,7 +54,7 @@ grid = ParameterGrid([
         'weights_bound': [None],
         'metric_decrease_tol': [0.00001],
         'batch_size': [256, 1.0],
-        'learning_rate_init': [0.0005, 0.001, 0.1]
+        'learning_rate_init': [0.001, 0.1]
     },
     {
         'activation_out': ['identity'],
@@ -86,13 +87,12 @@ grid = ParameterGrid([
 )
 
 print(len(grid))
-
+#print(grid)
+grid_splitted = np.array_split(grid, 3)
+grid_splitted[0] # 
 # grid_search_cv(grid, X_train, y_train, k)
 
 
-# TODO: lambda range (doppi)?
-# separare dataset
-# random state?
-# configurazioni griglia precedente (24 / 16 male)
-# configurazione che va in overflow
+# TODO: 
+# lambda range (doppi)?
 # parametri indipendnti

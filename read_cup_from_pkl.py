@@ -1,50 +1,56 @@
 from cup_parsing import load_blind_test_cup, load_dev_set_cup, load_internal_test_cup
+from network import Network
 
 X_blind_test = load_blind_test_cup()
-print(X_blind_test)
+# print("X blind")
+# print(X_blind_test)
 X_dev, y_dev = load_dev_set_cup()
-print(X_dev)
-print(y_dev)
+# print("X dev")
+# print(X_dev)
+# print("y dev")
+# print(y_dev)
 X_test, y_test = load_internal_test_cup()
-print(X_test)
-print(y_test)
+# print("X test")
+# print(X_test)
+# print("y test")
+# print(y_test)
 
-"""
-BLIND
-[[-1.295403  1.471468 -0.39474  ... -0.052994  0.890491 -1.258837]
- [ 0.351257 -0.583818  1.673024 ...  0.417183 -0.516325  0.902252]
- [ 0.076491  0.551166  0.157875 ...  2.167689  0.621724  0.259727]
- ...
- [-0.417201  0.542889  1.679711 ...  1.265932  0.677358  0.457895]
- [ 0.665644 -0.931716  0.354268 ... -1.029243 -1.02116   0.745672]
- [-0.931113  0.726406 -0.226625 ...  1.352274  1.727139 -1.512339]]
+di = {'activation_hidden': 'tanh', 'activation_out': 'identity', 'alpha': 0.9, 'batch_size': 256, 'classification': False, 'early_stopping': False, 'epochs': 500, 'evaluation_metric': 'mee', 'hidden_layer_sizes': [10, 10], 'lambd': 0.0001, 'learning_rate': 'linear_decay', 'learning_rate_init': 0.0005, 'loss': 'mse', 'metric_decrease_tol': 0.001, 'nesterov': False, 'random_state': None, 'reinit_weights': True, 'stopping_patience': 5, 'tau': 200, 'tol': 0.0001, 'validation_size': 0.1, 'verbose': True, 'weights_dist': None}
+# net = Network(
+#     activation_out='identity',
+#     classification=False,
+#     activation_hidden='leaky_relu',
+#     loss='mse',
+#     evaluation_metric='mee',
+#     epochs=500,
+#     batch_size=32, 
+#     learning_rate = "fixed",
+#     learning_rate_init=0.001,
+#     nesterov=False,
+#     stopping_patience=10,
+#     early_stopping=True
+#     )
 
-X DEV
-[[ 0.62475  -0.219667  2.286627 ...  1.39313  -0.027754  0.731976]
- [ 0.529094 -0.331923  0.873441 ...  0.359224 -0.101635  0.684412]
- [-1.034171  1.012813 -1.522769 ... -0.242578  1.707925 -1.249286]
- ...
- [-0.409786  0.960385 -0.120065 ...  1.518878  1.189874 -0.234002]
- [-1.677166  1.169745 -0.551796 ... -0.007014  1.171967 -0.877423]
- [ 0.711916 -0.371546 -0.294815 ... -0.933216 -1.17008   0.199703]]
-
- Y DEV
- [[  9.768276 -29.391799]
- [  8.237292 -28.261941]
- [ 18.811881 -28.325599]
- ...
- [ 15.392804 -29.572999]
- [ 20.092161 -27.876527]
- [  5.06925  -19.305946]]
-
-X_TEST
-[[ 0.101795 -0.157812  0.705722 ...  1.697538  0.669258 -0.075098]
- [-0.11497  -0.915701  2.121198 ... -0.242555 -1.605995  0.89179 ]
- [-0.32532  -0.510487  0.009867 ...  0.905986  1.459074 -0.105259]
- ...
- [-0.811805  0.391318 -0.310453 ...  0.059118  1.32184  -0.884968]
- [ 0.325668  0.067284  1.191255 ...  1.824321  0.501525  0.572866]
- [-1.057609  1.474734 -0.583271 ... -0.135837  0.811352 -1.337258]]
-
- Y TEST
-"""
+net = Network(**di)
+net = Network(
+    activation_out='identity',
+    hidden_layer_sizes=[50, 50],
+    classification=False,
+    activation_hidden='tanh',
+    loss='mse',
+    evaluation_metric='mee',
+    lambd=0.0001,
+    alpha=0.9,
+    epochs=100,
+    tau = 10,
+    batch_size=1.0, 
+    learning_rate = "linear_decay",
+    learning_rate_init=10, # TROPPO GRANDE! con 0.01 già meglio
+    nesterov=True,
+    stopping_patience=100,
+    metric_decrease_tol=0.0001,
+    early_stopping=True
+    )
+net.fit(X_dev, y_dev)
+pred = net.predict(X_test)
+print(net.evaluate(Y_true=y_test, Y_pred=pred))

@@ -37,6 +37,7 @@ def load_internal_test_cup():
     return test_set['X_test'], test_set['y_test']
 
 def main():
+    print("ciao")
     X_blind_test = read_ts_cup(CUP_BLIND_TEST_CSV_PATH)
     X_train, y_train = read_tr_cup(CUP_TRAIN_CSV_PATH)
     X_dev, X_test, y_dev, y_test = train_test_split(X_train, y_train, test_size=0.20, shuffle=True, random_state=0)
@@ -59,5 +60,5 @@ def main():
     pkl.dump(test_set, file)
     file.close()
 
-if __name__ == 'main':
+if __name__ == '__main__':
     main()
