@@ -301,10 +301,11 @@ class Network:
 
         return Y_train
 
-    def update_no_improvement_count(self, epoch, train_losses, val_scores):
+    def update_no_improvement_count(self, epoch, train_losses, train_scores, val_scores):
         if epoch < 10:
             self.best_epoch = epoch
-            self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
+            self.best_loss = train_losses[-1] # TODO: non servono, basta accedere alla lista
+            self.best_metric = val_scores[-1] if self.early_stopping else train_scores[-1]
             self.best_weights, self.best_bias = self.get_current_weights()
             return
         
@@ -317,13 +318,14 @@ class Network:
                 best_metric_delta = self.best_metric - val_scores[-1]
         elif not self.early_stopping:
             converged = train_losses[-1] <= self.tol
-            best_metric_delta = self.best_metric - train_losses[-1]
+            best_metric_delta = self.best_metric - train_scores[-1]
         else:
-            return # miss the best?
+            return # could miss the best
 
-        if best_metric_delta > 0: # if = 0 do not save epoch and weights?
+        if best_metric_delta > 0:
             self.best_epoch = epoch
-            self.best_metric = val_scores[-1] if self.early_stopping else train_losses[-1]
+            self.best_loss = train_losses[-1]
+            self.best_metric = val_scores[-1] if self.early_stopping else train_scores[-1]
             self.best_weights, self.best_bias = self.get_current_weights()
         if converged:
             self.no_improvement_count = self.stopping_patience # if we've already converged (error near 0)
@@ -441,7 +443,7 @@ class Network:
                         % (epoch+1, self.epochs, train_loss))
             
             #-----stopping-----
-            self.update_no_improvement_count(epoch, self.train_losses, self.val_scores)
+            self.update_no_improvement_count(epoch, self.train_losses, self.train_scores, self.val_scores)
 
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)

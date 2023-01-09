@@ -43,16 +43,19 @@ def cross_validation(network, X_train, y_train, k):
         # --------------fold validation--------------
         pred = network.predict(X_val_fold)
         score = network.evaluate(Y_true=y_val_fold, Y_pred=pred)
-        metrics.append(score) 
+        best_epoch = network.best_epoch
+        metrics.append(score)
+        metrics.append(best_epoch)
         print("{} fold VL score = {}".format(i, score))    
 
         folds_metrics.append(metrics)
         i+=1
     
-    
+    # training loss migliore, training score migliore, epoca migiore, (val loss e score migliori) di ciascun fold 
+
     # --------------results--------------
     # fold metrics contains for every fold in this order:
-    #   - train losses and score 
+    #   - train losses and scores
     #   - if early stopping validation loss and score 
     #   - test score 
     best_metrics = np.zeros(shape = (len(folds_metrics[0]), k))
