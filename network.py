@@ -166,6 +166,25 @@ class Network:
             Y = self.outputs_to_labels(Y)
         return Y
 
+    def score(self, X_test, Y_test):   
+        if self.first_fit:
+            raise ValueError("fit has not been called yet.")
+        if X_test.ndim != 2:
+            raise ValueError("X must be a 2-dimensional array")
+        if self.layers[0].fan_in != X_test.shape[1]:
+            raise ValueError("X has a different number of features "
+                "from the one of the dataset the net has been trained on.")
+        
+        if self.classification == True:
+            Y_test = self.binarizer.transform(Y_test).astype(np.float64)
+            if self.n_classes == 2 and self.activation_out == 'softmax':
+                Y_test = np.hstack((Y_test, 1 - Y_test))
+
+        #TODO: altri check!
+
+        outputs = self.predict_outputs(X_test)
+        return self.evaluate(Y_true=Y_test, Y_pred=outputs)
+
     # predict output for given input
     def predict_outputs(self, X):
         Y = np.empty((X.shape[0], 1, self.n_outputs))

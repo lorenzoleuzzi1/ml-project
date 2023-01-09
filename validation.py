@@ -4,6 +4,7 @@ from sklearn.model_selection import StratifiedKFold
 from network import Network
 from utils import write_json, read_json
 from multiprocessing import Process
+import pandas as pd
 
 JSON_PATH = 'monks_cv_results.json'
 
@@ -35,8 +36,7 @@ def cross_validation(network, X_train, y_train, k):
             metrics.append(network.val_scores)
         
         # --------------fold validation--------------
-        pred = network.predict(X_val_fold)
-        score = network.evaluate(Y_true=y_val_fold, Y_pred=pred)
+        score = network.score(X_test=X_val_fold, Y_test=y_val_fold)
         best_epoch = network.best_epoch
         metrics.append(score)
         metrics.append(best_epoch)
@@ -85,7 +85,7 @@ def cross_validation(network, X_train, y_train, k):
         'val_scores' : list(best_metrics[-2]),
         'val_score_mean' : means[-2],
         'val_score_dev' : stds[-2],
-        'best_epoch' : best_metrics[-1]
+        'best_epoch' : list(best_metrics[-1])
     }
 
     print("---K-fold results---")
@@ -125,14 +125,35 @@ def nested_cross_validation(grid, X_train, y_train, k):
 def grid_search_cv(grid, X_train, y_train, k):
     print(f"starting grid search - exploring {len(grid)} configs")
     i = 1
+    #df_scores =  pd.DataFrame(columns=[])
     for config in grid:
         print(f"{i}/{len(grid)}")
         network = Network(**config)
         cv_results = cross_validation(network, X_train, y_train, k)
         cv_results.update({'config' : config})
+        #df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
+
         write_json(cv_results, JSON_PATH)
+
         i += 1
 
+    #     'tr_losses' : list(best_metrics[0]),
+    #     'tr_scores' : list(best_metrics[1]),
+    #     'tr_loss_mean' : means[0],
+    #     'tr_loss_dev' : stds[0],
+    #     'val_scores' : list(best_metrics[-2]),
+    #     'val_score_mean' : means[-2],
+    #     'val_score_dev' : stds[-2],
+    #     'best_epoch' : list(best_metrics[-1])
+    # df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
+    # df_scores['tr_loss_rel_dev'] = rankdata(df_scores['tr_loss_rel_dev'], method='dense')
+    # df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
+    # df_scores['val_score_rel_dev'] = rankdata(df_scores['val_score_rel_dev'], method='dense')
+    # df_scores['params'] = params_list
+
+    # df_scores.to_csv('scores_df.csv')
+    # df_params.drop(['classification', 'verbose'], axis=1) # drop also random state, reinit weights... (?)
+    # df_params.to_csv('params_df.csv')
 
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""

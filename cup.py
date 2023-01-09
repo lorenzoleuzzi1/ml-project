@@ -33,19 +33,19 @@ net = Network(
     activation_hidden='leaky_relu',
     loss='mse',
     evaluation_metric='mee',
-    epochs=500,
+    epochs=50,
     batch_size=32, 
     learning_rate = "fixed",
     learning_rate_init=0.001,
     nesterov=False,
-    stopping_patience=10,
+    stopping_patience=30,
     early_stopping=True
     )
-net.fit(X_train, y_train)
-pred = net.predict(X_test)
-print(net.evaluate(Y_true=y_test, Y_pred=pred))
 
-regression2_plots(y_test, pred)
+net.fit(X_train, y_train)
+print(net.score(X_test, y_test))
+
+#regression2_plots(y_test, pred)
 
 #print(accuracy(y_pred=pred, y_true=y_test))
 #plt.plot(net.train_losses, label="training loss", color="blue")
