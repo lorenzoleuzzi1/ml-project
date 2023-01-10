@@ -7,6 +7,7 @@ from scipy.stats import rankdata
 from multiprocessing import Process
 import pandas as pd
 import copy
+from utils import mse, mee
 
 JSON_PATH = 'monks_cv_results.json'
 
@@ -41,8 +42,10 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
             metrics.append(network.val_scores)
         
         # --------------fold validation--------------
-        net_score = network.score(X_test=X_val_fold, Y_test=y_val_fold, evaluation_metric=network.evaluation_metric)
-        val_score = network.score(X_test=X_val_fold, Y_test=y_val_fold, evaluation_metric=evaluation_metric)
+        Y_pred = network.predict_outputs(X=X_val_fold)
+        net_score = mse(y_true=y_val_fold, y_pred=Y_pred)
+        val_score = mee(y_true=y_val_fold, y_pred=Y_pred)
+
         best_epoch = network.best_epoch
         metrics.append(net_score)
         metrics.append(val_score)
@@ -85,10 +88,10 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
         stds.append(np.std(best_metric))
 
     results = {
-        'tr_loss_mean' : means[0],
-        'tr_loss_dev' : stds[0],
+        'tr_mse_mean' : means[0],
+        'tr_mse_dev' : stds[0],
         'tr_%s_mean'%network.evaluation_metric : means[1],
-        'tr_%s_dev'%network.evaluation_metric : stds[1],
+        'tr_%s_dev'%network.evaluation_metric : stds[1], 
         'val_%s_mean'%network.evaluation_metric : means[-3],
         'val_%s_dev'%network.evaluation_metric : stds[-3],
         'val_%s_mean'%evaluation_metric : means[-2],
@@ -100,7 +103,7 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
     #   - test score evaluation_metric (della chiamata a questo metodo)
     #   - best epoch 
     for i in range(k):
-        results['split%d_tr_loss'%i] = best_metrics[0][i]
+        results['split%d_tr_mse'%i] = best_metrics[0][i]
         results['split%d_tr_%s'%(i,network.evaluation_metric)] = best_metrics[1][i]
         results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-3][i]
         results['split%d_val_%s'%(i, evaluation_metric)] = best_metrics[-2][i]
@@ -150,8 +153,7 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric): # TODO: clea
     print(f"starting grid search - exploring {len(grid)} configs")
     df_scores = pd.DataFrame(columns=[])
     for i, config in enumerate(grid):
-        if i%10==0:
-            print(f"{i}/{len(grid)}")
+        print(f"{i+1}/{len(grid)}")
         network = Network(**config)
         cv_results = k_fold_cross_validation(network, X, y, k, evaluation_metric)
         cv_results['params'] = config
