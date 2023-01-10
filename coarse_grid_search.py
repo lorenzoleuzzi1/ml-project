@@ -28,8 +28,8 @@ grid = ParameterGrid([
         'weights_dist': [None],
         'weights_bound': [None],
         'metric_decrease_tol': [0.00001],
-        'batch_size': [256, 1.0],
-        'learning_rate_init': [0.0005, 0.001, 0.1]
+        'batch_size': [64, 256, 1.0],
+        'learning_rate_init': [0.0005, 0.001, 0.1] # 0.0005 perchè quando alpha=0 e batch size 64 lr deve essere più piccolo
     },
     {
         'activation_out': ['identity'],
@@ -55,7 +55,7 @@ grid = ParameterGrid([
         'weights_dist': [None],
         'weights_bound': [None],
         'metric_decrease_tol': [0.00001],
-        'batch_size': [256, 1.0],
+        'batch_size': [64, 256, 1.0],
         'learning_rate_init': [0.001, 0.1]
     },
     {
@@ -89,7 +89,7 @@ grid = ParameterGrid([
 )
 
 print(len(grid))
-grid_splitted = np.array_split(grid, 3)
+"""grid_splitted = np.array_split(grid, 3)
 print(len(grid_splitted[0]))
 print(len(grid_splitted[1]))
 print(len(grid_splitted[2]))
@@ -98,7 +98,7 @@ print(grid_splitted[0][0])
 print("First config irene")
 print(grid_splitted[1][0])
 print("First config lorenzo")
-print(grid_splitted[2][0])
+print(grid_splitted[2][0])"""
 
 """results_path = 'coarse_gs_results_giulia.csv'
 grid = grid_splitted[0]
@@ -111,14 +111,3 @@ grid = grid_splitted[2]
 
 X_dev, y_dev = load_dev_set_cup()
 grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=3, results_path=results_path)"""
-
-# TODO:
-# rivedi tutti i parametri
-# lambda range doppi?
-# rivedi slides validation
-# giustifica topologia
-# weights dist?
-# batch size intermedia? (X_dev_size/3)*2 = 795 esempi per train fold, 795/256 = 3.1 batches
-# lr stocastico troppo grande? lr batch troppo piccolo?
-# 3 fold coarse, fine?
-# weights init for the final model? (before assesment, after assesment)

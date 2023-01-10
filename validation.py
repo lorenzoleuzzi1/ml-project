@@ -23,7 +23,7 @@ def k_fold_cross_validation(network, X_train, y_train, k):
     i = 1
     for train_index, validation_index in kf.split(X_train, y_train): # TODO: farlo con numpy? (possiamoe eliminare stratified)
         metrics = []
-        print("{} fold".format(i))
+        #print("{} fold".format(i))
        
         #-----stratified K-fold split-----
         X_train_fold, X_val_fold = X_train[train_index], X_train[validation_index] 
@@ -44,7 +44,7 @@ def k_fold_cross_validation(network, X_train, y_train, k):
         best_epoch = network.best_epoch
         metrics.append(score)
         metrics.append(best_epoch)
-        print("{} fold VL score = {}".format(i, score))    
+        #print("{} fold VL score = {}".format(i, score))    
 
         folds_metrics.append(metrics)
         i+=1
@@ -94,9 +94,9 @@ def k_fold_cross_validation(network, X_train, y_train, k):
         results['split%d_val_score'%i] = best_metrics[-2][i]
         results['split%d_best_epoch'%i] = best_metrics[-1][i]
 
-    print("---K-fold results---")
+    """print("---K-fold results---")
     for k, v in zip(results.keys(), results.values()):
-        print(f"{k} : {v}")
+        print(f"{k} : {v}")"""
 
     return results
 
@@ -138,7 +138,8 @@ def grid_search_cv(grid, X, y, k, results_path): # TODO: clean the following cod
     print(f"starting grid search - exploring {len(grid)} configs")
     df_scores = pd.DataFrame(columns=[])
     for i, config in enumerate(grid):
-        print(f"{i}/{len(grid)}")
+        if i%10==0:
+            print(f"{i}/{len(grid)}")
         network = Network(**config)
         cv_results = k_fold_cross_validation(network, X, y, k)
         cv_results['params'] = config
