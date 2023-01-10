@@ -113,13 +113,10 @@ X_dev, y_dev = load_dev_set_cup()
 grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=3, results_path=results_path)"""
 
 # TODO:
-# score funziona?
-# assicurarsi che shuffle con random seed fissato mescoli davvero i pattern...
 # rivedi tutti i parametri
 # lambda range doppi?
 # rivedi slides validation
 # giustifica topologia
-# alpha 0.5 con nesterov false?
 # weights dist?
 # batch size intermedia? (X_dev_size/3)*2 = 795 esempi per train fold, 795/256 = 3.1 batches
 # lr stocastico troppo grande? lr batch troppo piccolo?
