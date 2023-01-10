@@ -1,5 +1,7 @@
-from sklearn.model_selection import ParameterGrid
 import numpy as np
+from sklearn.model_selection import ParameterGrid
+from validation import grid_search_cv
+from cup_parsing import load_dev_set_cup
 
 grid = ParameterGrid([
     {
@@ -87,12 +89,39 @@ grid = ParameterGrid([
 )
 
 print(len(grid))
-#print(grid)
 grid_splitted = np.array_split(grid, 3)
-grid_splitted[0] # 
-# grid_search_cv(grid, X_train, y_train, k)
+print(len(grid_splitted[0]))
+print(len(grid_splitted[1]))
+print(len(grid_splitted[2]))
+print("First config giulia")
+print(grid_splitted[0][0])
+print("First config irene")
+print(grid_splitted[1][0])
+print("First config lorenzo")
+print(grid_splitted[2][0])
 
+"""results_path = 'coarse_gs_results_giulia.csv'
+grid = grid_splitted[0]
 
-# TODO: 
-# lambda range (doppi)?
-# parametri indipendnti
+results_path = 'coarse_gs_results_irene.csv'
+grid = grid_splitted[1]
+
+results_path = 'coarse_gs_results_lorenzo.csv'
+grid = grid_splitted[2]
+
+X_dev, y_dev = load_dev_set_cup()
+grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=3, results_path=results_path)"""
+
+# TODO:
+# score funziona?
+# assicurarsi che shuffle con random seed fissato mescoli davvero i pattern...
+# rivedi tutti i parametri
+# lambda range doppi?
+# rivedi slides validation
+# giustifica topologia
+# alpha 0.5 con nesterov false?
+# weights dist?
+# batch size intermedia? (X_dev_size/3)*2 = 795 esempi per train fold, 795/256 = 3.1 batches
+# lr stocastico troppo grande? lr batch troppo piccolo?
+# 3 fold coarse, fine?
+# weights init for the final model? (before assesment, after assesment)

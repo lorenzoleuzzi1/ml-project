@@ -17,7 +17,7 @@ def k_fold_cross_validation(network, X_train, y_train, k):
     if network.classification:
         kf = StratifiedKFold(n_splits=k, shuffle=True) 
     else:
-        kf = KFold(n_splits=k, shuffle=True)
+        kf = KFold(n_splits=k, shuffle=False) # NOTE: to compare different models on the same splits
     
     folds_metrics = []
     i = 1
@@ -128,7 +128,7 @@ def nested_cross_validation(grid, X_train, y_train, k):
         #TODO: save results into json?
         i += 1
 
-def grid_search_cv(grid, X_train, y_train, k):
+def grid_search_cv(grid, X, y, k, results_path): # TODO: clean the following code (assuming gs will be executed on a single machine)
     metric = None
     for param in grid:
         if metric==None:
@@ -140,7 +140,7 @@ def grid_search_cv(grid, X_train, y_train, k):
     for i, config in enumerate(grid):
         print(f"{i}/{len(grid)}")
         network = Network(**config)
-        cv_results = k_fold_cross_validation(network, X_train, y_train, k)
+        cv_results = k_fold_cross_validation(network, X, y, k)
         cv_results['params'] = config
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
     # if config['evaluation_metric'] == 'accuracy':
@@ -167,7 +167,7 @@ def grid_search_cv(grid, X_train, y_train, k):
     # columns_order.append('params')
     # df_scores = df_scores[columns_order]
     # df_scores.sort_values(by=['val_score_mean_rank'])
-    df_scores.to_csv('scores.csv')
+    df_scores.to_csv(results_path)
 
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""
