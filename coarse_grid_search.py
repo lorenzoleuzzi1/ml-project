@@ -180,8 +180,8 @@ grid800 = ParameterGrid([
 grid200_splitted = np.array_split(grid200, 3)
 grid800_splitted = np.array_split(grid800, 3)
 
-results_path = 'coarse_gs_results_giulia1.csv'
-grid = grid200_splitted[0]
+#results_path = 'coarse_gs_results_giulia1.csv'
+#grid = grid200_splitted[0]
 
 #results_path = 'coarse_gs_results_giulia2.csv'
 #grid = grid800_splitted[0]
@@ -192,8 +192,8 @@ grid = grid200_splitted[0]
 #results_path = 'coarse_gs_results_irene2.csv'
 #grid = grid800_splitted[1]
 
-#results_path = 'coarse_gs_results_lorenzo1.csv'
-#grid = grid200_splitted[2]
+results_path = 'coarse_gs_results_lorenzo1.csv'
+grid = grid200_splitted[2]
 
 #results_path = 'coarse_gs_results_lorenzo2.csv'
 #grid = grid800_splitted[2]
