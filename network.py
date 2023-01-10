@@ -166,7 +166,7 @@ class Network:
             Y = self.outputs_to_labels(Y)
         return Y
 
-    def score(self, X_test, Y_test):   
+    def score(self, X_test, Y_test, evaluation_metric): # evaluation_metric is a string
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
         if X_test.ndim != 2:
@@ -183,7 +183,7 @@ class Network:
         #TODO: altri check!
 
         outputs = self.predict_outputs(X_test)
-        return self.evaluate(Y_true=Y_test, Y_pred=outputs)
+        return self.evaluate(Y_true=Y_test, Y_pred=outputs, evaluation_metric=evaluation_metric)
 
     # predict output for given input
     def predict_outputs(self, X):
@@ -222,13 +222,15 @@ class Network:
         Y_lbl = Y_lbl.reshape(Y_lbl.shape[0], 1)
         return Y_lbl
 
-    def evaluate(self, Y_true, Y_pred):
-        if self.evaluation_metric == 'accuracy':
+    def evaluate(self, Y_true, Y_pred, evaluation_metric):
+        if evaluation_metric == 'accuracy': # TODO: check if classification
             Y = self.discretize_outputs(Y_pred)
             # TODO: se lasciamo bias con 2 dim occorre fare reshape
         else:
             Y = Y_pred
-        return self.evaluation_metric_fun(y_true=Y_true, y_pred=Y)
+
+        return EVALUATION_METRICS[evaluation_metric](y_true=Y_true, y_pred=Y)
+        #return self.evaluation_metric_fun(y_true=Y_true, y_pred=Y)
 
     def update_learning_rate(self, epoch):
         if self.learning_rate == "fixed":
@@ -329,7 +331,7 @@ class Network:
             return
         
         if self.early_stopping: #and (epoch % self.validation_frequency) == 0:
-            if self.evaluation_metric == 'accuracy':
+            if self.evaluation_metric == 'accuracy': # TODO: check 
                 converged = val_scores[-1] >= 1-self.tol
                 best_metric_delta = val_scores[-1] - self.best_metric
             else:
@@ -408,7 +410,7 @@ class Network:
                       
                     # compute loss and evaluation metric (for display)
                     train_loss += self.loss(y_true=y, y_pred=output)
-                    train_score += self.evaluate(Y_true=y, Y_pred=output)
+                    train_score += self.evaluate(Y_true=y, Y_pred=output, evaluation_metric=self.evaluation_metric)
                     
                     # backward propagation
                     delta = self.loss_prime(y_true=y, y_pred=output)
@@ -443,7 +445,7 @@ class Network:
             if self.early_stopping: # and (epoch % self.validation_frequency) == 0:
                 Y_val_output = self.predict_outputs(X_val)
                 val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
-                val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output)
+                val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output, evaluation_metric=self.evaluation_metric)
                 self.val_losses.append(val_loss)
                 self.val_scores.append(val_score)
             
@@ -465,7 +467,7 @@ class Network:
             self.update_no_improvement_count(epoch, self.train_losses, self.train_scores, self.val_scores)
             
             if train_loss > 10000:
-                break
+                break # TODO: togliere!
 
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)

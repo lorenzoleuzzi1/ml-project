@@ -6,10 +6,11 @@ from utils import write_json, read_json
 from scipy.stats import rankdata
 from multiprocessing import Process
 import pandas as pd
+import copy
 
 JSON_PATH = 'monks_cv_results.json'
 
-def k_fold_cross_validation(network, X_train, y_train, k):
+def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
     if k <= 1:
         print('Number of folds k must be more than 1')
         raise ValueError("k must be more than 1")
@@ -40,9 +41,11 @@ def k_fold_cross_validation(network, X_train, y_train, k):
             metrics.append(network.val_scores)
         
         # --------------fold validation--------------
-        score = network.score(X_test=X_val_fold, Y_test=y_val_fold)
+        net_score = network.score(X_test=X_val_fold, Y_test=y_val_fold, evaluation_metric=network.evaluation_metric)
+        val_score = network.score(X_test=X_val_fold, Y_test=y_val_fold, evaluation_metric=evaluation_metric)
         best_epoch = network.best_epoch
-        metrics.append(score)
+        metrics.append(net_score)
+        metrics.append(val_score)
         metrics.append(best_epoch)
         #print("{} fold VL score = {}".format(i, score))    
 
@@ -53,7 +56,8 @@ def k_fold_cross_validation(network, X_train, y_train, k):
     # fold metrics contains for every fold in this order:
     #   - train losses and scores
     #   - if early stopping validation loss and score 
-    #   - test score
+    #   - test score network.evaluation_metric
+    #   - test score evaluation_metric (della chiamata a questo metodo)
     #   - best epoch 
     best_metrics = np.zeros(shape = (len(folds_metrics[0]), k))
     # retrive the best (at the end of epoch) value for every fold
@@ -83,15 +87,23 @@ def k_fold_cross_validation(network, X_train, y_train, k):
     results = {
         'tr_loss_mean' : means[0],
         'tr_loss_dev' : stds[0],
-        'tr_score_mean': means[1],
-        'tr_score_dev': stds[1],
-        'val_score_mean' : means[-2],
-        'val_score_dev' : stds[-2]
+        'tr_%s_mean'%network.evaluation_metric : means[1],
+        'tr_%s_dev'%network.evaluation_metric : stds[1],
+        'val_%s_mean'%network.evaluation_metric : means[-3],
+        'val_%s_dev'%network.evaluation_metric : stds[-3],
+        'val_%s_mean'%evaluation_metric : means[-2],
+        'val_%s_dev'%evaluation_metric : stds[-2],
     }
+     #   - train losses and scores
+    #   - if early stopping validation loss and score 
+    #   - test score network.evaluation_metric
+    #   - test score evaluation_metric (della chiamata a questo metodo)
+    #   - best epoch 
     for i in range(k):
         results['split%d_tr_loss'%i] = best_metrics[0][i]
-        results['split%d_tr_score'%i] = best_metrics[1][i]
-        results['split%d_val_score'%i] = best_metrics[-2][i]
+        results['split%d_tr_%s'%(i,network.evaluation_metric)] = best_metrics[1][i]
+        results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-3][i]
+        results['split%d_val_%s'%(i, evaluation_metric)] = best_metrics[-2][i]
         results['split%d_best_epoch'%i] = best_metrics[-1][i]
 
     """print("---K-fold results---")
@@ -128,7 +140,7 @@ def nested_cross_validation(grid, X_train, y_train, k):
         #TODO: save results into json?
         i += 1
 
-def grid_search_cv(grid, X, y, k, results_path): # TODO: clean the following code (assuming gs will be executed on a single machine)
+def grid_search_cv(grid, X, y, k, results_path, evaluation_metric): # TODO: clean the following code (assuming gs will be executed on a single machine)
     metric = None
     for param in grid:
         if metric==None:
@@ -141,7 +153,7 @@ def grid_search_cv(grid, X, y, k, results_path): # TODO: clean the following cod
         if i%10==0:
             print(f"{i}/{len(grid)}")
         network = Network(**config)
-        cv_results = k_fold_cross_validation(network, X, y, k)
+        cv_results = k_fold_cross_validation(network, X, y, k, evaluation_metric)
         cv_results['params'] = config
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
     # if config['evaluation_metric'] == 'accuracy':

@@ -1,8 +1,12 @@
 import pandas as pd
 from scipy.stats import rankdata
 
+# TODO: togliere gli indici di riga e la riga unamed
+
 results_paths = ['coarse_gs_results_giulia.csv', 'coarse_gs_results_irene.csv', 'coarse_gs_results_lorenzo.csv']
 all_results_path = 'coarse_gs_results.csv'
+network_metric = 'mee'
+val_metric = 'mse'
 K = 3
 
 # concatenate results into a single dataframe
@@ -12,15 +16,16 @@ for path in results_paths:
 	scores_df = pd.concat([scores_df, partial_scores_df], ignore_index=True)
 
 # rank results
-scores_df['val_score_mean_rank'] = rankdata(scores_df['val_score_mean'], method='dense')
-scores_df['tr_score_mean_rank'] = rankdata(scores_df['tr_score_mean'], method='dense')
+scores_df['val_%s_mean_rank'%network_metric] = rankdata(scores_df['val_%s_mean'%network_metric], method='dense')
+scores_df['val_%s_mean_rank'%val_metric] = rankdata(scores_df['val_%s_mean'%val_metric], method='dense')
+scores_df['tr_%s_mean_rank'%network_metric] = rankdata(scores_df['tr_%s_mean'%network_metric], method='dense')
 scores_df['tr_loss_mean_rank'] = rankdata(scores_df['tr_loss_mean'], method='dense')
 
 # sort results by 'val_score_mean_rank'
-scores_df.sort_values(by=['val_score_mean_rank'])
+scores_df = scores_df.sort_values(by=['val_%s_mean_rank'%network_metric])
 
-# change column order
-columns_order = [
+# change column order TODO: sistemare inserendo tutte le colonne
+"""columns_order = [
 	'val_score_mean',
 	'val_score_mean_rank',
 	'tr_loss_mean',
@@ -34,7 +39,7 @@ for i in range(K):
 	columns_order.append('split%d_tr_score'%i)
 	columns_order.append('split%d_best_epoch'%i)
 columns_order.append('params')
-scores_df = scores_df[columns_order]
+scores_df = scores_df[columns_order]"""
 
 # write all results into a single csv
 scores_df.to_csv(all_results_path)

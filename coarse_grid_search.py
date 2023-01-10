@@ -3,12 +3,40 @@ from sklearn.model_selection import ParameterGrid
 from validation import grid_search_cv
 from cup_parsing import load_dev_set_cup
 
+# TODO: rifai i rank e cambia le topologie nella coarse grid
+# RANK WITH FIXED BEST VALUES
+# K=3
+# [30, 30] [60, 60] [30, 30, 30] [10, 10] [30] [60] [120]
+# k=5
+# [30, 30] [60, 60] [30, 30, 30] [30] [10, 10] [60] [120]
+
+
+"""
+split2_best_epoch 
+             31.0 
+             33.0 
+             19.0 
+             47.0 
+             28.0 
+             41.0 
+             43.0 
+
+params
+[30, 30, 30]
+[30, 30]
+[60, 60]
+[30]
+[10, 10]
+[60]
+[120]
+"""
+
 grid = ParameterGrid([
     {
         'activation_out': ['identity'],
         'classification' : [False],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[30], [120], [60,60]], 
+        'hidden_layer_sizes': [[30, 30], [60, 60], [30, 30, 30]], 
         'loss': ['mse'],
         'evaluation_metric' : ['mee'],
         'epochs': [200, 800],
@@ -35,7 +63,7 @@ grid = ParameterGrid([
         'activation_out': ['identity'],
         'classification' : [False],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[30], [120], [60,60]], 
+        'hidden_layer_sizes': [[30, 30], [60, 60], [30, 30, 30]], 
         'loss': ['mse'],
         'evaluation_metric' : ['mee'],
         'epochs': [200, 800],
@@ -62,7 +90,7 @@ grid = ParameterGrid([
         'activation_out': ['identity'],
         'classification' : [False],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[30], [120], [60,60]], 
+        'hidden_layer_sizes': [[30, 30], [60, 60], [30, 30, 30]], 
         'loss': ['mse'],
         'evaluation_metric' : ['mee'],
         'epochs': [200, 800],
@@ -88,26 +116,42 @@ grid = ParameterGrid([
     ]
 )
 
-print(len(grid))
-"""grid_splitted = np.array_split(grid, 3)
-print(len(grid_splitted[0]))
-print(len(grid_splitted[1]))
-print(len(grid_splitted[2]))
-print("First config giulia")
-print(grid_splitted[0][0])
-print("First config irene")
-print(grid_splitted[1][0])
-print("First config lorenzo")
-print(grid_splitted[2][0])"""
+grid = ParameterGrid(
+    {'activation_hidden': ['tanh'],
+        'activation_out': ['identity'],
+        'alpha': [0.5],
+        'batch_size': [64],
+        'classification': [False],
+        'early_stopping': [False],
+        'epochs': [500],
+        'evaluation_metric': ['mee'],
+        'hidden_layer_sizes': [[30], [60], [120], [10, 10], [30,30], [60, 60], [30,30,30]],
+        'lambd': [0.0001],
+        'learning_rate': ['linear_decay'],
+        'learning_rate_init': [0.01],
+        'loss': ['mse'],
+        'metric_decrease_tol': [0.00001],
+        'nesterov': [True],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'stopping_patience': [30],
+        'tau': [200],
+        'tol': [0.0001],
+        'verbose': [False],
+        'weights_dist': [None]
+        }
+    )
 
-"""results_path = 'coarse_gs_results_giulia.csv'
-grid = grid_splitted[0]
+grid_splitted = np.array_split(grid, 3)
 
-results_path = 'coarse_gs_results_irene.csv'
-grid = grid_splitted[1]
+#results_path = 'coarse_gs_results_giulia.csv'
+#grid = grid_splitted[0]
+
+#results_path = 'coarse_gs_results_irene.csv'
+#grid = grid_splitted[1]
 
 results_path = 'coarse_gs_results_lorenzo.csv'
 grid = grid_splitted[2]
 
 X_dev, y_dev = load_dev_set_cup()
-grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=3, results_path=results_path)"""
+grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=3, results_path=results_path, evaluation_metric='mse')
