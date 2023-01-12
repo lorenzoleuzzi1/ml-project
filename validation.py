@@ -8,6 +8,7 @@ from multiprocessing import Process
 import pandas as pd
 import copy
 from utils import mse, mee
+import json
 
 JSON_PATH = 'monks_cv_results.json'
 
@@ -68,7 +69,6 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
         best_epoch = fold[-1]  
         for j, values in enumerate(fold):
             if isinstance(values, list):
-                # best_metrics[j][i] = np.trim_zeros(values, 'b')[-1] # a list of values, take the last one
                 best_metrics[j][i] = values[best_epoch]
             else:           
                 best_metrics[j][i] = values #single value
@@ -92,12 +92,13 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
         'tr_mse_dev' : stds[0],
         'tr_%s_mean'%network.evaluation_metric : means[1],
         'tr_%s_dev'%network.evaluation_metric : stds[1], 
-        'val_%s_mean'%network.evaluation_metric : means[-3],
-        'val_%s_dev'%network.evaluation_metric : stds[-3],
-        'val_%s_mean'%evaluation_metric : means[-2],
-        'val_%s_dev'%evaluation_metric : stds[-2],
+        'val_%s_mean'%evaluation_metric : means[-3],
+        'val_%s_dev'%evaluation_metric : stds[-3],
+        'val_%s_mean'%network.evaluation_metric : means[-2],
+        'val_%s_dev'%network.evaluation_metric : stds[-2],
     }
-     #   - train losses and scores
+     
+    #   - train losses and scores
     #   - if early stopping validation loss and score 
     #   - test score network.evaluation_metric
     #   - test score evaluation_metric (della chiamata a questo metodo)
@@ -105,8 +106,8 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
     for i in range(k):
         results['split%d_tr_mse'%i] = best_metrics[0][i]
         results['split%d_tr_%s'%(i,network.evaluation_metric)] = best_metrics[1][i]
-        results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-3][i]
-        results['split%d_val_%s'%(i, evaluation_metric)] = best_metrics[-2][i]
+        results['split%d_val_%s'%(i, evaluation_metric)] = best_metrics[-3][i]
+        results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-2][i]  
         results['split%d_best_epoch'%i] = best_metrics[-1][i]
 
     """print("---K-fold results---")
@@ -115,34 +116,6 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
 
     return results
 
-def nested_cross_validation(grid, X_train, y_train, k):
-    
-    # inner kfold
-    # per multiprocessing dividere la griglia in n parti ogni parte va ad un Process
-    # Process(target=grid_search_cv, args=(grid, X_train, y_train, k))
-    # n_processi = 3
-    # splitted_grid = np.array_split(grid, n_processi)
-    # for partial_grid in splitted_grid:
-    #     Process(target=grid_search_cv, args=(grid, X_train, y_train, k)).start()
-    
-    grid_search_cv(grid, X_train, y_train, k)
-    
-   
-    data = read_json(JSON_PATH)
-    print(f"starting outer cv - exploring {len(grid)} configs")
-    i = 1
-   
-    for config in data:
-        #outerfold
-        print(f"{i}/{len(grid)}")
-        network = config_to_network(config.get("config"))
-        nested_results = k_fold_cross_validation(network, X_train, y_train, k)
-        print("------")
-        print(config)
-        print(f"outer score: {nested_results.get('val_score')} +/- {nested_results.get('val_score_dev')}")
-        #TODO: save results into json?
-        i += 1
-
 def grid_search_cv(grid, X, y, k, results_path, evaluation_metric): # TODO: clean the following code (assuming gs will be executed on a single machine)
     metric = None
     for param in grid:
@@ -150,39 +123,28 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric): # TODO: clea
             metric = param['evaluation_metric']
         elif param['evaluation_metric'] != metric:
             raise ValueError("Evaluation metric must be the same for each configuration.")
+    
     print(f"starting grid search - exploring {len(grid)} configs")
     df_scores = pd.DataFrame(columns=[])
     for i, config in enumerate(grid):
         print(f"{i+1}/{len(grid)}")
         network = Network(**config)
         cv_results = k_fold_cross_validation(network, X, y, k, evaluation_metric)
-        cv_results['params'] = config
+        cv_results['params'] = json.dumps(config)
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
-    # if config['evaluation_metric'] == 'accuracy':
-    #     df_scores['val_score_mean_rank'] = rankdata(1-df_scores['val_score_mean'], method='dense')
-    #     df_scores['tr_score_mean_rank'] = rankdata(1-df_scores['tr_score_mean'], method='dense')
-    # else:
-    #     df_scores['val_score_mean_rank'] = rankdata(df_scores['val_score_mean'], method='dense')
-    #     df_scores['tr_score_mean_rank'] = rankdata(df_scores['tr_score_mean'], method='dense')
     
-    # df_scores['tr_loss_mean_rank'] = rankdata(df_scores['tr_loss_mean'], method='dense')
-    # columns_order = [
-    #     'val_score_mean',
-    #     'val_score_mean_rank',
-    #     'tr_loss_mean',
-    #     'tr_loss_mean_rank',
-    #     'tr_score_mean',
-    #     'tr_score_mean_rank'
-    # ]
-    # for i in range(k):
-    #     columns_order.append('split%d_val_score'%i)
-    #     columns_order.append('split%d_tr_loss'%i)
-    #     columns_order.append('split%d_tr_score'%i)
-    #     columns_order.append('split%d_best_epoch'%i)
-    # columns_order.append('params')
-    # df_scores = df_scores[columns_order]
-    # df_scores.sort_values(by=['val_score_mean_rank'])
     df_scores.to_csv(results_path)
+
+def read_grid_search_results(path):
+    df = pd.read_csv(path, sep=",")
+    for i in range(len(df['params'])):
+        params_as_json_string = df['params'][i]#.replace("'", "\"").replace("False", "false").replace("True", "true").replace("None", "null")
+        params_as_dictionary = json.loads(params_as_json_string)
+        df.at[i,'params'] = params_as_dictionary
+    return df
+    
+    
+
 
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""
