@@ -3,8 +3,10 @@ from scipy.stats import rankdata
 
 # TODO: togliere gli indici di riga e la riga unamed
 
-results_paths = ['coarse_gs_results_giulia.csv', 'coarse_gs_results_irene.csv', 'coarse_gs_results_lorenzo.csv']
-all_results_path = 'coarse_gs_results.csv'
+results_paths = ['coarse_gs_results_giulia1.csv', 'coarse_gs_results_irene1.csv', 'coarse_gs_results_lorenzo1.csv',
+                 'coarse_gs_results_giulia800_1.csv', 'coarse_gs_results_giulia800_2.csv', 'coarse_gs_results_giulia800_3.csv',
+                 'coarse_gs_results_giulia800_4.csv', 'coarse_gs_results_irene2.csv']
+all_results_path = 'coarse_gs_results_risultati_parziali.csv'
 network_metric = 'mee'
 val_metric = 'mse'
 K = 3
