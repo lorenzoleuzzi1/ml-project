@@ -3,6 +3,19 @@ from sklearn.model_selection import ParameterGrid
 from validation import grid_search_cv
 from cup_parsing import load_dev_set_cup
 
+# TODO:
+# sistemare script validation
+# https://scikit-learn.org/stable/auto_examples/model_selection/plot_grid_search_stats.html
+# notebook per visualizzare max - min prestazioni nei fold (tipo quello per la CUP)
+# plot medie e dev standard MEE (applicare 1-standard error rule)
+# 3d heatmap per ogni topologia con la gs 2
+# fare ensemble
+# media epoche divisa per topologia
+# favorire modelli con lambda più alto se hanno pari perf (meno complessi, meno probabile che vadano in overfitting)
+# ultima va male perchè momentum è troppo basso e necessitava di più epoche? lr troppo basso
+# lr > 0.0005 (rank 36/54)
+# https://www.kaggle.com/code/jinilcs/grid-search-to-find-best-tuning-parameters heatmap
+
 # RANK WITH FIXED BEST VALUES
 # -----pazienza 30 -----
 # K=3
