@@ -111,6 +111,7 @@ for param in scores_df['params']: # TODO: fare in modo migliore?
 	params_dict = ast.literal_eval(param)
 	for key in rem_list:
 		del params_dict[key]
+		params_dict['batch_size'] = str(params_dict['batch_size'])
 	params_df = pd.concat([params_df, pd.DataFrame([params_dict])], ignore_index=True)
 params_df.to_csv('coarse_gs_params_rank.csv')
 
