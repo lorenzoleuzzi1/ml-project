@@ -4,7 +4,7 @@ from scipy.stats import rankdata
 
 # TODO: fix mse / mee order for gine grid search
 
-results_paths = [
+"""results_paths = [
 	'coarse_gs_results_giulia1.csv',
 	'coarse_gs_results_irene1.csv',
 	'coarse_gs_results_lorenzo1.csv',
@@ -17,8 +17,14 @@ results_paths = [
 	'coarse_gs_results_lorenzo3.csv',
 	'coarse_gs_results_lorenzo4.csv',
 	'coarse_gs_results_lorenzo5.csv'
+]"""
+results_paths = [
+	'coarse_gs2_results_giulia1.csv',
+	'coarse_gs2_results_giulia2.csv',
+	'coarse_gs2_results_irene.csv',
+	'coarse_gs2_results_lorenzo.csv'
 ]
-all_results_path = 'coarse_gs.csv'
+all_results_path = 'coarse_gs2.csv'
 MEE = 'MEE' # NOTE: added so that for the next gs we only need to change this
 MSE = 'MSE'
 K = 3
@@ -113,7 +119,7 @@ for param in scores_df['params']: # TODO: fare in modo migliore?
 		del params_dict[key]
 		params_dict['batch_size'] = str(params_dict['batch_size'])
 	params_df = pd.concat([params_df, pd.DataFrame([params_dict])], ignore_index=True)
-params_df.to_csv('coarse_gs_params_rank.csv')
+params_df.to_csv('coarse_gs2_params_rank.csv')
 
 # write all results into a single csv
 scores_df.to_csv(all_results_path)
