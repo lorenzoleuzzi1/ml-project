@@ -90,6 +90,7 @@ scores_df = scores_df[columns_order]
 
 # write params as csv deleting fixed params
 rem_list = [ 
+	'activation_out',
 	'classification',
 	'early_stopping',
 	'evaluation_metric',
