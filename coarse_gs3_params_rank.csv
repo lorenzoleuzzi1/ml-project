@@ -1,0 +1,55 @@
+,activation_hidden,alpha,batch_size,epochs,hidden_layer_sizes,lambd,learning_rate,learning_rate_init,nesterov
+0,logistic,0.9,128,500,"[20, 20, 20]",0.0001,fixed,0.005,False
+1,logistic,0.7,128,500,"[20, 20]",0.0005,fixed,0.05,False
+2,logistic,0.7,128,500,"[20, 20]",0.0001,fixed,0.05,False
+3,logistic,0.7,128,500,"[20, 20]",0.001,fixed,0.05,False
+4,logistic,0.9,128,500,"[20, 20, 20]",0.0005,fixed,0.005,False
+5,logistic,0.7,128,500,"[20, 20, 20]",0.0005,fixed,0.05,False
+6,logistic,0.9,128,500,"[20, 20]",0.0005,fixed,0.005,False
+7,logistic,0.7,128,500,"[20, 20, 20]",0.0001,fixed,0.05,False
+8,logistic,0.7,128,500,"[20, 20, 20]",0.001,fixed,0.05,False
+9,logistic,0.7,128,500,[60],0.001,fixed,0.05,False
+10,logistic,0.7,128,500,[60],0.0005,fixed,0.05,False
+11,logistic,0.9,128,500,"[20, 20]",0.0001,fixed,0.005,False
+12,logistic,0.9,128,500,"[20, 20, 20]",0.001,fixed,0.005,False
+13,logistic,0.9,128,500,"[20, 20]",0.001,fixed,0.05,False
+14,logistic,0.9,128,500,[60],0.0001,fixed,0.005,False
+15,logistic,0.9,128,500,[60],0.0005,fixed,0.005,False
+16,logistic,0.9,128,500,"[20, 20]",0.001,fixed,0.005,False
+17,logistic,0.9,128,500,"[20, 20, 20]",0.001,fixed,0.05,False
+18,logistic,0.7,128,500,"[20, 20, 20]",0.0001,fixed,0.005,False
+19,logistic,0.7,128,500,[60],0.0001,fixed,0.05,False
+20,logistic,0.9,128,500,"[20, 20]",0.0005,fixed,0.05,False
+21,logistic,0.9,128,500,[60],0.001,fixed,0.05,False
+22,logistic,0.9,128,500,"[20, 20]",0.0001,fixed,0.05,False
+23,logistic,0.7,128,500,"[20, 20, 20]",0.0005,fixed,0.005,False
+24,logistic,0.7,128,500,"[20, 20]",0.0001,fixed,0.005,False
+25,logistic,0.9,128,500,"[20, 20, 20]",0.0001,fixed,0.05,False
+26,logistic,0.9,128,500,[60],0.001,fixed,0.005,False
+27,logistic,0.7,128,500,"[20, 20]",0.0005,fixed,0.005,False
+28,logistic,0.9,128,500,[60],0.0005,fixed,0.05,False
+29,logistic,0.9,128,500,"[20, 20, 20]",0.0005,fixed,0.05,False
+30,logistic,0.9,128,500,[60],0.0001,fixed,0.05,False
+31,logistic,0.7,128,500,"[20, 20, 20]",0.001,fixed,0.005,False
+32,logistic,0.7,128,500,"[20, 20]",0.001,fixed,0.005,False
+33,logistic,0.7,128,500,[60],0.0001,fixed,0.005,False
+34,logistic,0.9,128,500,"[20, 20, 20]",0.0001,fixed,0.0005,False
+35,logistic,0.9,128,500,"[20, 20]",0.0001,fixed,0.0005,False
+36,logistic,0.7,128,500,[60],0.0005,fixed,0.005,False
+37,logistic,0.9,128,500,"[20, 20]",0.0005,fixed,0.0005,False
+38,logistic,0.9,128,500,"[20, 20, 20]",0.0005,fixed,0.0005,False
+39,logistic,0.7,128,500,[60],0.001,fixed,0.005,False
+40,logistic,0.9,128,500,"[20, 20]",0.001,fixed,0.0005,False
+41,logistic,0.9,128,500,[60],0.0001,fixed,0.0005,False
+42,logistic,0.9,128,500,"[20, 20, 20]",0.001,fixed,0.0005,False
+43,logistic,0.7,128,500,"[20, 20, 20]",0.0001,fixed,0.0005,False
+44,logistic,0.9,128,500,[60],0.0005,fixed,0.0005,False
+45,logistic,0.7,128,500,"[20, 20]",0.0001,fixed,0.0005,False
+46,logistic,0.9,128,500,[60],0.001,fixed,0.0005,False
+47,logistic,0.7,128,500,[60],0.0001,fixed,0.0005,False
+48,logistic,0.7,128,500,"[20, 20]",0.0005,fixed,0.0005,False
+49,logistic,0.7,128,500,[60],0.0005,fixed,0.0005,False
+50,logistic,0.7,128,500,[60],0.001,fixed,0.0005,False
+51,logistic,0.7,128,500,"[20, 20, 20]",0.0005,fixed,0.0005,False
+52,logistic,0.7,128,500,"[20, 20]",0.001,fixed,0.0005,False
+53,logistic,0.7,128,500,"[20, 20, 20]",0.001,fixed,0.0005,False
