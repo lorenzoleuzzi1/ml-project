@@ -12,7 +12,11 @@ results_paths = [
 	'fine_gs_results_irene1.csv',
 	'fine_gs_results_irene2.csv',
 	'fine_gs_results_irene3.csv',
-	'fine_gs_results_irene4.csv'
+	'fine_gs_results_irene4.csv',
+	'fine_gs_results_lorenzo1.csv',
+	'fine_gs_results_lorenzo2.csv',
+	'fine_gs_results_lorenzo3.csv',
+	'fine_gs_results_lorenzo4.csv'
 ]
 all_results_path = 'fine_gs.csv'
 ranked_results_path = 'fine_gs_params_rank.csv'
