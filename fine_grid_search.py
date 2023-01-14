@@ -60,7 +60,7 @@ grid = ParameterGrid([
 ])
 
 print(len(grid))
-grid_splitted = np.array_split(grid, 9)
+grid_splitted = np.array_split(grid, 12)
 
 print(grid_splitted[4][8])
 
