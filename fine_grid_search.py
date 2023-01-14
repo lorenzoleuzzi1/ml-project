@@ -62,32 +62,27 @@ grid = ParameterGrid([
 print(len(grid))
 grid_splitted = np.array_split(grid, 9)
 
-"""results_path = 'fine_gs_results_giulia1.csv'
-grid = grid_splitted[0]
+print(grid_splitted[4][8])
 
-results_path = 'fine_gs_results_giulia2.csv'
-grid = grid_splitted[1]
+print(grid_splitted[5][3])
 
-results_path = 'fine_gs_results_giulia3.csv'
-grid = grid_splitted[2]"""
+print(grid_splitted[6][0])
 
-results_path = '/kaggle/working/fine_gs_results_irene1.csv'
-grid = grid_splitted[3]
+print(grid_splitted[7][9])
+print(grid_splitted[7][10])
+print(grid_splitted[7][25])
+print(grid_splitted[7][26])
+print(grid_splitted[7][41])
+print(grid_splitted[7][42])
+print(grid_splitted[7][57])
+print(grid_splitted[7][58])
+print(grid_splitted[7][73])
+print(grid_splitted[7][74])
+print(grid_splitted[7][89])
+print(grid_splitted[7][90])
+print(grid_splitted[7][105])
+print(grid_splitted[7][106])
+print(grid_splitted[7][107])
 
-"""results_path = 'fine_gs_results_irene2.csv'
-grid = grid_splitted[4]
-
-results_path = 'fine_gs_results_irene3.csv'
-grid = grid_splitted[5]
-
-results_path = 'fine_gs_results_lorenzo1.csv'
-grid = grid_splitted[6]
-
-results_path = 'fine_gs_results_lorenzo2.csv'
-grid = grid_splitted[7]
-
-results_path = 'fine_gs_results_lorenzo3.csv'
-grid = grid_splitted[8]"""
-
-X_dev, y_dev = load_dev_set_cup()
-grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=5, results_path=results_path, evaluation_metric='mse')
+"""X_dev, y_dev = load_dev_set_cup()
+grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=5, results_path=results_path, evaluation_metric='mse')"""
