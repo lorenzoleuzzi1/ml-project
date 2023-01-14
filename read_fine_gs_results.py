@@ -72,7 +72,8 @@ rem_list = [
 	'validation_size',
 	'verbose',
 	'weights_bound',
-	'weights_dist'
+	'weights_dist',
+	'epochs'
 	]
 params_df = pd.DataFrame(columns=[])
 for param in scores_df['params']: # TODO: fare in modo migliore?
