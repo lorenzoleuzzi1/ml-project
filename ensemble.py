@@ -99,11 +99,11 @@ means_pred_k3 = np.mean(pred_k3, axis=0)
 means_pred_k4 = np.mean(pred_k4, axis=0)
 means_pred_k5 = np.mean(pred_k5, axis=0)
 
-split0_val_mee = mee(Y_true[0], means_pred_k1)
-split1_val_mee = mee(Y_true[1], means_pred_k2)
-split2_val_mee = mee(Y_true[2], means_pred_k3)
-split3_val_mee = mee(Y_true[3], means_pred_k4)
-split4_val_mee = mee(Y_true[4], means_pred_k5)
+split0_val_mee = np.array(mee(Y_true[0], means_pred_k1))
+split1_val_mee = np.array(mee(Y_true[1], means_pred_k2))
+split2_val_mee = np.array(mee(Y_true[2], means_pred_k3))
+split3_val_mee = np.array(mee(Y_true[3], means_pred_k4))
+split4_val_mee = np.array(mee(Y_true[4], means_pred_k5))
 
 val_mee = np.mean( np.sum(split0_val_mee, split1_val_mee, split2_val_mee, split3_val_mee, split4_val_mee) )
 
