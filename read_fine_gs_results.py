@@ -4,7 +4,7 @@ import ast
 from scipy.stats import rankdata
 import json
 
-results_paths = [
+"""results_paths = [
 	'fine_gs_results_giulia1.csv',
 	'fine_gs_results_giulia2.csv',
 	'fine_gs_results_giulia3.csv',
@@ -17,9 +17,20 @@ results_paths = [
 	'fine_gs_results_lorenzo2.csv',
 	'fine_gs_results_lorenzo3.csv',
 	'fine_gs_results_lorenzo4.csv'
+]"""
+results_paths = [
+	'fine_gs2_results_giulia1.csv',
+	'fine_gs2_results_giulia2.csv',
+	'fine_gs2_results_giulia3.csv',
+	#'fine_gs2_results_irene1.csv',
+	#'fine_gs2_results_irene2.csv',
+	#'fine_gs2_results_irene3.csv',
+	'fine_gs2_results_lorenzo1.csv',
+	'fine_gs2_results_lorenzo2.csv',
+	'fine_gs2_results_lorenzo3.csv'
 ]
-all_results_path = 'fine_gs.csv'
-ranked_results_path = 'fine_gs_params_rank.csv'
+all_results_path = 'fine_gs2_partial_results.csv'
+ranked_results_path = 'fine_gs2_params_rank_partial.csv'
 K = 5
 
 # concatenate results into a single dataframe

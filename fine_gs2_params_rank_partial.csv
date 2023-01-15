@@ -1,0 +1,748 @@
+    ,activation_hidden ,alpha ,batch_size ,hidden_layer_sizes ,lambd   ,learning_rate ,learning_rate_init ,nesterov ,tau
+  0 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+  1 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+  2 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+  3 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+  4 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+  5 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+  6 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+  7 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+  8 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,True     ,
+  9 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+ 10 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+ 11 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+ 12 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+ 13 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,False    ,
+ 14 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+ 15 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+ 16 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+ 17 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+ 18 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+ 19 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,True     ,
+ 20 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+ 21 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+ 22 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+ 23 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+ 24 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+ 25 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+ 26 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+ 27 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+ 28 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+ 29 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+ 30 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+ 31 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+ 32 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+ 33 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+ 34 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+ 35 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+ 36 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+ 37 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+ 38 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 39 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+ 40 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+ 41 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,True     ,
+ 42 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+ 43 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+ 44 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+ 45 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+ 46 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+ 47 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 48 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+ 49 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,False    ,
+ 50 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+ 51 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+ 52 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+ 53 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+ 54 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,True     ,
+ 55 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+ 56 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+ 57 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+ 58 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 59 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+ 60 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,False    ,
+ 61 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+ 62 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,False    ,
+ 63 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+ 64 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+ 65 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+ 66 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+ 67 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+ 68 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+ 69 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+ 70 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+ 71 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+ 72 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,False    ,
+ 73 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+ 74 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+ 75 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+ 76 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+ 77 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,False    ,
+ 78 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+ 79 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+ 80 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+ 81 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+ 82 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+ 83 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,False    ,
+ 84 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 85 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+ 86 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+ 87 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,False    ,
+ 88 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+ 89 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+ 90 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+ 91 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+ 92 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+ 93 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 94 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,True     ,300.0
+ 95 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+ 96 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+ 97 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,False    ,300.0
+ 98 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+ 99 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+100 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+101 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+102 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+103 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+104 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+105 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+106 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.01  ,False    ,
+107 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+108 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,True     ,
+109 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+110 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,False    ,
+111 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+112 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+113 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.01  ,False    ,
+114 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+115 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+116 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+117 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+118 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.01  ,False    ,
+119 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+120 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+121 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+122 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+123 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+124 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+125 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+126 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,False    ,
+127 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+128 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+129 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,False    ,
+130 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+131 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,False    ,
+132 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+133 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+134 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+135 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+136 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,False    ,
+137 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,True     ,
+138 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+139 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,False    ,300.0
+140 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+141 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,False    ,
+142 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+143 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+144 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,False    ,
+145 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+146 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+147 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,True     ,
+148 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+149 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.05  ,False    ,300.0
+150 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+151 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+152 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+153 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,False    ,
+154 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+155 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,False    ,
+156 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+157 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+158 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+159 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,True     ,
+160 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+161 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+162 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,True     ,
+163 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+164 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+165 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+166 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+167 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,False    ,
+168 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.01  ,False    ,
+169 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.06  ,True     ,300.0
+170 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,True     ,
+171 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+172 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,True     ,
+173 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+174 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,False    ,
+175 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.01  ,False    ,
+176 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,True     ,
+177 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+178 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.01  ,False    ,
+179 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+180 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+181 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,True     ,
+182 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+183 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,False    ,300.0
+184 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+185 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+186 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+187 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+188 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,True     ,
+189 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+190 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+191 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+192 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+193 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,False    ,
+194 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+195 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,False    ,
+196 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,False    ,
+197 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+198 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+199 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+200 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+201 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+202 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,True     ,
+203 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,False    ,
+204 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,False    ,
+205 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+206 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+207 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,True     ,
+208 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+209 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,False    ,
+210 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+211 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.01  ,False    ,
+212 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,True     ,300.0
+213 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+214 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+215 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+216 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+217 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.01  ,False    ,
+218 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,False    ,300.0
+219 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,False    ,
+220 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+221 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.06  ,True     ,300.0
+222 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,False    ,
+223 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.01  ,False    ,
+224 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,True     ,
+225 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,True     ,
+226 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.05  ,True     ,300.0
+227 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,True     ,
+228 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+229 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,False    ,300.0
+230 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,True     ,
+231 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,True     ,
+232 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+233 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.01  ,False    ,
+234 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.01  ,False    ,
+235 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,False    ,
+236 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+237 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,False    ,
+238 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,False    ,
+239 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+240 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+241 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,False    ,
+242 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,True     ,
+243 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,False    ,
+244 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+245 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.04  ,False    ,300.0
+246 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+247 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,True     ,
+248 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+249 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,True     ,
+250 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.01  ,False    ,
+251 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+252 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+253 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,False    ,
+254 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,False    ,
+255 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,False    ,
+256 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,False    ,
+257 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+258 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,False    ,
+259 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,False    ,
+260 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.06  ,False    ,300.0
+261 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+262 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,True     ,
+263 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,False    ,
+264 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+265 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.01  ,False    ,
+266 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,False    ,
+267 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+268 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,True     ,
+269 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,False    ,
+270 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.01  ,False    ,
+271 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+272 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+273 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,False    ,
+274 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,False    ,
+275 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,False    ,
+276 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.01  ,False    ,
+277 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,True     ,
+278 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.04  ,True     ,300.0
+279 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+280 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,False    ,
+281 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+282 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+283 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+284 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+285 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+286 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,True     ,
+287 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+288 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,False    ,
+289 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,True     ,
+290 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+291 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,False    ,
+292 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,False    ,
+293 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,True     ,
+294 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+295 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,True     ,
+296 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,True     ,
+297 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,False    ,300.0
+298 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,False    ,
+299 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.01  ,False    ,
+300 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,False    ,
+301 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,False    ,
+302 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+303 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,False    ,
+304 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,False    ,
+305 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,True     ,
+306 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.01  ,False    ,
+307 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,False    ,
+308 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,False    ,
+309 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,True     ,
+310 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,True     ,
+311 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.05  ,True     ,300.0
+312 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+313 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,False    ,
+314 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+315 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,True     ,
+316 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,True     ,
+317 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,True     ,
+318 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.01  ,False    ,
+319 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+320 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+321 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.04  ,True     ,300.0
+322 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+323 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,True     ,
+324 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,False    ,
+325 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,False    ,
+326 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,True     ,
+327 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+328 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.01  ,False    ,
+329 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,False    ,
+330 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.01  ,False    ,
+331 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,True     ,
+332 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,False    ,
+333 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,False    ,
+334 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,False    ,
+335 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,False    ,
+336 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,True     ,
+337 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,True     ,
+338 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,False    ,
+339 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,True     ,
+340 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,False    ,
+341 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.01  ,False    ,
+342 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,True     ,
+343 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,False    ,
+344 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+345 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,True     ,
+346 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+347 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+348 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+349 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,True     ,
+350 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,False    ,
+351 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,True     ,
+352 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.01  ,False    ,
+353 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,False    ,
+354 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+355 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,True     ,300.0
+356 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,True     ,
+357 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,True     ,
+358 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,False    ,
+359 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.05  ,True     ,300.0
+360 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.01  ,True     ,
+361 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,True     ,
+362 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,False    ,
+363 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+364 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,False    ,
+365 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,False    ,
+366 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.06  ,False    ,300.0
+367 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,False    ,
+368 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,True     ,
+369 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.05  ,False    ,300.0
+370 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+371 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+372 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,True     ,
+373 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.01  ,False    ,
+374 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,False    ,
+375 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,True     ,
+376 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+377 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,True     ,
+378 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.04  ,True     ,300.0
+379 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,True     ,300.0
+380 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,False    ,
+381 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,True     ,
+382 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,True     ,
+383 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,False    ,
+384 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.008 ,True     ,
+385 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,True     ,
+386 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.06  ,False    ,300.0
+387 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.002 ,True     ,
+388 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.002 ,True     ,
+389 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,False    ,
+390 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+391 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,False    ,
+392 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,False    ,
+393 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,False    ,
+394 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,False    ,
+395 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.006 ,False    ,
+396 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+397 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,False    ,
+398 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,True     ,
+399 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+400 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.008 ,False    ,
+401 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+402 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,False    ,300.0
+403 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.008 ,False    ,
+404 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+405 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+406 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.002 ,True     ,
+407 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,True     ,
+408 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,True     ,
+409 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,True     ,
+410 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,False    ,
+411 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,True     ,
+412 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,False    ,
+413 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,False    ,
+414 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.01  ,False    ,
+415 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,False    ,
+416 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,False    ,
+417 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,True     ,
+418 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,True     ,
+419 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.008 ,True     ,
+420 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,True     ,
+421 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,False    ,
+422 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,False    ,
+423 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+424 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,True     ,
+425 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.002 ,True     ,
+426 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,True     ,
+427 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,True     ,
+428 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,True     ,
+429 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.04  ,True     ,300.0
+430 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,False    ,
+431 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,True     ,
+432 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.002 ,True     ,
+433 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,True     ,
+434 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,False    ,
+435 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,True     ,
+436 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,True     ,
+437 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+438 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,False    ,300.0
+439 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.006 ,False    ,
+440 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,False    ,
+441 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+442 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,False    ,
+443 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.006 ,False    ,
+444 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+445 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+446 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,False    ,
+447 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,False    ,
+448 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.006 ,True     ,
+449 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+450 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,False    ,
+451 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,True     ,
+452 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.008 ,False    ,
+453 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,False    ,300.0
+454 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+455 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.01  ,True     ,
+456 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.08  ,False    ,300.0
+457 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,True     ,
+458 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+459 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,True     ,
+460 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,False    ,
+461 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.04  ,False    ,300.0
+462 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,True     ,
+463 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,False    ,
+464 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,False    ,
+465 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,True     ,
+466 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,False    ,
+467 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,True     ,
+468 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,False    ,
+469 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,True     ,
+470 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,False    ,
+471 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+472 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,False    ,
+473 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.004 ,True     ,
+474 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,True     ,
+475 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+476 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+477 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.01  ,False    ,
+478 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.004 ,True     ,
+479 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.002 ,True     ,
+480 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+481 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,False    ,
+482 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.01  ,False    ,
+483 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.002 ,True     ,
+484 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,False    ,
+485 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,False    ,
+486 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,False    ,
+487 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,True     ,
+488 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+489 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,True     ,
+490 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.01  ,False    ,
+491 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,True     ,
+492 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.006 ,False    ,
+493 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,True     ,
+494 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,False    ,
+495 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,True     ,
+496 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,True     ,
+497 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+498 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,True     ,
+499 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,False    ,
+500 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,False    ,
+501 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.004 ,False    ,
+502 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.008 ,False    ,
+503 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+504 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,False    ,300.0
+505 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,True     ,
+506 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+507 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.002 ,True     ,
+508 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,False    ,
+509 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.006 ,False    ,
+510 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.002 ,True     ,
+511 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,False    ,
+512 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.01  ,False    ,
+513 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,False    ,
+514 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.01  ,False    ,
+515 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+516 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,False    ,300.0
+517 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,True     ,
+518 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.008 ,False    ,
+519 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,False    ,
+520 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,True     ,
+521 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,False    ,
+522 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+523 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+524 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,False    ,300.0
+525 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+526 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,True     ,
+527 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+528 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,False    ,
+529 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,False    ,
+530 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,True     ,
+531 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,False    ,
+532 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+533 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+534 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+535 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,True     ,
+536 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.002 ,True     ,
+537 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,True     ,
+538 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,False    ,
+539 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,True     ,
+540 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,False    ,
+541 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,True     ,
+542 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,False    ,300.0
+543 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.004 ,False    ,
+544 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.002 ,True     ,
+545 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,True     ,
+546 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,True     ,
+547 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,False    ,
+548 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+549 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,fixed         ,             0.002 ,True     ,
+550 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.002 ,True     ,
+551 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,False    ,
+552 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.002 ,True     ,
+553 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,False    ,
+554 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+555 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,False    ,
+556 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+557 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,True     ,
+558 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.01  ,False    ,
+559 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+560 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+561 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.006 ,True     ,
+562 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+563 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,False    ,
+564 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+565 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,True     ,
+566 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.004 ,False    ,
+567 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,True     ,
+568 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+569 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+570 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+571 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.002 ,True     ,
+572 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+573 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.002 ,True     ,
+574 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+575 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+576 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.008 ,False    ,
+577 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+578 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+579 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,False    ,
+580 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+581 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,5e-05   ,fixed         ,             0.002 ,True     ,
+582 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.002 ,True     ,
+583 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,False    ,300.0
+584 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,False    ,
+585 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,False    ,
+586 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.002 ,True     ,
+587 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,True     ,
+588 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,False    ,
+589 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,False    ,
+590 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.004 ,True     ,
+591 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.002 ,True     ,
+592 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,True     ,
+593 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,5e-05   ,fixed         ,             0.002 ,True     ,
+594 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,False    ,
+595 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,True     ,
+596 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,False    ,
+597 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+598 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+599 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.002 ,True     ,
+600 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,False    ,
+601 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,True     ,
+602 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,True     ,
+603 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+604 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,False    ,
+605 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+606 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.006 ,True     ,
+607 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,True     ,
+608 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.01  ,False    ,
+609 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.002 ,True     ,
+610 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,True     ,
+611 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,True     ,
+612 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+613 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,False    ,300.0
+614 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,False    ,
+615 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+616 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,fixed         ,             0.002 ,True     ,
+617 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+618 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+619 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.01  ,False    ,
+620 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.002 ,True     ,
+621 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+622 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.06  ,True     ,300.0
+623 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,True     ,
+624 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.06  ,False    ,300.0
+625 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.008 ,False    ,
+626 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,False    ,
+627 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+628 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+629 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,False    ,300.0
+630 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,False    ,
+631 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,True     ,
+632 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.004 ,False    ,
+633 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+634 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,fixed         ,             0.002 ,True     ,
+635 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,False    ,
+636 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,False    ,
+637 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+638 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,False    ,
+639 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+640 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,True     ,
+641 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,False    ,
+642 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+643 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+644 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+645 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+646 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,fixed         ,             0.002 ,True     ,
+647 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.002 ,True     ,
+648 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+649 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,False    ,
+650 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+651 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+652 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,True     ,
+653 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.004 ,False    ,
+654 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,True     ,
+655 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+656 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,True     ,
+657 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,False    ,
+658 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.008 ,True     ,
+659 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+660 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+661 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.006 ,False    ,
+662 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,True     ,
+663 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,False    ,
+664 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,True     ,
+665 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.04  ,True     ,300.0
+666 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,False    ,300.0
+667 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,False    ,300.0
+668 ,logistic          , 0.9  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.002 ,True     ,
+669 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.002 ,True     ,
+670 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.05  ,False    ,300.0
+671 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+672 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,True     ,
+673 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+674 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,False    ,
+675 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,False    ,
+676 ,logistic          , 0.9  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.002 ,True     ,
+677 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.04  ,False    ,300.0
+678 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.006 ,True     ,
+679 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,False    ,
+680 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+681 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.002 ,True     ,
+682 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,False    ,300.0
+683 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.05  ,True     ,300.0
+684 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,True     ,
+685 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,fixed         ,             0.002 ,True     ,
+686 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,False    ,
+687 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,True     ,
+688 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,fixed         ,             0.002 ,True     ,
+689 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.004 ,False    ,
+690 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.002 ,True     ,
+691 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,False    ,
+692 ,logistic          , 0.7  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.004 ,True     ,
+693 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+694 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.002 ,True     ,
+695 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.002 ,True     ,
+696 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+697 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.002 ,True     ,
+698 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.001   ,fixed         ,             0.002 ,True     ,
+699 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,fixed         ,             0.002 ,True     ,
+700 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+701 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+702 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+703 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.08  ,True     ,300.0
+704 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.08  ,True     ,300.0
+705 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+706 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
+707 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+708 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+709 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+710 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+711 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+712 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+713 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+714 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.1   ,True     ,300.0
+715 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+716 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+717 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+718 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.08  ,True     ,300.0
+719 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.005   ,linear_decay  ,             0.1   ,True     ,300.0
+720 ,logistic          , 0.75 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
+721 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+722 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.08  ,True     ,300.0
+723 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.1   ,True     ,300.0
+724 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+725 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+726 ,logistic          , 0.8  ,       128 ,"[60, 30]"         ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+727 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+728 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.1   ,True     ,300.0
+729 ,logistic          , 0.7  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+730 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
+731 ,logistic          , 0.85 ,       128 ,"[60, 30]"         ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+732 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.1   ,True     ,300.0
+733 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+734 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
+735 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+736 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+737 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+738 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+739 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.005   ,linear_decay  ,             0.12  ,True     ,300.0
+740 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
+741 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.0005  ,linear_decay  ,             0.12  ,True     ,300.0
+742 ,logistic          , 0.75 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+743 ,logistic          , 0.8  ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+744 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.001   ,linear_decay  ,             0.12  ,True     ,300.0
+745 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.0001  ,linear_decay  ,             0.12  ,True     ,300.0
+746 ,logistic          , 0.85 ,       128 ,"[30, 30, 30]"     ,0.00025 ,linear_decay  ,             0.12  ,True     ,300.0
