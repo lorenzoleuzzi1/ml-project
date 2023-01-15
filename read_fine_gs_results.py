@@ -22,15 +22,15 @@ results_paths = [
 	'fine_gs2_results_giulia1.csv',
 	'fine_gs2_results_giulia2.csv',
 	'fine_gs2_results_giulia3.csv',
-	#'fine_gs2_results_irene1.csv',
-	#'fine_gs2_results_irene2.csv',
-	#'fine_gs2_results_irene3.csv',
+	'fine_gs2_results_irene1.csv',
+	'fine_gs2_results_irene2.csv',
+	'fine_gs2_results_irene3.csv',
 	'fine_gs2_results_lorenzo1.csv',
 	'fine_gs2_results_lorenzo2.csv',
 	'fine_gs2_results_lorenzo3.csv'
 ]
-all_results_path = 'fine_gs2_partial_results.csv'
-ranked_results_path = 'fine_gs2_params_rank_partial.csv'
+all_results_path = 'fine_gs2_results.csv'
+ranked_results_path = 'fine_gs2_params_rank.csv'
 K = 5
 
 # concatenate results into a single dataframe
@@ -88,15 +88,18 @@ rem_list = [
 	'verbose',
 	'weights_bound',
 	'weights_dist',
-	'epochs'
+	'epochs',
+	'tau',
+	'batch_size',
+	'activation_hidden'
 	]
 params_df = pd.DataFrame(columns=[])
 for param in scores_df['params']: # TODO: fare in modo migliore?
 	params_dict = json.loads(param)
 	#params_dict = ast.literal_eval(param)
 	for key in rem_list:
-		del params_dict[key]
-		params_dict['batch_size'] = str(params_dict['batch_size'])
+		if key in params_dict:
+			del params_dict[key]
 	params_df = pd.concat([params_df, pd.DataFrame([params_dict])], ignore_index=True)
 params_df.to_csv(ranked_results_path)
 
