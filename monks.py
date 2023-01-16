@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import ParameterGrid
 from sklearn.metrics import accuracy_score
-from validation import nested_cross_validation, k_fold_cross_validation, grid_search_cv
+from validation import k_fold_cross_validation, grid_search_cv
 from network import Network
 from utils import error_plot, accuracy_plot
 from sklearn.neural_network import MLPClassifier
@@ -65,7 +65,7 @@ X_test, y_test = read_monks(TEST_PATH)
 
 net = Network(
     hidden_layer_sizes=[3],
-    activation_out='softmax',
+    activation_out='logistic',
     classification=True,
     activation_hidden='tanh',
     epochs = 100, 
@@ -76,26 +76,31 @@ net = Network(
     learning_rate_init=0.01,
     #nesterov=True, 
     early_stopping=False,
-    evaluation_metric='logloss',
+    evaluation_metric='accuracy',
     verbose=True,
-    loss='logloss',
+    loss='mse',
     #validation_frequency=1,
     validation_size=0.1,
     tol=1e-4,
     random_state=0)
 
-grid_search_cv(grid, X_train=X_train, y_train=y_train, k=3)
+#grid_search_cv(grid, X_train=X_train, y_train=y_train, k=3)
 # results = cross_validation(net, X_train, y_train, 3)
 # print(results)
-# net.fit(X_train, y_train) # no early stopping
+net.fit(X_train, y_train, X_test, y_test) 
+tr_loss = net.train_losses_reg
+val_loss = net.val_losses
+tr_score = net.train_scores
+val_score = net.val_scores
+# no early stopping
 # # #tr_loss, val_loss, tr_score, val_score = net.fit(X_train, y_train) # early stopping
 # pred = net.predict(X_test)
 # print(accuracy_score(y_true=y_test, y_pred=pred))
 # # print(net.get_current_weights())
-# plt.plot(net.train_losses, label="training loss", color="blue")
-# # #plt.plot(tr_score, label="training score", color="green")
-# # #plt.plot(val_loss, label="validation loss", color="red")
-# # #plt.plot(val_score, label="validation score", color="black")
+plt.plot(tr_loss, label="training loss", color="blue")
+plt.plot(tr_score, label="training score", color="green")
+plt.plot(val_loss, label="validation loss", color="red")
+plt.plot(val_score, label="validation score", color="black")
 # # plt.legend(loc="upper right")
 # # plt.title("OUR")
 plt.show()

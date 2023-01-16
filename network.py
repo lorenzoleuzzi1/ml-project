@@ -3,6 +3,7 @@ import pickle
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
+from sklearn.utils.multiclass import unique_labels
 from math import floor, ceil
 from utils import *
 from layer import *
@@ -301,7 +302,7 @@ class Network:
         
         return Y_train
 
-    def fit_preprocessing(self, X_train, Y_train):
+    def fit_preprocessing(self, X_train, Y_train, X_val, Y_val):
         if X_train.ndim != 2:
             raise ValueError("X_train must be a 2-dimensional array")
         if Y_train.ndim != 2:
@@ -310,18 +311,42 @@ class Network:
             raise ValueError("Multilabel classification is not supported.")
         if self.batch_size > X_train.shape[0]:
             raise ValueError("batch_size must not be larger than sample size.")
+        
+        if (X_val is None and Y_val is not None) or (X_val is not None and Y_val is None):
+            raise ValueError("X_val and Y_val must be both None or not None.") # TODO: sistemare messaggio errore
+        if X_val is not None:
+            if X_val.ndim != 2:
+                raise ValueError("X_val must be a 2-dimensional array")
+            if Y_val.ndim != 2:
+                raise ValueError("Y_val must be a 2-dimensional array")
+            if Y_train.shape[1] != Y_val.shape[1]:
+                raise ValueError("Y_train and Y_val do not have matching sizes.")
+            if self.classification:
+                train_labels = unique_labels(Y_train)
+                val_labels = unique_labels(Y_val)
+                if len(val_labels) > len(train_labels):
+                    raise ValueError("validation labels are less than train labels.") # TODO: sistemare messaggio errore
+                for label in val_labels:
+                    if label not in train_labels:
+                        raise ValueError("validation labels are not included in train labels.")  # TODO: sistemare messaggio errore
 
         self.n_features = X_train.shape[1]
         if self.classification:
             Y_train = self.encode_targets(Y_train)
+            if Y_val is not None:
+                Y_val = self.binarizer.transform(Y_val).astype(np.float64)
+                if self.n_classes == 2 and self.activation_out == 'softmax':
+                    Y_val = np.hstack((Y_val, 1 - Y_val))
             self.n_outputs = self.n_classes
             if self.n_classes == 2 and self.activation_out != 'softmax':
                 self.n_outputs = 1
         else:
             self.n_outputs = Y_train.shape[1]
 
-        return Y_train
+        return Y_train, Y_val
 
+    # se early stopping è falso anche quando al fit viene passato X_val e Y_val 
+    # utilizza come criterio di arresto solo l'errore sul train
     def update_no_improvement_count(self, epoch, train_losses, train_scores, val_scores):
         if epoch < 10:
             self.best_epoch = epoch
@@ -355,8 +380,8 @@ class Network:
         else:
             self.no_improvement_count = 0
 
-    def fit(self, X_train, Y_train):
-        Y_train = self.fit_preprocessing(X_train, Y_train)
+    def fit(self, X_train, Y_train, X_val=None, Y_val=None):
+        Y_train, Y_val = self.fit_preprocessing(X_train, Y_train, X_val, Y_val)
         self.compose()
         n_samples = X_train.shape[0]
 
@@ -366,14 +391,15 @@ class Network:
                 stratify = Y_train
             else:
                 stratify = None
-            X_train, X_val, Y_train, Y_val = train_test_split(
-                X_train,
-                Y_train,
-                test_size=self.validation_size,
-                shuffle=True,
-                stratify=stratify,
-                random_state=self.random_state
-            )
+            if Y_val is None:
+                X_train, X_val, Y_train, Y_val = train_test_split(
+                    X_train,
+                    Y_train,
+                    test_size=self.validation_size,
+                    shuffle=True,
+                    stratify=stratify,
+                    random_state=self.random_state
+                )
         
         # divide training set into batches
         if isinstance(self.batch_size, int):
@@ -381,6 +407,7 @@ class Network:
         else: # assuming it is a float
             n_batches = floor(1 / self.batch_size)
 
+        self.train_losses_reg = []
         self.train_losses = []
         self.val_losses = []
         self.train_scores = []
@@ -390,6 +417,7 @@ class Network:
  
         for epoch in range(self.epochs):
             train_loss = 0
+            train_loss_not_reg = 0
             train_score = 0
             X_train, Y_train = shuffle(X_train, Y_train, random_state=self.random_state)
             X_train_batched = np.array_split(X_train, n_batches)
@@ -418,6 +446,7 @@ class Network:
                         delta = layer.backward_propagation(delta)
 
                 # add l2 regularization term to the loss
+                train_loss_not_reg = train_loss
                 reg_term = 0
                 for layer in self.layers:
                     weights = layer.weights.ravel()
@@ -442,7 +471,7 @@ class Network:
                     )
             
             #-----validation-----
-            if self.early_stopping: # and (epoch % self.validation_frequency) == 0:
+            if self.early_stopping or Y_val is not None: # and (epoch % self.validation_frequency) == 0:
                 Y_val_output = self.predict_outputs(X_val)
                 val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
                 val_score = self.evaluate(Y_true=Y_val, Y_pred=Y_val_output, evaluation_metric=self.evaluation_metric)
@@ -450,21 +479,25 @@ class Network:
                 self.val_scores.append(val_score)
             
             # average on all samples 
+            train_loss_not_reg /= n_samples
             train_loss /= n_samples
             train_score /= n_samples
-            self.train_losses.append(train_loss)
+            self.train_losses.append(train_loss_not_reg)
+            self.train_losses_reg.append(train_loss)
             self.train_scores.append(train_score)
 
+            # + reg
+
             if self.verbose:
-                if self.early_stopping: # and (epoch % self.validation_frequency) == 0:
+                if self.early_stopping or Y_val is not None: # and (epoch % self.validation_frequency) == 0:
                     print('epoch %d/%d   train error=%f     val error=%f    score=%f' 
-                        % (epoch+1, self.epochs, train_loss, val_loss, val_score))
+                        % (epoch+1, self.epochs, train_loss_not_reg, val_loss, val_score))
                 else:
                     print('epoch %d/%d   train error=%f' 
-                        % (epoch+1, self.epochs, train_loss))
+                        % (epoch+1, self.epochs, train_loss_not_reg))
             
             #-----stopping-----
-            self.update_no_improvement_count(epoch, self.train_losses, self.train_scores, self.val_scores)
+            self.update_no_improvement_count(epoch, self.train_losses_reg, self.train_scores, self.val_scores)
             
             if train_loss > 10000:
                 break # TODO: togliere!
