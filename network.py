@@ -364,10 +364,12 @@ class Network:
                 best_metric_delta = self.best_metric - val_scores[-1]
         else:
             converged = train_losses[-1] <= self.tol
-            if self.evaluation_metric == 'accuracy':
+            best_metric_delta = self.best_loss - train_losses[-1]
+            # TODO: aggiustare con parametro
+            """if self.evaluation_metric == 'accuracy':
                 best_metric_delta = train_scores[-1] - self.best_metric
             else:
-                best_metric_delta = self.best_metric - train_scores[-1]
+                best_metric_delta = self.best_metric - train_scores[-1] # nella cup!"""
         # else:
         #     return # could miss the best
 
@@ -493,10 +495,10 @@ class Network:
 
             if self.verbose:
                 if self.early_stopping or Y_val is not None: # and (epoch % self.validation_frequency) == 0:
-                    print('epoch %d/%d   train loss=%f     train score=%f     val loss=%f    val score=%f' 
+                    print('epoch %d/%d   train loss=%.6f     train score=%.6f     val loss=%.6f    val score=%.6f' 
                         % (epoch+1, self.epochs, train_loss_not_reg, train_score, val_loss, val_score))
                 else:
-                    print('epoch %d/%d   train error=%f' 
+                    print('epoch %d/%d   train error=%.6f' 
                         % (epoch+1, self.epochs, train_loss_not_reg))
             
             #-----stopping-----

@@ -6,9 +6,7 @@ from validation import k_fold_cross_validation, grid_search_cv
 from network import Network
 from utils import error_plot, accuracy_plot
 from sklearn.neural_network import MLPClassifier
-
 import matplotlib.pyplot as plt
-
 
 MONKS1_TRAIN_PATH = './datasets/monks-1.train'
 MONKS1_TEST_PATH = './datasets/monks-1.test'
@@ -31,19 +29,19 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
     targets = targets.reshape(targets.shape[0], 1)
     return data, targets
 
-X_train1, y_train1 = read_monks(MONKS1_TRAIN_PATH)
-X_test1, y_test1 = read_monks(MONKS1_TEST_PATH)
+X_train1, y_train1 = read_monks(MONKS2_TRAIN_PATH)
+X_test1, y_test1 = read_monks(MONKS2_TEST_PATH)
 
 net1 = Network(
-    hidden_layer_sizes=[3],
-    activation_out='logistic',
+    hidden_layer_sizes=[2],
+    activation_out='tanh',
     classification=True,
     activation_hidden='tanh',
     epochs = 400, # diminuire!
     lambd=0,
     learning_rate = "fixed", # ?, tau
-    batch_size=16,
-    learning_rate_init=0.01,
+    batch_size=16, # 4
+    learning_rate_init=0.005, # 0.001 0.01
     alpha=0.9,
     nesterov=False,
     early_stopping=False,
@@ -55,8 +53,8 @@ net1 = Network(
     random_state=None,
     stopping_patience=30,
     reinit_weights=True,
-    weights_dist=None,
-    weights_bound=None
+    weights_dist='uniform',
+    weights_bound=0.7
     )
 
 """activation_out='tanh',
@@ -86,19 +84,21 @@ print("ACCURACY test %f" % net1.val_scores[net1.best_epoch])
 
 plt.plot(net1.train_losses, label="Training", color="blue")
 plt.plot(net1.val_losses, 'r--', label='Test')
-plt.axvline(x=net1.best_epoch, ymin=0, ymax=net1.val_losses[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
+plt.vlines(x=net1.best_epoch, ymin=0, ymax=net1.val_losses[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
 plt.legend()
 plt.grid()
 plt.xlabel("Epochs")
 plt.ylabel("Loss (MSE)")
+plt.ylim(0, max(max(net1.train_losses), max(net1.val_losses)))
 plt.savefig("monks1_loss_curves.pdf", bbox_inches="tight")
 
 plt.figure()
 plt.plot(net1.train_scores, label="Training", color="blue")
 plt.plot(net1.val_scores, 'r--', label="Test")
-plt.axvline(x=net1.best_epoch, ymin=0, ymax=net1.val_scores[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
+plt.vlines(x=net1.best_epoch, ymin=0, ymax=net1.val_scores[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
 plt.legend()
 plt.grid()
 plt.xlabel("Epochs")
 plt.ylabel("Accuracy")
+plt.ylim(0, 1)
 plt.savefig("monks1_accuracy_curves.pdf", bbox_inches="tight")
