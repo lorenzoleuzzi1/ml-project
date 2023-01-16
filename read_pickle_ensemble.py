@@ -1,58 +1,119 @@
 import numpy as np
 import pickle
 import pandas as pd
-from utils import mee
+import matplotlib.pyplot as plt
+from utils import mee, mse
 
-file = open('./ensemble_kfold.pkl', 'rb')
+#TODO: dividiamo in 10 grafici con 5 plot per ogni modello + uno finale con la media
+# tutte sullo stesso range!!
+
+def pad(a):
+    l = np.array([len(a[i]) for i in range(len(a))])
+    width = l.max()
+    b=[]
+    for i in range(len(a)):
+        if len(a[i]) != width:
+            x = np.pad(a[i], (0,width-len(a[i])), 'constant',constant_values = 0)
+        else:
+            x = a[i]
+        b.append(x)
+    b = np.array(b)
+    return b
+
+
+file = open('./ensemble_assesment.pkl', 'rb')
 data = pickle.load(file)
 file.close()
 
+
+train_losses = np.array(data['train_losses'])
+train_scores = np.array(data['train_scores'])
+val_losses = np.array(data['val_losses'])
+val_scores = np.array(data['val_scores'])
+epochs = np.array(data['best epochs'])
+
+for i in range(50):
+    if i==49:
+            plt.semilogy(train_losses[i], label='Development set (MSE)', color='lightsteelblue', linewidth=0.5)
+            plt.semilogy(val_losses[i], label='Internal test set (MSE)', color='lightcoral', linewidth=0.5)
+    else:
+            plt.semilogy(train_losses[i], color='lightsteelblue', linewidth=0.5)
+            plt.semilogy(val_losses[i], color='lightcoral', linewidth=0.5)
+
+train_losses = pad(train_losses)
+val_losses = pad(val_losses)
+train_losses_mean = np.average(train_losses, weights=(train_losses > 0), axis=0)
+val_losses_mean = np.average(val_losses, weights=(train_losses > 0), axis=0)
+
+plt.semilogy(train_losses_mean, color='blue', label='Ensemble development set (MSE)')
+plt.semilogy(val_losses_mean , color='red', linestyle='-', label='Ensemble internal test set (MSE)')
+
+plt.legend()
+plt.xlabel('Epochs')
+plt.ylabel('Log(Loss)')
+plt.savefig('mse_curves.pdf', bbox_inches="tight")
+
+plt.figure() 
+for i in range(50):
+    if i==49:
+            plt.semilogy(train_scores[i], label='Development set (MEE)', color='lightsteelblue', linewidth=0.5)
+            plt.semilogy(val_scores[i], label='Internal test set (MEE)', color='lightcoral', linewidth=0.5)
+    else:
+            plt.figure('mee')
+            plt.semilogy(train_scores[i], color='lightsteelblue', linewidth=0.5)
+            plt.semilogy(val_scores[i], color='lightcoral', linewidth=0.5)
+
+train_scores = pad(train_scores)
+val_scores = pad(val_scores)
+train_scores_mean = np.average(train_scores, weights=(train_scores > 0), axis=0)
+val_scores_mean = np.average(val_scores, weights=(val_losses > 0), axis=0)
+plt.semilogy(train_scores_mean, color='blue', label='Ensemble development set (MEE)')
+plt.semilogy(val_scores_mean, color='red', linestyle='-', label='Ensemble internal test set (MEE)')
+
+plt.legend()
+plt.xlabel('Epochs')
+plt.ylabel('Log(Error)')
+plt.savefig('mee_curves.pdf', bbox_inches="tight")
+
+
+train_loss_mean = 0
+train_score_mean = 0
+val_loss_mean = 0
+val_score_mean = 0
+
+n_models = 50
+
+for i in range(n_models):
+    train_loss_mean += train_losses[i][epochs[i]]
+    train_score_mean += train_scores[i][epochs[i]]
+    val_loss_mean += val_losses[i][epochs[i]]
+    val_score_mean += val_scores[i][epochs[i]]
+
+train_loss_mean /= n_models
+train_score_mean /= n_models
+val_loss_mean /= n_models
+val_score_mean /= n_models
+
+
 preds = data['preds']
-Y_true = data['true']
+y_test = data['true']
+mean_preds = np.mean(np.array(preds), axis=0)
+mse_test = mse(mean_preds, y_test)
+mee_test = mee(mean_preds, y_test)
 
-pred_k1 = []
-pred_k2 = []
-pred_k3 = []
-pred_k4 = []
-pred_k5 = []
+csv_data = {}
+csv_data['mse_test'] = mse_test
+csv_data['mee_test'] = mee_test
+csv_data['train_loss_mean_best_epoch'] = train_loss_mean
+csv_data['train_score_mean_best_epoch'] = train_score_mean
+csv_data['val_loss_mean_best_epoch'] = val_loss_mean
+csv_data['val_score_mean_best_epoch'] = val_score_mean
 
-for pred in preds:
-    k = 1
-    for pred_kth in pred:
-        if k == 1:
-            pred_k1.append(pred_kth)
-        if k == 2:
-            pred_k2.append(pred_kth)
-        if k == 3:
-            pred_k3.append(pred_kth)
-        if k == 4:
-            pred_k4.append(pred_kth)
-        if k == 5:
-            pred_k5.append(pred_kth)
-        k += 1
-
-means_pred_k1 = np.mean(pred_k1, axis=0)
-means_pred_k2 = np.mean(pred_k2, axis=0)
-means_pred_k3 = np.mean(pred_k3, axis=0)
-means_pred_k4 = np.mean(pred_k4, axis=0)
-means_pred_k5 = np.mean(pred_k5, axis=0)
-
-split0_val_mee = mee(Y_true[0], means_pred_k1)
-split1_val_mee = mee(Y_true[1], means_pred_k2)
-split2_val_mee = mee(Y_true[2], means_pred_k3)
-split3_val_mee = mee(Y_true[3], means_pred_k4)
-split4_val_mee = mee(Y_true[4], means_pred_k5)
-
-val_mee = (split0_val_mee + split1_val_mee + split2_val_mee + split3_val_mee + split4_val_mee)/5
-
-diz = {'split0_val_mee': split0_val_mee,
-       'split1_val_mee': split1_val_mee,
-       'split2_val_mee': split2_val_mee,
-       'split3_val_mee': split3_val_mee,
-       'split4_val_mee': split4_val_mee,
-       'val_mee': val_mee}
-
-
-results_path = './ensemble_k_fold.csv'
-df_scores = pd.DataFrame([diz, diz])
+results_path = 'ensemble_assesment.csv'
+df_scores = pd.DataFrame([csv_data, csv_data])
 df_scores.to_csv(results_path)
+# TODO: predizioni di ogni modello non le salviamo
+
+preds_path = 'preds_assesment.csv'
+df_preds = pd.DataFrame(mean_preds)
+df_preds.to_csv(preds_path)
