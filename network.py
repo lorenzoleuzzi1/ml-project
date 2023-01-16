@@ -37,6 +37,7 @@ class Network:
         weights_dist : str = None,
         weights_bound : float = None,
         metric_decrease_tol : float = 0.001/100,
+        stopping_criteria_on_loss : bool = True # TODO: nella cup dobbiamo mettere False, rinominare! e controllare
         ):
        
         self.check_params(locals())
@@ -74,6 +75,7 @@ class Network:
         if self.activation_out == 'tanh': self.neg_label = -1.0
         else: self.neg_label = 0.0
         self.pos_label = 1.0
+        self.stopping_criteria_on_loss = stopping_criteria_on_loss
 
     def check_params(self, params):
         if (params['activation_out'] not in ACTIVATIONS):
@@ -364,14 +366,13 @@ class Network:
                 best_metric_delta = self.best_metric - val_scores[-1]
         else:
             converged = train_losses[-1] <= self.tol
-            best_metric_delta = self.best_loss - train_losses[-1]
-            # TODO: aggiustare con parametro
-            """if self.evaluation_metric == 'accuracy':
-                best_metric_delta = train_scores[-1] - self.best_metric
+            if self.stopping_criteria_on_loss:
+                best_metric_delta = self.best_loss - train_losses[-1]
             else:
-                best_metric_delta = self.best_metric - train_scores[-1] # nella cup!"""
-        # else:
-        #     return # could miss the best
+                if self.evaluation_metric == 'accuracy':
+                    best_metric_delta = train_scores[-1] - self.best_metric
+                else:
+                    best_metric_delta = self.best_metric - train_scores[-1]
 
         if best_metric_delta > 0:
             self.best_epoch = epoch
