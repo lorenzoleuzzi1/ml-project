@@ -8,7 +8,7 @@ CUP_BLIND_TEST_PATH = './datasets/CUP_BLIND_TS.pkl'
 CUP_DEV_PATH = './datasets/CUP_DEV.pkl'
 CUP_TEST_PATH = './datasets/CUP_TS.pkl'
 
-def read_tr_cup(path):
+def read_tr_cup(path): # TODO: valuta se cambiare nomi
     data = pd.read_csv(path, sep=",", header=None, comment='#')
     data.drop(data.columns[0], axis=1, inplace=True)
     targets = data[data.columns[-2:]].to_numpy()
