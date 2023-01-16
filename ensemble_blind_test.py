@@ -6,6 +6,19 @@ from network import Network
 from cup_parsing import load_blind_test_cup, read_tr_cup
 from validation import read_grid_search_results
 
+def pad(a):
+    l = np.array([len(a[i]) for i in range(len(a))])
+    width = l.max()
+    b=[]
+    for i in range(len(a)):
+        if len(a[i]) != width:
+            x = np.pad(a[i], (0,width-len(a[i])), 'constant',constant_values = 0)
+        else:
+            x = a[i]
+        b.append(x)
+    b = np.array(b)
+    return b
+
 df = read_grid_search_results("fine_gs2_results.csv")
 X_train, y_train = read_tr_cup()
 X_test = load_blind_test_cup()
@@ -44,8 +57,11 @@ for i in range(best_n):
         preds.append(Y_pred)
         epochs.append(net.best_epoch)
 
-train_losses_mean = np.mean(train_losses, axis=0)
-train_scores_mean = np.mean(train_scores, axis=0)
+train_losses = np.array(pad(train_losses))
+train_scores = np.array(pad(train_scores))
+train_losses_mean = np.average(train_losses, weights=(train_losses > 0), axis=0)
+train_scores_mean = np.average(train_scores, weights=(train_scores > 0), axis=0)
+
 
 train_loss_mean = 0
 train_score_mean = 0
@@ -100,10 +116,10 @@ df_scores = pd.DataFrame([csv_data, csv_data])
 df_scores.to_csv(results_path)
 
 df = pd.DataFrame(mean_preds)
-f = open('team-name_ML-CUP22-TS.csv', 'a')
+f = open('TheEnsembletors_ML-CUP22-TS.csv', 'a')
 f.write('# Giulia Ghisolfi	Lorenzo Leuzzi	Irene Testa\n')
-f.write('# team-name\n')
+f.write('# TheEnsembletors\n')
 f.write('# ML-CUP22\n')
 f.write('# 23/01/2023\n')
-df.to_csv(f, header=False)
+df.to_csv(f, header=False, line_terminator='\r')
 f.close()
