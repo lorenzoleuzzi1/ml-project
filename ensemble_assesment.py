@@ -1,6 +1,6 @@
 from validation import read_grid_search_results
 from network import Network
-from cup_parsing import load_blind_test_cup, load_tr
+from cup_parsing import load_dev_set_cup, load_internal_test_cup
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold, KFold
@@ -11,8 +11,8 @@ from utils import mee, mse
 
 
 df = read_grid_search_results("fine_gs2_results.csv")
-X_train, y_train = load_blind_test_cup()
-X_test, y_test = load_blind_test_cup()
+X_train, y_train = load_dev_set_cup()
+X_test, y_test = load_internal_test_cup()
 n_trials = 5
 best_n = 10
 preds = []
