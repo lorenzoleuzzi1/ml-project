@@ -4,8 +4,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from utils import mee, mse
 
-#TODO: dividiamo in 10 grafici con 5 plot per ogni modello + uno finale con la media
-# tutte sullo stesso range!!
 
 def pad(a):
     l = np.array([len(a[i]) for i in range(len(a))])

@@ -4,6 +4,7 @@ from cup_parsing import load_dev_set_cup
 import pandas as pd
 import json
 
+# TODO: ripetizione per valutare influenza inizializzazione pesi
 results_path = 'fine_gs2_repetition.csv'
 
 df = read_grid_search_results("fine_gs2_results.csv")

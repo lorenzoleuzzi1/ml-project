@@ -9,6 +9,7 @@ import pickle
 import numpy as np
 from utils import mee, mse
 
+#TODO: fatta per verificare se fosse meglio di un solo modello
 def k_fold_cross_validation_ensemble(network, X_train, y_train, k):
     if k <= 1:
         print('Number of folds k must be more than 1')

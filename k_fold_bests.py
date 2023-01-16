@@ -5,6 +5,7 @@ from network import Network
 from validation import read_grid_search_results, k_fold_cross_validation
 from cup_parsing import load_dev_set_cup
 
+# TODO: train loss senza regolarizzazione -> le usiamo?
 X_dev, y_dev = load_dev_set_cup()
 df = read_grid_search_results("fine_gs2_results.csv")
 best_n = 10
