@@ -3,12 +3,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from network import Network
-from cup_parsing import load_internal_test_cup, read_tr_cup
+from cup_parsing import load_blind_test_cup, read_tr_cup
 from validation import read_grid_search_results
 
 df = read_grid_search_results("fine_gs2_results.csv")
 X_train, y_train = read_tr_cup()
-X_test = load_internal_test_cup()
+X_test = load_blind_test_cup()
 
 n_trials = 5
 best_n = 10
@@ -75,14 +75,14 @@ plt.semilogy(train_losses_mean, color='blue', label='Development set + internal 
 plt.legend()
 plt.xlabel('Epochs')
 plt.ylabel('Log(Loss)')
-plt.savefig('mse_curves.pdf', bbox_inches="tight")
+plt.savefig('blind_mse_curves.pdf', bbox_inches="tight")
 
 plt.figure("mee")
 plt.semilogy(train_scores_mean, color='blue', label='Development set + internal test set (MEE)')
 plt.legend()
 plt.xlabel('Epochs')
 plt.ylabel('Log(Error)')
-plt.savefig('mee_curves.pdf', bbox_inches="tight")
+plt.savefig('blind_mee_curves.pdf', bbox_inches="tight")
 
 mean_preds = np.mean(np.array(preds), axis=0)
 data['mean_preds'] = mean_preds
