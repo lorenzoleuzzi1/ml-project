@@ -1,77 +1,234 @@
-from sklearn.model_selection import train_test_split
 from sklearn.model_selection import ParameterGrid
-from sklearn.model_selection import StratifiedKFold
-from sklearn.datasets import load_breast_cancer
 from network import Network
 
-# TODO: add other params...
 grid = ParameterGrid([
     {
-        'activation_out': ['tanh', 'logistic'],
-        'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[10], [3, 3]],
-        'loss': ['mse', 'rmse'],
-        'epochs': [100, 200, 500, 1000],
-        'learning_rate': ['fixed'],
-        'learning_rate_init': [0.001, 0.05, 0.01, 0.1, 0.5],
-        'batch_size': [1, 0.25, 0.5, 1.0],
-        'lambd': [0.0001, 0.001, 0.01, 0.1],
-        'alpha': [0.5, 0.7, 0.9]
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        # 32,16 # 20, 100, 30,30, 100,100
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0.5, 0.7, 0.9],
+        'verbose': [False],
+        'nesterov': [True, False],
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [1],
+        'learning_rate_init': [0.0001, 0.0005, 0.001]
     },
     {
-        'activation_out': ['tanh', 'logistic'],
-        'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[10], [3, 3]],
-        'loss': ['mse', 'rmse'],
-        'epochs': [100,200, 500, 1000],
-        'learning_rate': ['linear_decay'],
-        'learning_rate_init': [0.001, 0.05, 0.01, 0.1, 0.5],
-        'tau': [100], # depends on epochs (must be less)
-        'batch_size': [1, 0.25, 0.5, 1.0],
-        'lambd': [0.0001, 0.001, 0.01, 0.1],
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
         'alpha': [0.5, 0.7, 0.9],
+        'verbose': [False],
+        'nesterov': [True, False],
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [1.0],
+        'learning_rate_init': [0.1, 0.01]
+    },
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0.5, 0.7, 0.9],
+        'verbose': [False],
+        'nesterov': [True, False],  # TODO togliere ????
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        # faremo 5 o 3 fold cross alidation 1500/5*4 => 1200 1500/3*2=1000,
+        'batch_size': [32, 256],
+        'learning_rate_init': [0.01, 0.001]
+    },
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0],
+        'verbose': [False],
+        'nesterov': [False],
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [1],
+        'learning_rate_init': [0.0001, 0.0005, 0.001]
+    },
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100, ], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0],
+        'verbose': [False],
+        'nesterov': [False],
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [1.0],
+        'learning_rate_init': [0.1, 0.01]
+    },
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh', 'logistic', 'relu'],  # identity?
+        # 20, 100, 30,30, 100,100
+        'hidden_layer_sizes': [[10], [10, 10], [50], [100], [50, 50], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [500, 1000],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0],
+        'verbose': [False],
+        'nesterov': [False],  # TODO togliere ????
+        'early_stopping': [True, False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        # faremo 5 o 3 fold cross alidation 1500/5*4 => 1200 1500/3*2=1000,
+        'batch_size': [32, 256],
+        'learning_rate_init': [0.01, 0.001]
     }
-])
+]
+)
 
-N_SPLITS = 5
-N_TRIALS = 5 
+grid = ParameterGrid([
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh'],  # identity?
+        'hidden_layer_sizes': [[20], [100], [30, 30], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [100, 500],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0, 0.5, 0.9],
+        'verbose': [False],
+        # in generale non sembra influire tanto (forse peggiorare)
+        'nesterov': [False],
+        'early_stopping': [False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [256, 1.0],
+        'learning_rate_init': [0.0005, 0.001, 0.1]
+    },
+    {
+        'activation_out': ['identity'],
+        'classification': [False],
+        'activation_hidden': ['tanh'],  # identity?
+        'hidden_layer_sizes': [[20], [100], [30, 30], [100, 100]],
+        'loss': ['mse'],
+        'evaluation_metric': ['mee'],
+        'epochs': [100, 500],
+        'tau': [200],  # after tau epochs lr=1/10*init
+        'tol': [0.0001],
+        'learning_rate': ['fixed', 'linear_decay'],
+        # rivedi dopo aver capito come scalare lamda, quando alto serve early stopping?
+        'lambd': [0, 0.0001, 0.001, 0.01, 0.1],
+        'alpha': [0, 0.5, 0.9],
+        'verbose': [False],
+        # in generale non sembra influire tanto (forse peggiorare)
+        'nesterov': [False],
+        'early_stopping': [False],
+        'stopping_patience': [5],
+        'validation_size': [0.1],
+        'validation_frequency': [5],
+        'random_state': [None],
+        'reinit_weights': [True],
+        'weights_dist': [None],
+        'metric_decrease_tol': [0.1/100],
+        'batch_size': [1],
+        'learning_rate_init': [0.0001, 0.0005, 0.001]
+    }
+]
+)
 
-X, y = load_breast_cancer(return_X_y=True)
-X_dev, X_test, y_dev, y_test = train_test_split(X, y, test_size=0.33, shuffle=True, stratify=True)
-cv = StratifiedKFold(n_splits=N_SPLITS)
-
-# GRID SEARCH
-# param_scores = []
-# best_score = min value
-# best_params = {} 
-for params in grid:
-    # CROSS VALIDATION
-    # cv_scores = []
-    for split, (train_index , test_index) in enumerate(cv.split(X_dev, y_dev)):
-        X_train, X_val = X_dev[train_index, :], X_dev[test_index, :]
-        y_train, y_val = y_dev[train_index] , y_dev[test_index]
-        # trials_scores = []
-        for i in range(N_TRIALS):
-            net = Network(**params)
-            net.fit(X_train, y_train) # TODO: get returned tr_error, val_error, tr_accuracy, val_accuracy
-            y_pred = net.predict(X_val)
-            # trials_scores.append(metric(y_pred, y_val))
-        # mean_score_trials = mean(trials_scores)
-        # cv_scores.append(mean_score_trials)
-    # mean_score_cv = mean(cv_scores)
-    # param_scores.append(mean_score_cv)
-    # if mean_score_cv is better than best_score:
-    #   best_score = mean_score_cv
-    #   best_params = params
-
-###### RETRAIN WITH RANDOM INIT WEIGHTS ###### (could be risky, if unliky we could fall in local minimum)
-# net = Network(**best_params)
-# net.fit(X_dev, y_dev)
-# y_pred = net.predict(X_test)
-# risk = metric(y_pred, y_test)
-
-# OR
-
-###### RETRAIN ENSEMBLE ######
-# with init weights which gave the best score in each split?
-# with k nets using random init weights and building ensemble?
+print(len(grid))

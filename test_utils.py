@@ -3,13 +3,21 @@ import numpy as np
 
 # No asserts, need to call the functions and to check what they print
 
-size = 2
+size = 1
 input = np.random.rand(1, size)-0.5
 print("IN:")
 print(input)
 true = np.random.rand(1, size)-0.5
 print("TRUE:")
 print(true)
+
+def test_tanh():
+    f_net = tanh(input)
+    print("TANH(INPUT):")
+    print(f_net)
+    f_prime = tanh_prime(input)
+    print("TANH_PRIME(INPUT):")
+    print(f_prime)
 
 def test_relu():
     f_net = relu(input)
@@ -44,21 +52,35 @@ def test_softplus():
     print(f_prime)
 
 def test_softmax():
+    input = np.array([1, 2])
     f_net = softmax(input)
     print("SOFTMAX(INPUT):")
     print(f_net)
+    f_prime = softmax_prime(input)
+    print("SOFTMAX_PRIME(INPUT):")
+    print(f_prime)
 
 def test_losses():
-    pred = np.array([[1, 1], [3, 1]]) # mse flatten array (1 + 4 + 1)/4 == (1/2 + 5/2)/2 = 3/2 = 1.5
-    true = np.array([[2, 1], [5, 2]]) # mee = (1+sqrt(5))/2
-    #pred = np.array([[3,1]])
-    #true = np.array([[5,2]])
-    print(pred.shape)
+    pred = np.array([[2,2]])
+    true = np.array([3,2])
+    print("--MEE prime--")
+    print(mee_prime(true, pred)) # (y_pred - y_true) / f
+    print("--MSE prime--")
+    print(mse_prime(true, pred)) # 2 * (y_pred - y_true) / y_true.size
+    print("--MSE --")
+    print(mse(true, pred))
     print("--MEE--")
     print(mee(true, pred))
-    print("--MSE--")
-    print(mse(true, pred))
-    from sklearn.metrics import mean_squared_error
-    print(mean_squared_error(y_pred=pred, y_true=true))
+    #from sklearn.metrics import mean_squared_error
+    #print(mean_squared_error(y_pred=pred, y_true=true))
 
 test_losses()
+# target    prob
+# 1         1
+# 1         0.7
+# 0         0.7
+# 1         1
+# - ((0)+(1*log(0.7))+(1*log(0.3))+(0))/4
+# -(log(0.7)+log(0.3))/4 = 
+#print(log_loss(y_true=np.array([[1,0], [1,0], [1,0], [1,0]]), y_prob=np.array([[1,0],[0.7, 0.3],[0.3,0.7],[1,0]])))
+#print(-(np.log(0.7)+np.log(0.3))/4)
