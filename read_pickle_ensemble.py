@@ -32,13 +32,50 @@ val_losses = np.array(data['val_losses'])
 val_scores = np.array(data['val_scores'])
 epochs = np.array(data['best epochs'])
 
+# loss per ogni modello
+for i in range(5):
+    plt.figure()
+    for j in range(5):
+        if j == 0:
+            plt.semilogy(train_losses[j], label='Development set (MSE)', color='blue', linewidth=0.8)
+            plt.semilogy(val_losses[j], label='Internal test set (MSE)', color='red', linewidth=0.8)
+        else:
+            plt.semilogy(train_losses[j], color='blue', linewidth=0.8)
+            plt.semilogy(val_losses[j], color='red', linewidth=0.8)
+    
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.ylabel('Log(Loss)')
+    plt.ylim(top=10)
+    plt.savefig('mse_curves_model%d.pdf' % i, bbox_inches="tight")
+
+# score per ogni modello
+plt.figure()
+for i in range(5):
+    plt.figure()
+    for j in range(5):
+        if j == 0:
+            plt.semilogy(train_scores[j], label='Development set (MEE)', color='blue', linewidth=0.6)
+            plt.semilogy(val_scores[j], label='Internal test set (MEE)', color='red', linewidth=0.6)
+        else:
+            plt.semilogy(train_scores[j], color='blue', linewidth=0.6)
+            plt.semilogy(val_scores[j], color='red', linewidth=0.6)
+
+    plt.legend()
+    plt.xlabel('Epochs')
+    plt.ylabel('Log(Error)')
+    plt.ylim(top=5)
+    plt.savefig('mee_curves_model%d.pdf' % i, bbox_inches="tight")
+
+# loss di tutti i modelli
+plt.figure()
 for i in range(50):
     if i==49:
-            plt.semilogy(train_losses[i], label='Development set (MSE)', color='lightsteelblue', linewidth=0.5)
-            plt.semilogy(val_losses[i], label='Internal test set (MSE)', color='lightcoral', linewidth=0.5)
+            plt.semilogy(train_losses[i], label='Development set (MSE)', color='lightsteelblue', linewidth=0.6)
+            plt.semilogy(val_losses[i], label='Internal test set (MSE)', color='lightcoral', linewidth=0.6)
     else:
-            plt.semilogy(train_losses[i], color='lightsteelblue', linewidth=0.5)
-            plt.semilogy(val_losses[i], color='lightcoral', linewidth=0.5)
+            plt.semilogy(train_losses[i], color='lightsteelblue', linewidth=0.6)
+            plt.semilogy(val_losses[i], color='lightcoral', linewidth=0.6)
 
 train_losses = pad(train_losses)
 val_losses = pad(val_losses)
@@ -51,15 +88,16 @@ plt.semilogy(val_losses_mean , color='red', linestyle='-', label='Ensemble inter
 plt.legend()
 plt.xlabel('Epochs')
 plt.ylabel('Log(Loss)')
+plt.ylim(top=10)
 plt.savefig('mse_curves.pdf', bbox_inches="tight")
 
+# score di tutti i modelli
 plt.figure() 
 for i in range(50):
     if i==49:
             plt.semilogy(train_scores[i], label='Development set (MEE)', color='lightsteelblue', linewidth=0.5)
             plt.semilogy(val_scores[i], label='Internal test set (MEE)', color='lightcoral', linewidth=0.5)
     else:
-            plt.figure('mee')
             plt.semilogy(train_scores[i], color='lightsteelblue', linewidth=0.5)
             plt.semilogy(val_scores[i], color='lightcoral', linewidth=0.5)
 
@@ -73,8 +111,29 @@ plt.semilogy(val_scores_mean, color='red', linestyle='-', label='Ensemble intern
 plt.legend()
 plt.xlabel('Epochs')
 plt.ylabel('Log(Error)')
+plt.ylim(top=5)
 plt.savefig('mee_curves.pdf', bbox_inches="tight")
 
+# loss media
+plt.figure()
+plt.semilogy(train_losses_mean, color='blue', label='Ensemble development set (MSE)')
+plt.semilogy(val_losses_mean , 'r--', linestyle='-', label='Ensemble internal test set (MSE)')
+plt.legend()
+plt.xlabel('Epochs')
+plt.ylabel('Log(Loss)')
+plt.savefig('mse_mean_curves.pdf', bbox_inches="tight")
+
+#score medio
+plt.figure()
+plt.semilogy(train_scores_mean, color='blue', label='Ensemble development set (MEE)')
+plt.semilogy(val_scores_mean, 'r--', linestyle='-', label='Ensemble internal test set (MEE)')
+plt.legend()
+plt.xlabel('Epochs')
+plt.ylabel('Log(Error)')
+plt.savefig('mee_mean_curves.pdf', bbox_inches="tight")
+
+
+# dataframe
 
 train_loss_mean = 0
 train_score_mean = 0
