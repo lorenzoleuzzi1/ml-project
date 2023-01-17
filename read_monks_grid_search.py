@@ -2,10 +2,9 @@ import pandas as pd
 from scipy.stats import rankdata
 import json
 
-
-results_path = 'monks1_gs.py'
-all_results_path = 'monks1_results.csv'
-ranked_results_path = 'monks1_params_rank.csv'
+results_path = './csv_results/monks3_gs.csv'
+all_results_path = './csv_results/monks3_results_rank.csv'
+ranked_results_path = './csv_results/monks3_params_rank.csv'
 
 # concatenate results into a single dataframe
 scores_df = pd.DataFrame(columns=[])
@@ -15,7 +14,7 @@ scores_df = pd.read_csv(results_path, sep=",")
 scores_df['mean_train_loss_rank'] = rankdata(scores_df['mean_train_loss'], method='dense')
 scores_df['mean_train_score_rank'] = rankdata(scores_df['mean_train_score'], method='dense')
 scores_df['mean_val_loss_rank'] = rankdata(scores_df['mean_val_loss'], method='dense')
-scores_df['mean_accuracy_rank'] = rankdata(scores_df['mean_accuracy'], method='dense')
+scores_df['mean_accuracy_rank'] = rankdata(1-scores_df['mean_accuracy'], method='dense')
 
 # sort results by 'val_score_mean_rank'
 scores_df = scores_df.sort_values(by=['mean_accuracy_rank'], ignore_index=True)
