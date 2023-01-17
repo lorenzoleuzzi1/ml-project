@@ -2,9 +2,9 @@ import pandas as pd
 from scipy.stats import rankdata
 import json
 
-results_path = './csv_results/monks2_gs.csv'
-all_results_path = './csv_results/monks2_results_rank.csv'
-ranked_results_path = './csv_results/monks2_params_rank.csv'
+results_path = './csv_results/monks1_gs2.csv'
+all_results_path = './csv_results/monks1_results2_rank.csv'
+ranked_results_path = './csv_results/monks1_params2_rank.csv'
 
 # concatenate results into a single dataframe
 scores_df = pd.DataFrame(columns=[])
