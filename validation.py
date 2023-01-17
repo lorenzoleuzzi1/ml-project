@@ -1,9 +1,6 @@
 import numpy as np
-from utils import fold_plot, mean_and_std
 from sklearn.model_selection import StratifiedKFold, KFold
 from network import Network
-from utils import write_json, read_json
-from scipy.stats import rankdata
 from multiprocessing import Process
 import pandas as pd
 import copy
