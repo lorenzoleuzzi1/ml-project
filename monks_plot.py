@@ -175,7 +175,7 @@ n_trials = 5
 
 for i in range(n_trials):
     net1.fit(X_train1, y_train1, X_test1, y_test1)
-    plot_monks_curves(net1, 'monks1_%i')
+    plot_monks_curves(net1, 'monks1_%d' %i)
     
     print('accuracy_test = %f' % net1.score(X_test1, y_test1, 'accuracy'))
     print('accuracy_train = %f' %net1.train_scores[net1.best_epoch])
@@ -185,7 +185,7 @@ for i in range(n_trials):
     
 for i in range(n_trials):
     net2.fit(X_train2, y_train2, X_test2, y_test2)
-    plot_monks_curves(net2, 'monks2_%i')
+    plot_monks_curves(net2, 'monks2_%d' %i)
     
     print('accuracy_test = %f' % net2.score(X_test2, y_test2, 'accuracy'))
     print('accuracy_train = %f' %net2.train_scores[net2.best_epoch])
@@ -195,7 +195,7 @@ for i in range(n_trials):
     
 for i in range(n_trials):
     net3.fit(X_train3, y_train3, X_test3, y_test3)
-    plot_monks_curves(net3, 'monks3_%i')
+    plot_monks_curves(net3, 'monks3_%d' %i)
     
     print('accuracy_test = %f' % net3.score(X_test3, y_test3, 'accuracy'))
     print('accuracy_train = %f' %net3.train_scores[net3.best_epoch])
@@ -205,7 +205,7 @@ for i in range(n_trials):
     
 for i in range(n_trials):
     net3_reg.fit(X_train3, y_train3, X_test3, y_test3)
-    plot_monks_curves(net3_reg, 'monks3_%i')
+    plot_monks_curves(net3_reg, 'monks3_reg_%d' %i)
     
     print('accuracy_test = %f' % net3_reg.score(X_test3, y_test3, 'accuracy'))
     print('accuracy_train = %f' %net3_reg.train_scores[net3_reg.best_epoch])
