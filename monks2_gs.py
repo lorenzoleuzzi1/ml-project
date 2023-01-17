@@ -91,7 +91,7 @@ n_trial = 5
 df_scores = pd.DataFrame(columns=[])
 
 print(f"starting grid search - exploring {len(grid2)} configs")
-for config in grid2:
+for i, config in enumerate(grid2):
     print(f"{i+1}/{len(grid2)}")
     network = Network(**config)
     dict_row = {}
