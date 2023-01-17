@@ -33,13 +33,13 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
 
 grid1 = ParameterGrid([
     {
-        'activation_out': ['tanh', 'logistic'],
+        'activation_out': ['logistic'],
         'classification' : [True],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[3]],
+        'hidden_layer_sizes': [[4]],
         'loss': ['mse'],
         'evaluation_metric' : ['accuracy'],
-        'epochs': [400],
+        'epochs': [100, 200],
         'tol' : [0.000001],
         'learning_rate': ['fixed'],
         'lambd': [0],
@@ -51,20 +51,20 @@ grid1 = ParameterGrid([
         'random_state': [None],
         'reinit_weights': [True], 
         'weights_dist': ['uniform'],
-        'weights_bound': [0.7],
+        'weights_bound': [0.7, 0.1],
         'metric_decrease_tol': [0.000001],
         'batch_size': [1, 8, 16, 32],
-        'learning_rate_init': [0.05, 0.01, 0.005, 0.001, 0.0001],
+        'learning_rate_init': [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],
         'stopping_criteria_on_loss': [True]
     },
     {
-        'activation_out': ['tanh', 'logistic'],
+        'activation_out': ['logistic'],
         'classification' : [True],
         'activation_hidden': ['tanh', 'logistic'],
-        'hidden_layer_sizes': [[3]],
+        'hidden_layer_sizes': [[4]],
         'loss': ['mse'],
         'evaluation_metric' : ['accuracy'],
-        'epochs': [400],
+        'epochs': [100, 200],
         'tol' : [0.000001],
         'learning_rate': ['fixed'],
         'lambd': [0],
@@ -78,11 +78,13 @@ grid1 = ParameterGrid([
         'weights_dist': [None],
         'weights_bound': [None],
         'metric_decrease_tol': [0.000001],
-        'batch_size': [1, 8, 16, 32],
-        'learning_rate_init': [0.05, 0.01, 0.005, 0.001, 0.0001],
+        'batch_size': [1, 4, 8, 16, 32],
+        'learning_rate_init': [0.1, 0.05, 0.01, 0.005, 0.001, 0.0005, 0.0001],
         'stopping_criteria_on_loss': [True]
     }]
 )
+
+print(len(grid1))
 
 X_train1, y_train1 = read_monks(MONKS1_TRAIN_PATH)
 X_test1, y_test1 = read_monks(MONKS1_TEST_PATH)

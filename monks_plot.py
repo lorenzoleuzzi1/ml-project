@@ -44,7 +44,7 @@ def plot_monks_curves(net, data_set_name):
     plt.grid()
     plt.xlabel("Epochs")
     plt.ylabel("Loss (MSE)")
-    plt.ylim(-0.05, 1)
+    #plt.ylim(-0.05, 1)
     plt.savefig("./monks_curves/%s_loss_curves.pdf" %data_set_name, bbox_inches="tight")
 
     plt.figure()
@@ -71,13 +71,13 @@ net1 = Network(
     epochs = 400,
     lambd=0,
     learning_rate = "fixed",
-    batch_size=32,
+    batch_size=8,
     learning_rate_init=0.05,
     alpha=0.9,
     nesterov=False,
     early_stopping=False,
     evaluation_metric='accuracy',
-    verbose=True,
+    verbose=False,
     loss='mse',
     tol=0.00001,
     metric_decrease_tol=0.000001,
@@ -94,19 +94,19 @@ X_test2, y_test2 = read_monks(MONKS2_TEST_PATH)
 
 net2 = Network(
     hidden_layer_sizes=[4],
-    activation_out='tanh',
+    activation_out='logistic',
     classification=True,
     activation_hidden='logistic',
     epochs = 100,
     lambd=0,
     learning_rate = "fixed",
-    batch_size=8,
+    batch_size=1,
     learning_rate_init=0.05,
     alpha=0.9,
     nesterov=False,
     early_stopping=False,
     evaluation_metric='accuracy',
-    verbose=True,
+    verbose=False,
     loss='mse',
     tol=0.00001,
     metric_decrease_tol=0.000001,
@@ -118,7 +118,7 @@ net2 = Network(
     )
 
 # MONKS3
-net3 = Network(
+net3 = Network( #11,tanh,logistic,32,[4],0,0.005,0.7,uniform
     hidden_layer_sizes=[4],
     activation_out='logistic',
     classification=True,
@@ -132,7 +132,7 @@ net3 = Network(
     nesterov=False,
     early_stopping=False,
     evaluation_metric='accuracy',
-    verbose=True,
+    verbose=False,
     loss='mse',
     tol=0.00001,
     metric_decrease_tol=0.000001,
@@ -157,7 +157,7 @@ net3_reg = Network(
     nesterov=False,
     early_stopping=False,
     evaluation_metric='accuracy',
-    verbose=True,
+    verbose=False,
     loss='mse',
     tol=0.00001,
     metric_decrease_tol=0.000001,
