@@ -88,44 +88,44 @@ X_train1, y_train1 = read_monks(MONKS1_TRAIN_PATH)
 X_test1, y_test1 = read_monks(MONKS1_TEST_PATH)
 
 n_trial = 5
-for param in grid1:
-    print(f"starting grid search - exploring {len(grid1)} configs")
-    df_scores = pd.DataFrame(columns=[])
-    for i, config in enumerate(grid1):
-        print(f"{i+1}/{len(grid1)}")
-        network = Network(**config)
-        dict_row = {}
-        train_losses = 0
-        train_scores = 0
-        val_losses = 0
-        val_scores = 0
-        accuracy_mean = 0
-        for i in range(n_trial):
-            network.fit(X_train1, y_train1, X_test1, y_test1)
-            accuracy = network.score(X_test1, y_test1, 'accuracy')
-            dict_row['trial%d_train_loss'%i] = network.train_losses[network.best_epoch]
-            dict_row['trial%d_train_score'%i] = network.train_scores[network.best_epoch]
-            dict_row['trial%d_val_loss'%i] = network.val_losses[network.best_epoch]
-            dict_row['trial%d_val_score'%i] = network.val_scores[network.best_epoch]
-            dict_row['trial%d_best_epoch'%i] = network.best_epoch
-            dict_row['trial%d_accuracy'%i] = accuracy
-            train_losses += network.train_losses[network.best_epoch]
-            train_scores += network.train_scores[network.best_epoch]
-            val_losses += network.val_losses[network.best_epoch]
-            val_scores += network.val_scores[network.best_epoch]
-            accuracy_mean += accuracy
+df_scores = pd.DataFrame(columns=[])
 
-        train_losses /= n_trial
-        train_scores /= n_trial
-        val_losses /= n_trial
-        val_scores /= n_trial
-        accuracy_mean /= n_trial
-        dict_row['mean_accuracy'] = accuracy_mean
-        dict_row['mean_train_loss'] = train_losses
-        dict_row['mean_train_score'] = train_scores
-        dict_row['mean_val_loss'] = val_losses
-        dict_row['val_scores'] = val_scores
-        dict_row['params'] = json.dumps(config)
-        df_scores = pd.concat([df_scores, pd.DataFrame([dict_row])], ignore_index=True)
+print(f"starting grid search - exploring {len(grid1)} configs")
+for config in grid1:
+    print(f"{i+1}/{len(grid1)}")
+    network = Network(**config)
+    dict_row = {}
+    train_losses = 0
+    train_scores = 0
+    val_losses = 0
+    val_scores = 0
+    accuracy_mean = 0
+    for i in range(n_trial):
+        network.fit(X_train1, y_train1, X_test1, y_test1)
+        accuracy = network.score(X_test1, y_test1, 'accuracy')
+        dict_row['trial%d_train_loss'%i] = network.train_losses[network.best_epoch]
+        dict_row['trial%d_train_score'%i] = network.train_scores[network.best_epoch]
+        dict_row['trial%d_val_loss'%i] = network.val_losses[network.best_epoch]
+        dict_row['trial%d_val_score'%i] = network.val_scores[network.best_epoch]
+        dict_row['trial%d_best_epoch'%i] = network.best_epoch
+        dict_row['trial%d_accuracy'%i] = accuracy
+        train_losses += network.train_losses[network.best_epoch]
+        train_scores += network.train_scores[network.best_epoch]
+        val_losses += network.val_losses[network.best_epoch]
+        val_scores += network.val_scores[network.best_epoch]
+        accuracy_mean += accuracy
+
+    train_losses /= n_trial
+    train_scores /= n_trial
+    val_losses /= n_trial
+    val_scores /= n_trial
+    accuracy_mean /= n_trial
+    dict_row['mean_accuracy'] = accuracy_mean
+    dict_row['mean_train_loss'] = train_losses
+    dict_row['mean_train_score'] = train_scores
+    dict_row['mean_val_loss'] = val_losses
+    dict_row['val_scores'] = val_scores
+    dict_row['params'] = json.dumps(config)
+    df_scores = pd.concat([df_scores, pd.DataFrame([dict_row])], ignore_index=True)
 
 df_scores.to_csv('/kaggle/working/monks1_gs.csv')
