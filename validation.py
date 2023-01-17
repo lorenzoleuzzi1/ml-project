@@ -135,7 +135,7 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric): # TODO: clea
     
     df_scores.to_csv(results_path)
 
-def read_grid_search_results(path):
+def read_csv_results(path):
     df = pd.read_csv(path, sep=",")
     for i in range(len(df['params'])):
         params_as_json_string = df['params'][i]#.replace("'", "\"").replace("False", "false").replace("True", "true").replace("None", "null")
@@ -143,9 +143,6 @@ def read_grid_search_results(path):
         df.at[i,'params'] = params_as_dictionary
     return df
     
-    
-
-
 def mean_std_dev(data_fold):
     """return average and std deviation for each epoch"""
     k = data_fold.shape[0]
