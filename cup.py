@@ -1,5 +1,7 @@
+from network import Network
+from utils import regression2_plots, mse, mee
+import matplotlib.pyplot as plt
 import pandas as pd
-from sklearn.model_selection import train_test_split
 import pickle as pkl
 
 CUP_TRAIN_CSV_PATH = './datasets/ML-CUP22-TR.csv'
@@ -36,29 +38,21 @@ def load_internal_test_cup():
     test_set = pkl.load(file)
     return test_set['X_test'], test_set['y_test']
 
-def main():
-    print("ciao")
-    X_blind_test = read_ts_cup()
-    X_train, y_train = read_tr_cup()
-    X_dev, X_test, y_dev, y_test = train_test_split(X_train, y_train, test_size=0.20, shuffle=True, random_state=0)
 
-    file = open(CUP_BLIND_TEST_PATH, 'wb')
-    pkl.dump(X_blind_test, file)
-    file.close()
+def run_cup(config):
+    #TODO: validation/test + curves
+    print(f"Running cup with the following configuration:\n{config}")
+    X_train, y_train = load_dev_set_cup()
 
-    dev_set={}
-    dev_set['X_dev'] = X_dev
-    dev_set['y_dev'] = y_dev
-    file = open(CUP_DEV_PATH, 'wb')
-    pkl.dump(dev_set, file)
-    file.close()
+    net = Network(**config)
 
-    test_set={}
-    test_set['X_test'] = X_test
-    test_set['y_test'] = y_test
-    file = open(CUP_TEST_PATH, 'wb')
-    pkl.dump(test_set, file)
-    file.close()
+    net.fit(X_train, y_train)
+    X_test, y_test = load_internal_test_cup()
+    pred = net.predict_outputs(X_test)
+    print(mse(y_test, pred))
+    print(mee(y_test, pred))
+    # regression2_plots(y_test, pred)
+    plt.plot(net.train_losses_reg)
+    plt.plot(net.train_scores)
+    plt.show()
 
-if __name__ == '__main__':
-    main()

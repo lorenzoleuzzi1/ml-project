@@ -111,7 +111,8 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
         elif param['evaluation_metric'] != metric:
             raise ValueError("Evaluation metric must be the same for each configuration.")
     
-    print(f"starting grid search - exploring {len(grid)} configs")
+    print(f"Starting grid search - exploring {len(grid)} configs")
+    
     df_scores = pd.DataFrame(columns=[])
     for i, config in enumerate(grid):
         print(f"{i+1}/{len(grid)}")
@@ -120,9 +121,10 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
         cv_results['params'] = json.dumps(config)
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
     
+    print("Grid search finished.")
     df_scores.to_csv(results_path)
 
-def read_grid_search_results(path):
+def read_csv_results(path):
     df = pd.read_csv(path, sep=",")
     for i in range(len(df['params'])):
         params_as_json_string = df['params'][i]

@@ -1,21 +1,10 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.model_selection import ParameterGrid
-from sklearn.metrics import accuracy_score
-from validation import k_fold_cross_validation, grid_search_cv
-from network import Network
-from utils import error_plot, accuracy_plot
-from sklearn.neural_network import MLPClassifier
 import matplotlib.pyplot as plt
+from validation import read_csv_results
+from network import Network
 
-MONKS1_TRAIN_PATH = './datasets/monks-1.train'
-MONKS1_TEST_PATH = './datasets/monks-1.test'
-MONKS2_TRAIN_PATH = './datasets/monks-2.train'
-MONKS2_TEST_PATH = './datasets/monks-2.test'
-MONKS3_TRAIN_PATH = './datasets/monks-3.train'
-MONKS3_TEST_PATH = './datasets/monks-3.test'
-
-def read_monks(path, one_hot_encoding=True, target_rescaling=True):
+def read_monks(path, one_hot_encoding=True):
     data = pd.read_csv(path, sep=" ", header=None)
     data.drop(data.columns[0], axis=1, inplace=True)
     data.drop(data.columns[-1], axis=1, inplace=True)
@@ -24,81 +13,58 @@ def read_monks(path, one_hot_encoding=True, target_rescaling=True):
     data = data.to_numpy() # int 64
     if one_hot_encoding:
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
-    if target_rescaling:
-        targets[targets == 0] = -1 # int 64
-    targets = targets.reshape(targets.shape[0], 1)
     return data, targets
 
-X_train1, y_train1 = read_monks(MONKS2_TRAIN_PATH)
-X_test1, y_test1 = read_monks(MONKS2_TEST_PATH)
+def plot_monks_curves(net, data_set_name):
+    print("MSE train %f" % net.train_losses[net.best_epoch])
+    print("MSE test %f" % net.val_losses[net.best_epoch])
+    print("ACCURACY train %f" % net.train_scores[net.best_epoch])
+    print("ACCURACY test %f" % net.val_scores[net.best_epoch])
 
-net1 = Network(
-    hidden_layer_sizes=[2],
-    activation_out='tanh',
-    classification=True,
-    activation_hidden='tanh',
-    epochs = 400, # diminuire!
-    lambd=0,
-    learning_rate = "fixed", # ?, tau
-    batch_size=16, # 4
-    learning_rate_init=0.005, # 0.001 0.01
-    alpha=0.9,
-    nesterov=False,
-    early_stopping=False,
-    evaluation_metric='accuracy',
-    verbose=True,
-    loss='mse',
-    tol=0.00001,
-    metric_decrease_tol=0.000001,
-    random_state=None,
-    stopping_patience=30,
-    reinit_weights=True,
-    weights_dist='uniform',
-    weights_bound=0.7
-    )
+    plt.figure()
+    plt.plot(net.train_losses, label="Training", color="blue")
+    plt.plot(net.val_losses, 'r--', label='Test')
+    plt.legend()
+    plt.grid()
+    plt.xlabel("Epochs")
+    plt.ylabel("Loss (MSE)")
+    plt.savefig("./monks_curves/%s_loss_curves.pdf" %data_set_name, bbox_inches="tight")
 
-"""activation_out='tanh',
-    classification=True,
-    activation_hidden='tanh',
-    epochs = 100, 
-    batch_size = 1,
-    lambd=0,
-    learning_rate = "fixed",
-    learning_rate_init=0.001,
-    #nesterov=True, 
-    early_stopping=True,
-    evaluation_metric='accuracy',
-    verbose=True,
-    loss='mse',
-    validation_frequency=1,
-    validation_size=0.1,
-    tol=1e-4,
-    random_state=0"""
+    plt.figure()
+    plt.plot(net.train_scores, label="Training", color="blue")
+    plt.plot(net.val_scores, 'r--', label="Test")
+    plt.legend()
+    plt.grid()
+    plt.xlabel("Epochs")
+    plt.ylabel("Accuracy")
+    plt.ylim(0, 1.05)
+    plt.savefig("./monks_curves/%s_accuracy_curves.pdf" %data_set_name, bbox_inches="tight")
 
-net1.fit(X_train1, y_train1, X_test1, y_test1)
+def run_monks(monks : str):
+    print(f"Running {monks}")
+    
+    if monks == "monks-3reg":
+        monks = "monks-3"
+        monks_number = 3
+    else:
+        monks_number = monks[6] - 1
 
-print("MSE train %f" % net1.train_losses[net1.best_epoch])
-print("MSE test %f" % net1.val_losses[net1.best_epoch])
-print("ACCURACY train %f" % net1.train_scores[net1.best_epoch])
-print("ACCURACY test %f" % net1.val_scores[net1.best_epoch])
+    MONKS_TRAIN_PATH = f"./datasets/{monks}.train"
+    MONKS_TEST_PATH = f"./datasets/{monks}.test"
 
-plt.plot(net1.train_losses, label="Training", color="blue")
-plt.plot(net1.val_losses, 'r--', label='Test')
-plt.vlines(x=net1.best_epoch, ymin=0, ymax=net1.val_losses[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
-plt.legend()
-plt.grid()
-plt.xlabel("Epochs")
-plt.ylabel("Loss (MSE)")
-plt.ylim(0, max(max(net1.train_losses), max(net1.val_losses)))
-plt.savefig("monks1_loss_curves.pdf", bbox_inches="tight")
+    X_train, y_train = read_monks(MONKS_TRAIN_PATH)
+    X_test, y_test = read_monks(MONKS_TEST_PATH)
 
-plt.figure()
-plt.plot(net1.train_scores, label="Training", color="blue")
-plt.plot(net1.val_scores, 'r--', label="Test")
-plt.vlines(x=net1.best_epoch, ymin=0, ymax=net1.val_scores[net1.best_epoch], color='black', linestyle='dashed', linewidth=0.8)
-plt.legend()
-plt.grid()
-plt.xlabel("Epochs")
-plt.ylabel("Accuracy")
-plt.ylim(0, 1)
-plt.savefig("monks1_accuracy_curves.pdf", bbox_inches="tight")
+    config = read_csv_results("monks.csv")['params'][monks_number]
+    net = Network(**config)
+    
+    net.fit(X_train, y_train, X_test, y_test)
+    plot_monks_curves(net, monks)
+    
+    print('accuracy_test = %f' % net.score(X_test, y_test, 'accuracy'))
+    print('accuracy_train = %f' %net.train_scores[net.best_epoch])
+    print('mse_train = %f' %net.train_losses[net.best_epoch])
+    print('mse_test = %f' %net.val_losses[net.best_epoch])
+    print('accuracy_test_internal = %f' %net.val_scores[net.best_epoch])
+
+
