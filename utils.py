@@ -13,45 +13,39 @@ def identity(x):
     return x
 
 def identity_prime(x):
-    diag = np.ones(x.shape)
-    return np.diagflat(diag)
+    return np.ones(x.shape)
 
 def relu(x):
     return np.maximum(0, x)
 
 def relu_prime(x):
-    diag = np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
-    return np.diagflat(diag)
+    return np.where(x < 0, 0, 1) # arbitrarily 0 or 1 in 0
 
 def leaky_relu(x): 
     return np.where(x >= 0, x, 0.01 * x)
 
-def leaky_relu_prime(x): 
-    diag = np.where(x >= 0, 1, 0.01)
-    return np.diagflat(diag)
+def leaky_relu_prime(x):
+    return np.where(x >= 0, 1, 0.01)
 
 def logistic(x):
     return 1 / (1 + np.exp(-x))
 
 def logistic_prime(x):
     l = logistic(x)
-    diag = l * (1 - l)
-    return np.diagflat(diag)
+    return l * (1 - l)
 
 def tanh(x):
     return np.tanh(x)
 
 def tanh_prime(x):
     t = tanh(x)
-    diag = 1 - t**2
-    return np.diagflat(diag)
+    return 1 - t**2
 
 def softplus(x):
     return np.log(1 + np.exp(x))
 
 def softplus_prime(x):
-    diag = 1 / (1 + np.exp(-x))
-    return np.diagflat(diag)
+    return 1 / (1 + np.exp(-x))
 
 def softmax(x):
     exps = np.exp(x - np.max(x)) # subtracting the maximum avoids overflow
