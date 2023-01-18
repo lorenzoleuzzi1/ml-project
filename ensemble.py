@@ -42,7 +42,7 @@ def k_fold_cross_validation_ensemble(network, X_train, y_train, k):
         train_scores.append(network.train_scores[best_epoch])
         
         # --------------fold validation--------------
-        Y_pred = network.predict_outputs(X=X_val_fold)
+        Y_pred = network._predict_outputs(X=X_val_fold)
 
         #print("{} fold VL score = {}".format(i, score))    
 
