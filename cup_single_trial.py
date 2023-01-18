@@ -29,7 +29,7 @@ net = Network(
 
 net.fit(X_train, y_train)
 X_test, y_test = load_internal_test_cup()
-pred = net.predict_outputs(X_test)
+pred = net._predict_outputs(X_test)
 print(mse(y_test, pred))
 print(mee(y_test, pred))
 regression2_plots(y_test, pred)
