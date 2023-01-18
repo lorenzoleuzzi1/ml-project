@@ -5,11 +5,11 @@ from cup import run_cup
 import json
 
 def main(experiment_name):
-    if (experiment_name in AVAILABLE_EXPERIMENTS):
+    if (experiment_name in AVAILABLE_EXPERIMENTS[:3]):
         run_monks(experiment_name)
     
     elif (experiment_name == "cup-best_gs"):
-        best_gs_config = read_csv_results()[0]
+        best_gs_config = read_csv_results("fine_csv.csv")['params'][0]
         run_cup(best_gs_config)
     
     elif (experiment_name == "cup-custom"):

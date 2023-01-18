@@ -42,16 +42,20 @@ def plot_monks_curves(net, data_set_name):
 
 def run_monks(monks : str):
     print(f"Running {monks}")
-    if monk == "monks-3reg":
-        monk = "monks-3"
     
+    if monks == "monks-3reg":
+        monks = "monks-3"
+        monks_number = 3
+    else:
+        monks_number = monks[6] - 1
+
     MONKS_TRAIN_PATH = f"./datasets/{monks}.train"
     MONKS_TEST_PATH = f"./datasets/{monks}.test"
 
     X_train, y_train = read_monks(MONKS_TRAIN_PATH)
     X_test, y_test = read_monks(MONKS_TEST_PATH)
 
-    config = read_csv_results("monks.csv")
+    config = read_csv_results("monks.csv")['params'][monks_number]
     net = Network(**config)
     
     net.fit(X_train, y_train, X_test, y_test)
