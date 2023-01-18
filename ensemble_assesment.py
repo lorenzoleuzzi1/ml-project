@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from network import Network
-from cup_parsing import load_dev_set_cup, load_internal_test_cup
+from cup import load_dev_set_cup, load_internal_test_cup
 from validation import read_grid_search_results
 from utils import mee, mse
 
