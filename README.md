@@ -4,7 +4,7 @@ Final project for the Machine Learning course at University of Pisa, a.y. 2022/2
 ### Installation and Usage ###
 `pip install -r requirements.txt`
 
-The application allows to run different trials using a basic command-line interface. To do so you need to type the following code `python main.py <experiment_name>` where `experiment_name` must be one of the following:
+The application allows to run different trials using a basic command-line interface. To do so you need to type the following command `python main.py <experiment_name>` where `experiment_name` must be one of the following:
 - `monks-1`: to fit and test a network with the monks-1 dataset
 - `monks-2`: to fit and test a network with the monks-2 dataset
 - `monks-3`: to fit and test a network with the monks-3 dataset
