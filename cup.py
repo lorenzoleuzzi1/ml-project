@@ -41,6 +41,7 @@ def load_internal_test_cup():
 
 def run_cup(config):
     #TODO: validation/test + curves
+    print(f"Running cup with the following configuration:\n{config}")
     X_train, y_train = load_dev_set_cup()
 
     net = Network(**config)
