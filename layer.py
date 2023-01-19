@@ -14,10 +14,8 @@ class Layer():
         self.activation_prime = ACTIVATIONS_DERIVATIVES[activation]
         self.weights_init(weights_dist, weights_bound)
         self.deltas_weights = np.zeros(shape = (fan_in, fan_out))
-        #self.deltas_bias = np.zeros(shape = (1, fan_out))
         self.deltas_bias = np.zeros(shape = (fan_out))
         self.velocity_w = np.zeros(shape = (fan_in, fan_out))
-        #self.velocity_b = np.zeros(shape = (1, fan_out))
         self.velocity_b = np.zeros(shape = (fan_out))
 
     def set_weights(self, weights, bias):
@@ -32,21 +30,16 @@ class Layer():
                 self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
             else:
                 self.weights = np.random.normal(scale=bound, size=(self.fan_in, self.fan_out))
-            #self.bias = np.zeros((1, self.fan_out)) # TODO: same distribution for the bias?
             self.bias = np.zeros((self.fan_out))
         elif self.activation in ['relu', 'leaky_relu', 'softplus']:
-            # He inizialization [https://arxiv.org/abs/1502.01852]
             self.weights = np.random.normal(scale=np.sqrt(2 / self.fan_in), size=(self.fan_in, self.fan_out))
-            #self.bias = np.zeros((1, self.fan_out))
             self.bias = np.zeros((self.fan_out))
-        else: # softmax? nel paper la utilizzano
-            # Xavier initialization [https://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf]
+        else:
             factor = 6.0
             bound = np.sqrt(factor / (self.fan_in + self.fan_out))
             if self.activation in ['logistic', 'softmax']: 
-                bound *= 4 # https://arxiv.org/pdf/1206.5533.pdf pag 15
+                bound *= 4 
             self.weights = np.random.uniform(-bound, bound, (self.fan_in, self.fan_out))
-            #self.bias = np.zeros((1, self.fan_out))
             self.bias = np.zeros((self.fan_out))
         self.init_weights = copy.deepcopy(self.weights)
         self.init_bias = copy.deepcopy(self.bias)

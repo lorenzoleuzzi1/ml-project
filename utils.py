@@ -4,7 +4,6 @@ from sklearn.metrics import accuracy_score
 import pickle
 import pandas as pd
 import json
-import matplotlib.pyplot as plt
 
 #-----ACTIVATIONS-----
 # activation functions and their derivatives
@@ -77,13 +76,8 @@ ACTIVATIONS_DERIVATIVES = {
 }
 
 ACTIVATIONS_THRESHOLDS = {
-    #TODO
-    #'identity': 0,
-    #'relu': 0,
-    #'leaky_relu': 0,
     'logistic': 0.5,
     'tanh': 0,
-    #'softplus': ln(1+e^0)?,
     'softmax': 0.5
 }
 

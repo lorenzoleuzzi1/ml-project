@@ -1,30 +1,12 @@
 import numpy as np
-import pickle
-import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 from sklearn.utils.multiclass import unique_labels
 from math import floor, ceil
 from utils import *
-from layer import *
+from layer import Layer
 from sklearn import preprocessing
 
-# TODO: sistemare cose degli score
-#       checks sui parametri passati dall'utente (alcuni mancano, altri vanno ricontrollati)
-#       fare documentazione dei soli metodi invocabili della rete! (niente k-val, ...)
-#       use cases
-
-#       vedere todo in file word
-#       rinominare NeuralNetwork!
-
-#       stopping criteria on loss nella cup deve essere False! nome migliore?
-
-# score invoca predict internamente ed evita all'utente di codificarsi i target, tipo se usa softmax con monk non deve fare nulla
-# evaluate viene invocata solo internamente alla rete, con self evaluation metric o con la metrica passata a score
-
-# fit se invocato con X_train, y_train soltanto ed early stopping usa una porzione del train per fare validation
-#     se viene invocato con X_train, y_train, X_val, y_val senza early stopping fa solo curve e riporta score (si arresta in base a errore su train)
-#                                                          con early stopping fa i controlli sul validation evaluation metric
 
 class NeuralNetwork:
     def __init__(
@@ -42,18 +24,18 @@ class NeuralNetwork:
         batch_size : int or float = 1,
         lambd : float = 0.0001,
         alpha : float = 0.9,
-        verbose : bool = True,
         nesterov : bool = False,
-        early_stopping : bool = True,
+        early_stopping : bool = False,
+        stopping_criteria_on_loss : bool = True,
         stopping_patience : int = 20,
         validation_size : int or float = 0.1,
         tol : float = 0.00001,
+        metric_decrease_tol : float = 0.00001,   
+        verbose : bool = True,
         random_state = None,
         reinit_weights : bool = True,
         weights_dist : str = None,
-        weights_bound : float = None,
-        metric_decrease_tol : float = 0.00001, # TODO: metric_improvement_tol
-        stopping_criteria_on_loss : bool = True # TODO: nome migliore?
+        weights_bound : float = None  
         ):
        
         self._check_params(locals())
@@ -65,33 +47,33 @@ class NeuralNetwork:
         self.loss = loss
         self.loss_fun = LOSSES[loss]
         self.loss_prime = LOSSES_DERIVATIVES[loss]
-        self.epochs = epochs
         self.evaluation_metric = evaluation_metric
         self.evaluation_metric_fun = EVALUATION_METRICS[evaluation_metric]
+        self.epochs = epochs
         self.learning_rate = learning_rate
         self.learning_rate_init = learning_rate_init
         self.learning_rate_curr = learning_rate_init
         self.learning_rate_fin = learning_rate_init * 0.1
         self.tau = tau
-        self.batch_size = batch_size # TODO: check if float
+        self.batch_size = batch_size
         self.lambd = lambd
         self.alpha = alpha
-        self.verbose = verbose
         self.nesterov = nesterov
         self.stopping_patience = stopping_patience
         self.early_stopping = early_stopping
+        self.stopping_criteria_on_loss = stopping_criteria_on_loss
         self.validation_size = validation_size
         self.tol = tol
+        self.metric_decrease_tol = metric_decrease_tol
         self.classification = classification
+        self.verbose = verbose
         self.random_state = random_state
         self.reinit_weights = reinit_weights
         self.weights_dist = weights_dist # None, 'normal' or 'uniform'
-        self.weights_bound = weights_bound # if 'normal' is the std, if 'uniform' in [-weights_bound, weights_bound]
-        self.metric_decrease_tol = metric_decrease_tol
+        self.weights_bound = weights_bound # if 'normal' is the std, if 'uniform' in [-weights_bound, weights_bound]   
         if self.activation_out == 'tanh': self.neg_label = -1.0
         else: self.neg_label = 0.0
         self.pos_label = 1.0
-        self.stopping_criteria_on_loss = stopping_criteria_on_loss
 
     def _check_params(self, params):
         if (params['activation_out'] not in ACTIVATIONS):
@@ -132,6 +114,9 @@ class NeuralNetwork:
         if params['learning_rate'] == "linear_decay":
             if params['tau'] <= 0 or params['tau'] > params['epochs']:
                 raise ValueError("tau must be > 0 and <= epochs.")
+        if (not isinstance(params['batch_size'], int)) and \
+            (not isinstance(params['batch_size'], float)):
+            raise ValueError("batch_size must be a float or an integer.")
         if params['batch_size'] <= 0:
             raise ValueError("batch_size must be > 0.")
         if params['lambd'] < 0.0:
@@ -163,6 +148,11 @@ class NeuralNetwork:
             not isinstance(params['weights_bound'], int) and \
             not isinstance(params['weights_bound'], float):
             raise ValueError("weights_bound must be an int or a float.")
+        if params['metric_decrease_tol'] < 0:
+            raise ValueError("metric_decrease_tol must be positive.")
+        if (not isinstance(params['stopping_criteria_on_loss'], bool)):
+            raise ValueError("stopping_criteria_on_loss must be a boolean.")
+
 
     def _encode_targets(self, Y_train):
         self.binarizer = preprocessing.LabelBinarizer(
@@ -262,7 +252,7 @@ class NeuralNetwork:
                 weights_dist = self.weights_dist,
                 weights_bound = self.weights_bound
                 ))
-            self.first_fit = False # TODO: controlla che se corretto
+            self.first_fit = False
         elif self.reinit_weights:
             for layer in self.layers:
                 layer.weights_init( self.weights_dist, self.weights_bound)
@@ -285,7 +275,7 @@ class NeuralNetwork:
     def _update_no_improvement_count(self, epoch, train_losses, train_scores, val_scores):
         if epoch < 10:
             self.best_epoch = epoch
-            self.best_loss = train_losses[-1] # TODO: usiamole fuori
+            self.best_loss = train_losses[-1] 
             self.best_metric = val_scores[-1] if self.early_stopping else train_scores[-1]
             self.best_weights, self.best_bias = self.get_current_weights()
             return
@@ -346,12 +336,12 @@ class NeuralNetwork:
                     raise ValueError("validation labels are more than train labels.")
                 for label in val_labels:
                     if label not in train_labels:
-                        raise ValueError("validation labels are not included in train labels.") # TODO: lo vogliamo?
+                        raise ValueError("validation labels are not included in train labels.") 
                 self.labels = train_labels
 
         self.n_features = X_train.shape[1]
         if self.classification:
-            Y_train = self._encode_targets(Y_train) # TODO: unisce tutte le etichette
+            Y_train = self._encode_targets(Y_train) 
             if Y_val is not None:
                 Y_val = self.binarizer.transform(Y_val).astype(np.float64)
                 if self.n_classes == 2 and self.activation_out == 'softmax':
@@ -410,7 +400,7 @@ class NeuralNetwork:
             # for every batch in the set loop
             for X_batch, Y_batch in zip(X_train_batched, Y_train_batched):
                 # for every pattern in the batch loop
-                for i, (x, y) in enumerate(zip(X_batch, Y_batch)):
+                for x, y in zip(X_batch, Y_batch):
                     batch_size = X_batch.shape[0]
                     output = x
                     
@@ -493,7 +483,7 @@ class NeuralNetwork:
             Y = self._outputs_to_labels(Y)
         return Y
 
-    def score(self, X_test, Y_test, evaluation_metrics): # TODO: lista di scores senza rifare forward phase
+    def score(self, X_test, Y_test, evaluation_metrics):
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
         if X_test.ndim != 2:
