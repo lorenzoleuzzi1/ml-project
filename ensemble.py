@@ -33,6 +33,10 @@ class Ensemble:
         self.models = []
     
     def fit(self, X_train, y_train, X_test = None, y_test = None):
+        """ Network's fit for each param's configuration in the model_params list
+            given to the ensamble object during initialization.
+            n_trials fits are made for each network.
+        """
         self.fitted = True
         self.validation_flag = False
 
@@ -41,6 +45,7 @@ class Ensemble:
         self.train_scores_trials_mean = []
         self.val_scores_trials_mean = []
         
+        # tensor of losses/scores for each epoch for every trail of every model
         train_losses = np.full(shape = (self.n_models, self.n_trials, self.max_epoch), fill_value = np.nan)
         val_losses = np.full(shape = (self.n_models, self.n_trials, self.max_epoch), fill_value = np.nan)
         train_scores = np.full(shape = (self.n_models, self.n_trials, self.max_epoch), fill_value = np.nan)
@@ -72,6 +77,7 @@ class Ensemble:
                 val_scores[i][j][:len(net.val_scores)] = np.array(net.val_scores)
                 self.best_epochs[i][j] = net.best_epoch
 
+            # matrix of average of losses/scores for each model across every epoch
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
                 self.train_losses_trials_mean.append(np.nanmean(train_losses[i], axis=0))
@@ -79,18 +85,21 @@ class Ensemble:
                 self.train_scores_trials_mean.append(np.nanmean(train_scores[i], axis=0))
                 self.val_scores_trials_mean.append(np.nanmean(val_scores[i], axis=0))
         
+        # list of average of the best scores/losses resched on each trials for every model
         self.best_train_losses_mean /= self.n_trials
         self.best_val_losses_mean /= self.n_trials
         self.best_train_scores_mean /= self.n_trials
         self.best_val_scores_mean /= self.n_trials
 
+        # list of averege of losess/scores for each epoch
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             self.train_losses_mean = np.nanmean(self.train_losses_trials_mean, axis=0)
             self.val_losses_mean = np.nanmean(self.val_losses_trials_mean, axis=0)
             self.train_scores_mean = np.nanmean(self.train_scores_trials_mean, axis=0)
             self.val_scores_mean = np.nanmean(self.val_scores_trials_mean, axis=0)
-        
+
+        # remove nan values
         for i in range(self.n_models):
             self.train_losses_trials_mean[i] = self.train_losses_trials_mean[i][~np.isnan(self.train_losses_trials_mean[i])]
             self.val_losses_trials_mean[i] = self.val_losses_trials_mean[i][~np.isnan(self.val_losses_trials_mean[i])]
@@ -111,12 +120,15 @@ class Ensemble:
         self.train_scores_mean = self.train_scores_mean[~np.isnan(self.train_scores_mean)]
         self.val_scores_mean = self.val_scores_mean[~np.isnan(self.val_scores_mean)]
 
+        # ensamble's losses/scores (scalar)
         self.final_train_loss = np.mean(self.best_train_losses_mean)
         self.final_val_loss = np.mean(self.best_val_losses_mean)
         self.final_train_score = np.mean(self.best_train_scores_mean)
         self.finale_val_score = np.mean(self.best_val_scores_mean)
 
     def predict(self, X_test):
+        """Returns ensemble's prediction on X_test
+        """
         if not self.fitted:
             print('Ensemble has not been fitted yet')
             return
@@ -134,6 +146,9 @@ class Ensemble:
                 
     
     def plot(self):
+        """Plots losses and scores curves of the ensemble.
+            All figures are saved in PDF format
+        """
         if not self.fitted:
             print('Ensemble has not been fitted yet')
             return
@@ -251,7 +266,10 @@ class Ensemble:
         
 
     def validate(self, X_train, y_train, k):
-        results = []
+        """ Model assessment through a k-fold cross validation for each model of the ensemble.
+            Returns a dictionary.
+        """
+        results = [] # list of dictionary returned from k-fold cross validation of each model
         
         for i, params in enumerate(self.models_params):
             print(f"{i+1}/{len(self.models_params)}")
@@ -260,11 +278,13 @@ class Ensemble:
             result = k_fold_cross_validation(net, X_train, y_train, k, shuffle=False)
             results.append(result)
         
+        # tensor contain a matrix for each model contain predictions/losses/scores for each fold
         preds_k = []
-        train_loss_models = []
         split_train_loss_models = []
-        train_score_models = []
         split_train_score_models = []
+        # list of averages/scores over all folds for each model
+        train_loss_models = []
+        train_score_models = []
         
         for i in range(k):
             preds_k.append([])
@@ -275,19 +295,21 @@ class Ensemble:
                 preds_k[i].append(pred)
                 split_train_loss_models[i].append(result['split%d_tr_%s'%(i, self.loss)])
                 split_train_score_models[i].append(result['split%d_tr_%s'%(i, self.evaluation_metric)])
-            train_loss_models.append(result['tr_%s_mean'%self.loss]) #medie sui fold per ogni modello
+            train_loss_models.append(result['tr_%s_mean'%self.loss])
             train_score_models.append(result['tr_%s_mean'%self.evaluation_metric])
-            
-        train_loss_mean = np.mean(train_loss_models) #media di ogni modello -> scalare
+        
+        # average and std deviation of losses/scores across all models
+        train_loss_mean = np.mean(train_loss_models)
         train_loss_dev = np.std(train_loss_models)
         train_score_mean = np.mean(train_score_models)
         train_score_dev = np.std(train_score_models)
 
-        y_true_k = results[0]['y_trues']
-        means_pred_k = []
+        y_true_k = results[0]['y_trues'] # true values
+        means_pred_k = [] # average of all predictions
+        # list of avereges of losses/scores across all models for every split
         pred_split_val_loss = []
         pred_split_val_metric = []
-        split_train_loss_mean = [] #media per ogni split
+        split_train_loss_mean = []
         split_train_score_mean = []
         
         for i in range(k):
@@ -297,6 +319,7 @@ class Ensemble:
             split_train_loss_mean.append(np.mean(split_train_loss_models[i]))
             split_train_score_mean.append(np.mean(split_train_score_models[i]))
 
+        # averege and std deviation of losses/scores across every fold and model
         pred_split_val_loss_mean = np.mean(pred_split_val_loss)
         pred_split_val_loss_dev = np.std(pred_split_val_loss)
         pred_split_val_metric_mean = np.mean(pred_split_val_metric)

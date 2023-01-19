@@ -7,7 +7,6 @@ import json
 
 #-----ACTIVATIONS-----
 # activation functions and their derivatives
-# all take as input a numpy array with shape (1, #units)
 
 def identity(x):
     return x
