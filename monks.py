@@ -48,9 +48,9 @@ def run_monks(config):
     X_train, y_train = read_monks(MONKS_TRAIN_PATH)
     X_test, y_test = read_monks(MONKS_TEST_PATH)
     net = Network(**config)
-    # net.batch_size = 4
-    # net.lambd = 0.0001
+
     net.fit(X_train, y_train, X_test, y_test)
+    
     scores = net.score(X_test, y_test, ["accuracy", "mse", "mee"])
     print(scores)
     plot_monks_curves(net, monks_name)

@@ -40,7 +40,6 @@ def load_internal_test_cup():
 
 
 def run_cup(config):
-    #TODO: validation/test + curves
     print(f"Running cup with the following configuration:\n{config}")
     X_train, y_train = load_dev_set_cup()
 
@@ -52,7 +51,7 @@ def run_cup(config):
     print(mse(y_test, pred))
     print(mee(y_test, pred))
     # regression2_plots(y_test, pred)
-    plt.plot(net.train_losses_reg)
+    plt.plot(net.train_losses)
     plt.plot(net.train_scores)
     plt.show()
 

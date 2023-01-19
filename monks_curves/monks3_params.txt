@@ -1,0 +1,2 @@
+monks3: 14,logistic,logistic,4,[4],0,0.005,0.1,
+monks3: 7,logistic,logistic,4,[4],0.0005,0.005,0.1,uniform
