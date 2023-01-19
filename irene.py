@@ -17,11 +17,13 @@ ens.fit(X_dev, y_dev, X_test, y_test)
 end = time.time()
 ens.plot()
 preds = ens.predict(X_test)
-print(f"training time {end-time}")
+print("training time %f"%(end-start))
 mse_score = mse(y_test, preds)
 mee_score = mee(y_test, preds)
 
-save_obj(ens)
+save_obj(ens, "ensemble.pkl")
+save_obj(preds, "internal_preds.pkl")
+
 d = {
     "mse" : mse_score,
     "mee" : mee_score
