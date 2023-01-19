@@ -1,6 +1,6 @@
 from network import Network
 from utils import read_csv_results
-from cup import load_dev_set_cup, load_internal_test_set_cup
+from cup import load_dev_set_cup, load_internal_test_cup
 import time
 
 configs = read_csv_results("fine_csv.csv")['params'][:10]
