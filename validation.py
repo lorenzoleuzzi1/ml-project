@@ -38,18 +38,16 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
             metrics.append(network.val_scores)
         
         # --------------fold validation--------------
-        Y_pred = network._predict_outputs(X=X_val_fold)
-        # TODO: 
-        net_score = LOSSES[network.loss](y_true=y_val_fold, y_pred=Y_pred)
-        val_score = LOSSES[network.evaluation_metrics](y_true=y_val_fold, y_pred=Y_pred)
-        # TODO: modificare score in modo che gli passo lista
+        #Y_pred = network._predict_outputs(X=X_val_fold)
+        metric_values = network.score(X_val_fold, y_val_fold, [network.loss, network.evaluation_metric])
+        y_pred = network.preds
 
-        y_preds.append(Y_pred)
+        y_preds.append(y_pred)
         y_trues.append(y_val_fold)
 
         best_epoch = network.best_epoch
-        metrics.append(net_score)
-        metrics.append(val_score)
+        metrics.append(metric_values[network.loss])
+        metrics.append(metric_values[network.evaluation_metric])
         metrics.append(best_epoch)
 
         folds_metrics.append(metrics)
@@ -86,10 +84,10 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
         stds.append(np.std(best_metric))
 
     results = {
-        'tr_mse_mean' : means[0],
-        'tr_mse_dev' : stds[0],
-        'tr_%s_mean'%network.evaluation_metric : means[1], # TODO: medie degli score della lista passata a questa funzione
-        'tr_%s_dev'%network.evaluation_metric : stds[1], 
+        'tr_%s_mean'%network.loss : means[0],
+        'tr_%s_dev'%network.loss : stds[0],
+        'tr_%s_mean'%network.evaluation_metric : means[1],
+        'tr_%s_dev'%network.evaluation_metric : stds[1],
         'val_%s_mean'%network.loss : means[-3],
         'val_%s_dev'%network.loss : stds[-3],
         'val_%s_mean'%network.evaluation_metric : means[-2],
@@ -102,10 +100,10 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     #   - test score evaluation_metric (della chiamata a questo metodo)
     #   - best epoch 
     for i in range(k):
-        results['split%d_tr_mse'%i] = best_metrics[0][i]
-        results['split%d_tr_%s'%(i,network.evaluation_metric)] = best_metrics[1][i]
+        results['split%d_tr_%s'%(i, network.loss)] = best_metrics[0][i]
+        results['split%d_tr_%s'%(i, network.evaluation_metric)] = best_metrics[1][i]
         results['split%d_val_%s'%(i, network.loss)] = best_metrics[-3][i]
-        results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-2][i]  # TODO: qui salva tutti gli score della lista passata a questa funzione
+        results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-2][i]
         results['split%d_best_epoch'%i] = best_metrics[-1][i]
     
     results['y_preds'] = y_preds
@@ -127,7 +125,7 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
     for i, config in enumerate(grid):
         print(f"{i+1}/{len(grid)}")
         network = Network(**config)
-        cv_results = k_fold_cross_validation(network, X, y, k, evaluation_metric)
+        cv_results = k_fold_cross_validation(network, X, y, k, shuffle=False)
         cv_results.pop('y_preds')
         cv_results.pop('y_trues')
         cv_results['params'] = json.dumps(config)

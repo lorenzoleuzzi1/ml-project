@@ -1,5 +1,5 @@
 from network import Network
-from utils import regression2_plots, mse, mee
+from utils import mse, mee
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle as pkl

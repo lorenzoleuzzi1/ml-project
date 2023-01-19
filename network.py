@@ -62,7 +62,8 @@ class Network:
         self.activation_out = activation_out
         self.activation_hidden = activation_hidden
         self.hidden_layer_sizes = hidden_layer_sizes
-        self.loss = LOSSES[loss]
+        self.loss = loss
+        self.loss_fun = LOSSES[loss]
         self.loss_prime = LOSSES_DERIVATIVES[loss]
         self.epochs = epochs
         self.evaluation_metric = evaluation_metric
@@ -418,7 +419,7 @@ class Network:
                         output = layer.forward_propagation(output)
                       
                     # compute loss and evaluation metric (for display)
-                    train_loss += self.loss(y_true=y, y_pred=output)
+                    train_loss += self.loss_fun(y_true=y, y_pred=output)
                     train_score += self._evaluate(Y_true=y, Y_pred=output, metric=self.evaluation_metric)
                     
                     # backward propagation
@@ -450,7 +451,7 @@ class Network:
             #-----validation-----
             if self.early_stopping or Y_val is not None:
                 Y_val_output = self._predict_outputs(X_val)
-                val_loss = self.loss(y_true=Y_val, y_pred=Y_val_output)
+                val_loss = self.loss_fun(y_true=Y_val, y_pred=Y_val_output)
                 val_score = self._evaluate(Y_true=Y_val, Y_pred=Y_val_output, metric=self.evaluation_metric)
                 self.val_losses.append(val_loss)
                 self.val_scores.append(val_score)
@@ -518,6 +519,10 @@ class Network:
                 Y_test = np.hstack((Y_test, 1 - Y_test))
 
         outputs = self._predict_outputs(X_test)
+        if self.classification:
+            self.preds = self._outputs_to_labels(outputs)
+        else: self.preds = outputs
+        
         metric_values = {}
         for evaluation_metric in evaluation_metrics:
             metric_value = self._evaluate(

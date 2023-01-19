@@ -1,9 +1,11 @@
 
 from network import Network
 import numpy as np
+import pandas as pd
 import warnings
 import matplotlib.pyplot as plt
 from validation import k_fold_cross_validation
+from utils import LOSSES, EVALUATION_METRICS
 
 class Ensemble:
     def __init__(self, models_params, n_trials):
@@ -12,6 +14,7 @@ class Ensemble:
         self.evaluation_metric = self.models_params[0]['evaluation_metric']
         self.n_trials = n_trials
         self.n_models = len(models_params)
+        self.fitted = False
 
         self.max_epoch = 0
         for i in range(len(models_params)):
@@ -31,6 +34,7 @@ class Ensemble:
  
      
     def fit(self, X_train, y_train, X_test = None, y_test = None):
+        self.fitted = True
         self.validation_flag = False
 
         self.train_losses_trials_mean = []
@@ -129,6 +133,10 @@ class Ensemble:
                 
     
     def plot(self):
+        if not self.fitted:
+            print('Ensemble has not been fitted yet')
+            return
+        
         # ---------------------- LOSSES ----------------------
         # ------ mean losses ------
         plt.figure()      
@@ -241,7 +249,74 @@ class Ensemble:
             plt.savefig(f'model_{i}_scores.pdf', bbox_inches="tight")    
         
 
-    def validate(self, X_train, y_train, k, evaluation_metric):
-   
-        for network in self.models:
-            results = k_fold_cross_validation(network, X_train, y_train, k, ) 
+    def validate(self, X_train, y_train, k):
+        results = []
+        for params in self.models_params:
+            net = Network(**params)
+            net.epochs = 10
+            result = k_fold_cross_validation(net, X_train, y_train, k, shuffle=False)
+            results.append(result)
+        
+        preds_k = []
+        train_loss_models = []
+        split_train_loss_models = []
+        train_score_models = []
+        split_train_score_models = []
+        
+        for i in range(k):
+            preds_k.append([])
+            split_train_loss_models.append([])
+            split_train_score_models.append([])
+        for result in results:
+            for i, pred in enumerate(result['y_preds']):
+                preds_k[i].append(pred)
+                split_train_loss_models[i].append(result['split%d_tr_%s'%(i, self.loss)])
+                split_train_score_models[i].append(result['split%d_tr_%s'%(i, self.evaluation_metric)])
+            train_loss_models.append(result['tr_%s_mean'%self.loss]) #medie sui fold per ogni modello
+            train_score_models.append(result['tr_%s_mean'%self.evaluation_metric])
+            
+        train_loss_mean = np.mean(train_loss_models) #media di ogni modello -> scalare
+        train_loss_dev = np.std(train_loss_models)
+        train_score_mean = np.mean(train_score_models)
+        train_score_dev = np.std(train_score_models)
+
+        y_true_k = results[0]['y_trues']
+        means_pred_k = []
+        pred_split_val_loss = []
+        pred_split_val_metric = []
+        split_train_loss_mean = [] #media per ogni split
+        split_train_score_mean = []
+        
+        for i in range(k):
+            means_pred_k.append(np.mean(preds_k[i], axis=0))
+            pred_split_val_loss.append(LOSSES[self.loss](y_true_k[i], means_pred_k[i]))
+            pred_split_val_metric.append(EVALUATION_METRICS[self.evaluation_metric](y_true_k[i], means_pred_k[i]))
+            split_train_loss_mean.append(np.mean(split_train_loss_models[i]))
+            split_train_score_mean.append(np.mean(split_train_score_models[i]))
+
+        pred_split_val_loss_mean = np.mean(pred_split_val_loss)
+        pred_split_val_loss_dev = np.std(pred_split_val_loss)
+        pred_split_val_metric_mean = np.mean(pred_split_val_metric)
+        pred_split_val_metric_dev = np.std(pred_split_val_metric)
+
+        cv_results = {
+            'tr_%s_mean'%self.loss : train_loss_mean,
+            'tr_%s_dev'%self.loss : train_loss_dev,
+            'tr_%s_mean'%self.evaluation_metric : train_score_mean,
+            'tr_%s_dev'%self.evaluation_metric : train_score_dev,
+            'val_%s_mean'%self.loss : pred_split_val_loss_mean,
+            'val_%s_dev'%self.loss : pred_split_val_loss_dev,
+            'val_%s_mean'%self.evaluation_metric : pred_split_val_metric_mean,
+            'val_%s_dev'%self.evaluation_metric : pred_split_val_metric_dev,
+        }
+
+        for i in range(k):
+            cv_results['split%d_tr_%s'%(i, self.loss)] = split_train_loss_mean[i]
+            cv_results['split%d_tr_%s'%(i, self.evaluation_metric)] = split_train_score_mean[i]
+            cv_results['split%d_val_%s'%(i, self.loss)] = pred_split_val_loss[i]
+            cv_results['split%d_val_%s'%(i, self.evaluation_metric)] = pred_split_val_metric[i]
+            cv_results['split%d_best_epoch'%i] = '-'
+            
+        cv_results['params'] = 'ensemble'
+        
+        return cv_results
