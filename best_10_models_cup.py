@@ -14,8 +14,8 @@ for config in configs:
 
     start = time.time()
     net.fit(X_train, y_train)
-    end = time.end()
-    print(end-time)
+    end = time.time()
+    print(end-start)
     score = net.score(X_test, y_test, ['mse', 'mee'])
     print(score)
     scores.append(score)
