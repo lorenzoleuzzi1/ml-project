@@ -2,9 +2,7 @@ import numpy as np
 import pandas as pd
 import json
 from sklearn.model_selection import StratifiedKFold, KFold
-from network import Network
-from utils import mse, mee
-from utils import LOSSES
+from neural_network import NeuralNetwork
 
 def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     if k <= 1:
@@ -124,7 +122,7 @@ def grid_search_cv(grid, X, y, k, results_path):
     df_scores = pd.DataFrame(columns=[])
     for i, config in enumerate(grid):
         print(f"{i+1}/{len(grid)}")
-        network = Network(**config)
+        network = NeuralNetwork(**config)
         cv_results = k_fold_cross_validation(network, X, y, k, shuffle=False)
         cv_results.pop('y_preds')
         cv_results.pop('y_trues')
