@@ -1,5 +1,6 @@
 from ensembler import Ensemble
-from validation import read_csv_results
+from utils import read_csv_results
+from validation import grid_search_cv
 from cup import load_dev_set_cup, load_internal_test_cup
 from monks import read_monks
 import numpy as np

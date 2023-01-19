@@ -6,7 +6,6 @@ from network import Network
 from utils import mse, mee
 from utils import LOSSES
 
-# TODO: evaluation_metric come lista? se passi mee, mse li calcola entrambi sui validation folds
 def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     if k <= 1:
         print('Number of folds k must be more than 1')
@@ -111,13 +110,14 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     
     return results
 
-def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
-    metric = None
-    for param in grid: # TODO: necessario?
-        if metric==None:
-            metric = param['evaluation_metric'] # TODO: servono altri check? dovremo metterli ovunque...
-        elif param['evaluation_metric'] != metric:
+def grid_search_cv(grid, X, y, k, results_path):
+    metric = grid[0]['evaluation_metric']
+    loss = grid[0]['loss']
+    for param in grid:
+        if param['evaluation_metric'] != metric:
             raise ValueError("Evaluation metric must be the same for each configuration.")
+        if param['loss'] != loss:
+            raise ValueError("Loss must be the same for each configuration.")
     
     print(f"Starting grid search - exploring {len(grid)} configs")
     
