@@ -555,8 +555,3 @@ class Network:
 
     def set_reinit_weights(self, value: bool):
         self.reinit_weights = value
-
-    def save(self, path):
-        file = open(path, 'wb')
-        pickle.dump(self, file)
-        file.close()

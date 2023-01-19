@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.special import xlogy
 from sklearn.metrics import accuracy_score
+import pickle
 
 #-----ACTIVATIONS-----
 # activation functions and their derivatives
@@ -131,3 +132,8 @@ EVALUATION_METRICS = {
     'logloss': log_loss,
     'accuracy': accuracy_score
 }
+
+def save_obj(obj, path):
+    file = open(path, 'wb')
+    pickle.dump(obj, file)
+    file.close()
