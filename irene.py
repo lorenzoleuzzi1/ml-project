@@ -10,7 +10,6 @@ params = read_csv_results("csv_results/fine_gs2_results.csv")['params'][:10]
 X_dev, y_dev = load_dev_set_cup()
 X_test, y_test = load_internal_test_cup()
 
-
 ens = Ensemble(params, 5)
 start = time.time()
 ens.fit(X_dev, y_dev, X_test, y_test)
@@ -20,6 +19,10 @@ preds = ens.predict(X_test)
 print("training time %f"%(end-start))
 mse_score = mse(y_test, preds)
 mee_score = mee(y_test, preds)
+
+print(preds)
+print(mse_score)
+print(mee_score)
 
 save_obj(ens, "ensemble.pkl")
 save_obj(preds, "internal_preds.pkl")
@@ -31,6 +34,3 @@ d = {
 
 with open("assessment_scores.json", 'w') as f:
 	json.dump(d, fp = f, indent = 4)
-
-
-
