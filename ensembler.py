@@ -1,7 +1,6 @@
 
 from network import Network
 import numpy as np
-import pandas as pd
 import scipy.stats as st
 import warnings
 import matplotlib.pyplot as plt
@@ -49,21 +48,21 @@ class Ensemble:
         self.best_epochs = np.full(shape = (self.n_models, self.n_trials), fill_value = np.nan)
 
         for i in range(self.n_models):
-            print(f"{i}/{self.n_models}")
+            print(f"{i+1}/{self.n_models}")
             params =self.models_params[i]
             print(params)
             self.models.append([])
             
             for j in range(self.n_trials):
-                net = Network(**params)   
-                net.stopping_criteria_on_loss = False
+                net = Network(**params)
+                net.stopping_criteria_on_loss = False # TODO: togliere
                 net.fit(X_train, y_train, X_test, y_test)
                 self.models[i].append(net)
 
-                self.best_train_losses_mean[i] += net.train_losses[net.best_epoch]               
+                self.best_train_losses_mean[i] += net.train_losses[net.best_epoch]
                 self.best_train_scores_mean[i] += net.train_scores[net.best_epoch]
 
-                if (X_test is not None and y_test is not None and net.early_stopping == False):
+                if ((X_test is not None and y_test is not None) or net.early_stopping == True):
                     self.validation_flag = True
                     self.best_val_losses_mean[i] += net.val_losses[net.best_epoch]
                     self.best_val_scores_mean[i] += net.val_scores[net.best_epoch]
@@ -142,23 +141,23 @@ class Ensemble:
         
         # ---------------------- LOSSES ----------------------
         # ------ mean losses ------
-        plt.figure()      
+        plt.figure()
         plt.semilogy(self.train_losses_mean, color='blue', label='Development Set - Mean', linewidth=1.2)
         if self.validation_flag:
-            plt.semilogy(self.val_losses_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)    
+            plt.semilogy(self.val_losses_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)
         plt.xlabel('Epochs')
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
         plt.savefig('mean_final_losses.pdf', bbox_inches="tight")
 
         # ------ mean and all models losses ------
-        plt.figure()    
+        plt.figure()
         label = None
         for i in range(0, self.n_models):
             for j in range(0, self.n_trials):
                 if (i==self.n_models-1 and j==self.n_trials-1):
                     label = "Development Set"
-                plt.semilogy(self.train_losses[i][j], label = label, color='lightsteelblue', linewidth=0.5)      
+                plt.semilogy(self.train_losses[i][j], label = label, color='lightsteelblue', linewidth=0.5)
         if self.validation_flag:
             label = None
             for i in range(0, self.n_models):
@@ -167,13 +166,13 @@ class Ensemble:
                         label = "Internal Test Set"
                     plt.semilogy(self.val_losses[i][j], label = label, color='lightsalmon', linewidth=0.5) 
         plt.semilogy(self.train_losses_mean, color='blue', label='Development Set - Mean', linewidth=1.2)
-        if self.validation_flag: plt.semilogy(self.val_losses_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)  
+        if self.validation_flag: plt.semilogy(self.val_losses_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)
         plt.xlabel('Epochs')
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
         plt.savefig('mean_all_models_losses.pdf', bbox_inches="tight")
 
-        # ------ plot for each model ------       
+        # ------ plot for each model ------
         for i in range(0, self.n_models):
             plt.figure()
             label = None
@@ -223,15 +222,15 @@ class Ensemble:
                         label = "Internal Test Set"
                     plt.semilogy(self.val_scores[i][j], label = label, color='lightsalmon', linewidth=0.5) 
         plt.semilogy(self.train_scores_mean, color='blue', label='Development Set - Mean', linewidth=1.2)
-        if self.validation_flag: plt.semilogy(self.val_scores_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)      
+        if self.validation_flag: plt.semilogy(self.val_scores_mean, color='red', linestyle='--', label='Internal Test Set - Mean', linewidth=1.2)
         plt.xlabel('Epochs')
         plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
         plt.legend()
         plt.savefig('mean_all_models_scores.pdf', bbox_inches="tight")
 
-        # ------ plot for each model ------       
+        # ------ plot for each model ------
         for i in range(0, self.n_models):
-            plt.figure()     
+            plt.figure()
             label = None
             for j in range(0, self.n_trials):
                 if (j==self.n_trials-1):
@@ -249,14 +248,14 @@ class Ensemble:
             plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
             plt.legend()
             plt.title(f'Model {i}')
-            plt.savefig(f'model_{i}_scores.pdf', bbox_inches="tight")    
+            plt.savefig(f'model_{i}_scores.pdf', bbox_inches="tight")
         
 
     def validate(self, X_train, y_train, k):
         results = []
         
         for i, params in enumerate(self.models_params):
-            print(f"{i}/{len(self.models_params)}")
+            print(f"{i+1}/{len(self.models_params)}")
             net = Network(**params)
             net.stopping_criteria_on_loss = False
             result = k_fold_cross_validation(net, X_train, y_train, k, shuffle=False)
