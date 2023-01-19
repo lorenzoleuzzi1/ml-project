@@ -2,6 +2,7 @@
 from network import Network
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 import warnings
 import matplotlib.pyplot as plt
 from validation import k_fold_cross_validation
@@ -12,6 +13,7 @@ class Ensemble:
         self.models_params = models_params
         self.loss = self.models_params[0]['loss']
         self.evaluation_metric = self.models_params[0]['evaluation_metric']
+        self.classification = self.models_params[0]['classification']
         self.n_trials = n_trials
         self.n_models = len(models_params)
         self.fitted = False
@@ -30,9 +32,7 @@ class Ensemble:
         self.best_train_scores_mean = np.zeros(shape = (self.n_models))
         self.best_val_scores_mean = np.zeros(shape = (self.n_models))
         self.models = []
-        self.preds =[]
- 
-     
+    
     def fit(self, X_train, y_train, X_test = None, y_test = None):
         self.fitted = True
         self.validation_flag = False
@@ -120,16 +120,20 @@ class Ensemble:
         self.finale_val_score = np.mean(self.best_val_scores_mean)
 
     def predict(self, X_test):
+        if not self.fitted:
+            print('Ensemble has not been fitted yet')
+            return
         preds = []
-
         for i in range(self.n_models):
             for j in range(self.n_trials):
                 pred = self.models[i][j].predict(X_test)
                 preds.append(pred)
-        
-        self.preds_mean = np.mean(np.array(preds), axis=0)
 
-        return self.preds_mean 
+        if self.classification:
+            self.preds = st.mode(preds, axis=0).mode
+        else: self.preds = np.mean(np.array(preds), axis=0)
+
+        return self.preds
                 
     
     def plot(self):

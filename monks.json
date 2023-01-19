@@ -28,7 +28,7 @@
         "weights_dist": "uniform"
     },
 
-    "monks-2": {
+    "monks-2" : {
         "activation_hidden": "logistic",
         "activation_out": "logistic",
         "alpha": 0.9,
