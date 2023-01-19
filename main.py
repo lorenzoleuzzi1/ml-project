@@ -3,10 +3,16 @@ from monks import run_monks
 from validation import read_csv_results
 from cup import run_cup
 import json
+from sklearn.model_selection import ParameterGrid
+from cup import load_dev_set_cup
+from validation import grid_search_cv
 
 def main(experiment_name):
-    if (experiment_name in AVAILABLE_EXPERIMENTS[:3]):
-        run_monks(experiment_name)
+    if (experiment_name in AVAILABLE_EXPERIMENTS[:4]):
+        with open("monks.json") as json_monks:
+            monks_config = json.load(json_monks).get(experiment_name)
+            monks_config['name'] = experiment_name
+            run_monks(monks_config)
     
     elif (experiment_name == "cup-best_gs"):
         best_gs_config = read_csv_results("fine_csv.csv")['params'][0]
@@ -20,16 +26,16 @@ def main(experiment_name):
         pass
     
     elif (experiment_name == "cup-coarse_gs"):
-        # leggi griglia o da un .py o .json
-        # X_dev, y_dev = load_dev_set_cup()
-        # grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=5, results_path=results_path, evaluation_metric='mse')
-        pass
-    
+        X_dev_cup, y_dev_cup = load_dev_set_cup()
+        with open("grid_searches.json") as json_gs:
+            coarse_grid = ParameterGrid(json.load(json_gs).get("coarse"))
+            grid_search_cv(grid=coarse_grid, X=X_dev_cup, y=y_dev_cup, k=5, results_path="coarse_gs.csv", evaluation_metric='mse')
+ 
     elif (experiment_name == "cup-fine_gs"):
-        # leggi griglia o da un .py o .json
-        # X_dev, y_dev = load_dev_set_cup()
-        # grid_search_cv(grid=grid, X=X_dev, y=y_dev, k=5, results_path=results_path, evaluation_metric='mse')
-        pass 
+        X_dev_cup, y_dev_cup = load_dev_set_cup()
+        with open("grid_searches.json") as json_gs:
+            coarse_grid = ParameterGrid(json.load(json_gs).get("fine"))
+            grid_search_cv(grid=coarse_grid, X=X_dev_cup, y=y_dev_cup, k=5, results_path="fine_gs.csv", evaluation_metric='mse')
     
     else:
         raise ValueError(f"Incorrect input. Experiment name must be one of {AVAILABLE_EXPERIMENTS}")

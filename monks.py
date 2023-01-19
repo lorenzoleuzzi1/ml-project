@@ -13,14 +13,10 @@ def read_monks(path, one_hot_encoding=True):
     data = data.to_numpy() # int 64
     if one_hot_encoding:
         data = OneHotEncoder().fit_transform(data).toarray() # float 64
+    targets = targets.reshape(targets.shape[0], 1)
     return data, targets
 
 def plot_monks_curves(net, data_set_name):
-    print("MSE train %f" % net.train_losses[net.best_epoch])
-    print("MSE test %f" % net.val_losses[net.best_epoch])
-    print("ACCURACY train %f" % net.train_scores[net.best_epoch])
-    print("ACCURACY test %f" % net.val_scores[net.best_epoch])
-
     plt.figure()
     plt.plot(net.train_losses, label="Training", color="blue")
     plt.plot(net.val_losses, 'r--', label='Test')
@@ -29,6 +25,7 @@ def plot_monks_curves(net, data_set_name):
     plt.xlabel("Epochs")
     plt.ylabel("Loss (MSE)")
     plt.savefig("./monks_curves/%s_loss_curves.pdf" %data_set_name, bbox_inches="tight")
+    plt.show()
 
     plt.figure()
     plt.plot(net.train_scores, label="Training", color="blue")
@@ -36,35 +33,28 @@ def plot_monks_curves(net, data_set_name):
     plt.legend()
     plt.grid()
     plt.xlabel("Epochs")
-    plt.ylabel("Accuracy")
+    plt.ylabel("Score (Accuracy)")
     plt.ylim(0, 1.05)
     plt.savefig("./monks_curves/%s_accuracy_curves.pdf" %data_set_name, bbox_inches="tight")
+    plt.show()
 
-def run_monks(monks : str):
-    print(f"Running {monks}")
+def run_monks(config):
+    monks_name = config.get("name")
+    config.pop("name")
+    print(f"Running {monks_name} with the following configuration:\n{config}")
+
+    MONKS_TRAIN_PATH = f"./datasets/{monks_name[:7]}.train"
+    MONKS_TEST_PATH = f"./datasets/{monks_name[:7]}.test"
     
-    if monks == "monks-3reg":
-        monks = "monks-3"
-        monks_number = 3
-    else:
-        monks_number = monks[6] - 1
-
-    MONKS_TRAIN_PATH = f"./datasets/{monks}.train"
-    MONKS_TEST_PATH = f"./datasets/{monks}.test"
-
     X_train, y_train = read_monks(MONKS_TRAIN_PATH)
     X_test, y_test = read_monks(MONKS_TEST_PATH)
-
-    config = read_csv_results("monks.csv")['params'][monks_number]
     net = Network(**config)
-    
+    # net.batch_size = 4
+    # net.lambd = 0.0001
     net.fit(X_train, y_train, X_test, y_test)
-    plot_monks_curves(net, monks)
+    scores = net.score(X_test, y_test, ["accuracy", "mse", "mee"])
+    print(scores)
+    plot_monks_curves(net, monks_name)
     
-    print('accuracy_test = %f' % net.score(X_test, y_test, 'accuracy'))
-    print('accuracy_train = %f' %net.train_scores[net.best_epoch])
-    print('mse_train = %f' %net.train_losses[net.best_epoch])
-    print('mse_test = %f' %net.val_losses[net.best_epoch])
-    print('accuracy_test_internal = %f' %net.val_scores[net.best_epoch])
 
 

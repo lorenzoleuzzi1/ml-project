@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from network import Network
-from cup_parsing import load_blind_test_cup, read_tr_cup
+from cup import load_blind_test_cup, read_tr_cup
 from validation import read_grid_search_results
 
 def pad(a):
@@ -17,6 +17,7 @@ def pad(a):
             x = a[i]
         b.append(x)
     b = np.array(b)
+    # .append(zeros(net.epochs - len(list)))
     return b
 
 df = read_grid_search_results("fine_gs2_results.csv")

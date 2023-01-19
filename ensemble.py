@@ -8,6 +8,7 @@ import pandas as pd
 import pickle
 import numpy as np
 from utils import mee, mse
+from validation import k_fold_cross_validation
 
 #TODO: fatta per verificare se fosse meglio di un solo modello
 def k_fold_cross_validation_ensemble(network, X_train, y_train, k):

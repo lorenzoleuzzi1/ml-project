@@ -492,7 +492,7 @@ class Network:
             Y = self._outputs_to_labels(Y)
         return Y
 
-    def score(self, X_test, Y_test, evaluation_metric): # TODO: lista di scores senza rifare forward phase
+    def score(self, X_test, Y_test, evaluation_metrics): # TODO: lista di scores senza rifare forward phase
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
         if X_test.ndim != 2:
@@ -500,16 +500,17 @@ class Network:
         if self.layers[0].fan_in != X_test.shape[1]:
             raise ValueError("X has a different number of features "
                 "from the one of the dataset the net has been trained on.")
-        if evaluation_metric not in EVALUATION_METRICS:
-            raise ValueError("Unrecognized evaluation metric. "
-                "Supported evaluation metrics are %s."% list(EVALUATION_METRICS))
-        if evaluation_metric == 'accuracy' and self.classification == False:
+        for evaluation_metric in evaluation_metrics:
+            if evaluation_metric not in EVALUATION_METRICS:
+                raise ValueError("Unrecognized evaluation metric %s. "
+                    "Supported evaluation metrics are %s."% (evaluation_metric, list(EVALUATION_METRICS)))
+        if 'accuracy' in evaluation_metrics and self.classification == False:
             raise ValueError("accuracy metric can be used only for classification tasks.")
         if self.classification:
             labels = unique_labels(Y_test)
             for label in labels:
                 if label not in self.labels:
-                    raise ValueError("test label are not included in train labels.")  # TODO: lo vogliamo?
+                    raise ValueError("test label are not included in train labels.")  
         
         if self.classification == True:
             Y_test = self.binarizer.transform(Y_test).astype(np.float64)
@@ -517,12 +518,15 @@ class Network:
                 Y_test = np.hstack((Y_test, 1 - Y_test))
 
         outputs = self._predict_outputs(X_test)
-        metric_value = self._evaluate(
-            Y_true=Y_test,
-            Y_pred=outputs,
-            metric=evaluation_metric # TODO: se classificazione serve self._outputs_to_labels(Y)
-        )
-        return metric_value
+        metric_values = {}
+        for evaluation_metric in evaluation_metrics:
+            metric_value = self._evaluate(
+                Y_true=Y_test,
+                Y_pred=outputs,
+                metric=evaluation_metric 
+            )
+            metric_values[evaluation_metric] = metric_value
+        return metric_values
 
     def get_init_weights(self):
         init_weights = []

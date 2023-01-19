@@ -4,20 +4,23 @@ import json
 from sklearn.model_selection import StratifiedKFold, KFold
 from network import Network
 from utils import mse, mee
+from utils import LOSSES
 
 # TODO: evaluation_metric come lista? se passi mee, mse li calcola entrambi sui validation folds
-# TODO: aggiungere parametro shuffle (teniamo falso nella grid search! vogliamo confrontare modelli diversi su stessi dati)
-def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
+def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     if k <= 1:
         print('Number of folds k must be more than 1')
         raise ValueError("k must be more than 1")
 
     if network.classification:
-        kf = StratifiedKFold(n_splits=k, shuffle=True) # TODO: shuffle
+        kf = StratifiedKFold(n_splits=k, shuffle=shuffle)
     else:
-        kf = KFold(n_splits=k, shuffle=False) # TODO: shuffle
+        kf = KFold(n_splits=k, shuffle=shuffle) 
     
     folds_metrics = []
+    y_preds = []
+    y_trues = []
+
     for train_index, validation_index in kf.split(X_train, y_train):
         metrics = []
        
@@ -36,9 +39,13 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
         
         # --------------fold validation--------------
         Y_pred = network._predict_outputs(X=X_val_fold)
-        net_score = mse(y_true=y_val_fold, y_pred=Y_pred)
-        val_score = mee(y_true=y_val_fold, y_pred=Y_pred)
+        # TODO: 
+        net_score = LOSSES[network.loss](y_true=y_val_fold, y_pred=Y_pred)
+        val_score = LOSSES[network.evaluation_metrics](y_true=y_val_fold, y_pred=Y_pred)
         # TODO: modificare score in modo che gli passo lista
+
+        y_preds.append(Y_pred)
+        y_trues.append(y_val_fold)
 
         best_epoch = network.best_epoch
         metrics.append(net_score)
@@ -83,8 +90,8 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
         'tr_mse_dev' : stds[0],
         'tr_%s_mean'%network.evaluation_metric : means[1], # TODO: medie degli score della lista passata a questa funzione
         'tr_%s_dev'%network.evaluation_metric : stds[1], 
-        'val_%s_mean'%evaluation_metric : means[-3],
-        'val_%s_dev'%evaluation_metric : stds[-3],
+        'val_%s_mean'%network.loss : means[-3],
+        'val_%s_dev'%network.loss : stds[-3],
         'val_%s_mean'%network.evaluation_metric : means[-2],
         'val_%s_dev'%network.evaluation_metric : stds[-2],
     }
@@ -97,10 +104,13 @@ def k_fold_cross_validation(network, X_train, y_train, k, evaluation_metric):
     for i in range(k):
         results['split%d_tr_mse'%i] = best_metrics[0][i]
         results['split%d_tr_%s'%(i,network.evaluation_metric)] = best_metrics[1][i]
-        results['split%d_val_%s'%(i, evaluation_metric)] = best_metrics[-3][i]
+        results['split%d_val_%s'%(i, network.loss)] = best_metrics[-3][i]
         results['split%d_val_%s'%(i, network.evaluation_metric)] = best_metrics[-2][i]  # TODO: qui salva tutti gli score della lista passata a questa funzione
         results['split%d_best_epoch'%i] = best_metrics[-1][i]
-
+    
+    results['y_preds'] = y_preds
+    results['y_trues'] = y_trues
+    
     return results
 
 def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
@@ -118,6 +128,8 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
         print(f"{i+1}/{len(grid)}")
         network = Network(**config)
         cv_results = k_fold_cross_validation(network, X, y, k, evaluation_metric)
+        cv_results.pop('y_preds')
+        cv_results.pop('y_trues')
         cv_results['params'] = json.dumps(config)
         df_scores = pd.concat([df_scores, pd.DataFrame([cv_results])], ignore_index=True)
     
