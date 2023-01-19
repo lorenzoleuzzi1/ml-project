@@ -133,11 +133,3 @@ def grid_search_cv(grid, X, y, k, results_path, evaluation_metric):
     
     print("Grid search finished.")
     df_scores.to_csv(results_path)
-
-def read_csv_results(path):
-    df = pd.read_csv(path, sep=",")
-    for i in range(len(df['params'])):
-        params_as_json_string = df['params'][i]
-        params_as_dictionary = json.loads(params_as_json_string)
-        df.at[i,'params'] = params_as_dictionary
-    return df

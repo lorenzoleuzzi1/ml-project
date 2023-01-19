@@ -2,6 +2,8 @@ import numpy as np
 from scipy.special import xlogy
 from sklearn.metrics import accuracy_score
 import pickle
+import pandas as pd
+import json
 
 #-----ACTIVATIONS-----
 # activation functions and their derivatives
@@ -137,3 +139,11 @@ def save_obj(obj, path):
     file = open(path, 'wb')
     pickle.dump(obj, file)
     file.close()
+
+def read_csv_results(path):
+    df = pd.read_csv(path, sep=",")
+    for i in range(len(df['params'])):
+        params_as_json_string = df['params'][i]
+        params_as_dictionary = json.loads(params_as_json_string)
+        df.at[i,'params'] = params_as_dictionary
+    return df

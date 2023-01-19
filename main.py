@@ -1,6 +1,6 @@
 import argparse
 from monks import run_monks
-from validation import read_csv_results
+from utils import read_csv_results
 from cup import run_cup
 import json
 from sklearn.model_selection import ParameterGrid

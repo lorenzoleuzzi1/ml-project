@@ -1,7 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
-from validation import read_csv_results
 from network import Network
 
 def read_monks(path, one_hot_encoding=True):

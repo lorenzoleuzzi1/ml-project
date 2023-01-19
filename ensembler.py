@@ -56,7 +56,7 @@ class Ensemble:
             
             for j in range(self.n_trials):
                 net = Network(**params)   
-                net.epochs = 10
+                net.stopping_criteria_on_loss = False
                 net.fit(X_train, y_train, X_test, y_test)
                 self.models[i].append(net)
 
@@ -73,7 +73,6 @@ class Ensemble:
                 train_scores[i][j][:len(net.train_scores)] = np.array(net.train_scores)
                 val_scores[i][j][:len(net.val_scores)] = np.array(net.val_scores)
                 self.best_epochs[i][j] = net.best_epoch
-
 
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=RuntimeWarning)
@@ -255,9 +254,11 @@ class Ensemble:
 
     def validate(self, X_train, y_train, k):
         results = []
-        for params in self.models_params:
+        
+        for i, params in enumerate(self.models_params):
+            print(f"{i}/{len(self.models_params)}")
             net = Network(**params)
-            net.epochs = 10
+            net.stopping_criteria_on_loss = False
             result = k_fold_cross_validation(net, X_train, y_train, k, shuffle=False)
             results.append(result)
         
