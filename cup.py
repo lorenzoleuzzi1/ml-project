@@ -86,5 +86,5 @@ def best_models_assessment(configs):
         print(score)
         scores.append({f"model_{i}" : score})
     
-    with open("best_models_assessment_scores.json", 'w') as f:
-        json.dump(scores, fp = f, indent = 4)
+    return scores
+   
