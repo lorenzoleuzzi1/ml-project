@@ -9,6 +9,67 @@ from sklearn import preprocessing
 
 
 class NeuralNetwork:
+    """
+    A neural network class for classification or regression tasks.
+
+    Parameters:
+        - activation_out (str): the activation function to use for the output layer. 
+            Choices: 'identity', 'relu', 'leaky_relu', 'logistic', 'tanh', 'softplus', 'softmax'
+        
+        - classification (bool): a boolean indicating whether the task is classification or regression.
+        
+        - activation_hidden (str): the activation function to use for the hidden layers. 
+            Choices: 'identity', 'relu', 'leaky_relu', 'logistic', 'tanh', 'softplus', 'softmax'
+        
+        - hidden_layer_sizes (list): a list of integers representing the number of neurons in each hidden layer.
+        
+        - loss (str): the loss function to use for the network. 
+            Choices: 'mse', 'mee', 'logloss'
+        
+        - evaluation_metric (str): the evaluation metric to use for the network.
+            Choices: 'mse', 'mee', 'logloss', 'accuracy'
+        
+        - epochs (int): the number of training iterations to perform.
+        
+        - learning_rate (str): the type of learning rate to use. 
+            Choices: 'fixed', 'linear_decay'
+        
+        - learning_rate_init (float): the initial learning rate value.
+        
+        - tau (int): the number of iterations over the training data before the learning rate is decreased.
+            Only used if learning_rate = 'linear_decay'
+        
+        - batch_size (int or float): the number of samples to use in each training update.
+        
+        - ambd (float): the regularization term to use as weight decay.
+        
+        - alpha (float): the momentum term to use in the optimizer.
+        
+        - nesterov (bool): a boolean indicating whether to use Nesterov momentum.
+        
+        - early_stopping (bool): a boolean indicating whether to use early stopping during training.
+        
+        - stopping_criteria_on_loss (bool): a boolean indicating whether to stop training if the loss stops decreasing.
+        
+        - stopping_patience (int): the number of iterations to wait for improvement before stopping training.
+        
+        - validation_size (int or float): the proportion of the data to use for validation during training.
+        
+        - tol (float): the tolerance for the optimizer.
+        
+        - metric_decrease_tol (float): the tolerance for the evaluation metric during early stopping.
+        
+        - verbose (bool): a boolean indicating whether to print progress during training.
+        
+        - random_state (int): the seed to use for the random number generator.
+        
+        - reinit_weights (bool): a boolean indicating whether to reinitialize the weights at the beginning of training.
+        
+        - weights_dist (str): the distribution to use for initializing the weights.
+            Choices: 'normal', 'uniform'
+        
+        - weights_bound (float): the range for the distribution used to initialize the weights.
+    """
     def __init__(
         self, 
         activation_out : str,
@@ -152,7 +213,6 @@ class NeuralNetwork:
             raise ValueError("metric_decrease_tol must be positive.")
         if (not isinstance(params['stopping_criteria_on_loss'], bool)):
             raise ValueError("stopping_criteria_on_loss must be a boolean.")
-
 
     def _encode_targets(self, Y_train):
         self.binarizer = preprocessing.LabelBinarizer(
@@ -355,6 +415,18 @@ class NeuralNetwork:
         return Y_train, Y_val
 
     def fit(self, X_train, Y_train, X_val=None, Y_val=None):
+        """
+        Train the neural network on the given training data.
+
+        Parameters:
+            - X_train (np.array): the training data.
+
+            - Y_train (np.array): the target data for the training set.
+
+            - X_val (np.array): the validation data. Optional, if not provided, no validation score will be calculated.
+
+            - Y_val (np.array): the target data for the validation set.
+        """
         Y_train, Y_val = self._fit_preprocessing(X_train, Y_train, X_val, Y_val)
         self._compose()
         n_samples = X_train.shape[0]
@@ -388,7 +460,8 @@ class NeuralNetwork:
         self.val_scores = []
 
         self.no_improvement_count = 0
- 
+
+        # loop through the number of epochs
         for epoch in range(self.epochs):
             train_loss = 0
             train_loss_not_reg = 0
@@ -397,9 +470,10 @@ class NeuralNetwork:
             X_train_batched = np.array_split(X_train, n_batches)
             Y_train_batched = np.array_split(Y_train, n_batches)
             
-            # for every batch in the set loop
+            # loop through batches
             for X_batch, Y_batch in zip(X_train_batched, Y_train_batched):
-                # for every pattern in the batch loop
+                
+                # loop through patterns in the batch
                 for x, y in zip(X_batch, Y_batch):
                     batch_size = X_batch.shape[0]
                     output = x
@@ -408,7 +482,7 @@ class NeuralNetwork:
                     for layer in self.layers:
                         output = layer.forward_propagation(output)
                       
-                    # compute loss and evaluation metric (for display)
+                    # compute loss and evaluation metric 
                     train_loss += self.loss_fun(y_true=y, y_pred=output)
                     train_score += self._evaluate(Y_true=y, Y_pred=output, metric=self.evaluation_metric)
                     
@@ -445,15 +519,18 @@ class NeuralNetwork:
                 val_score = self._evaluate(Y_true=Y_val, Y_pred=Y_val_output, metric=self.evaluation_metric)
                 self.val_losses.append(val_loss)
                 self.val_scores.append(val_score)
-            
+            #--------------------
+
             # average on all samples 
             train_loss_not_reg /= n_samples
             train_loss /= n_samples
             train_score /= n_samples
+            
             self.train_losses.append(train_loss_not_reg)
             self.train_losses_reg.append(train_loss)
             self.train_scores.append(train_score)
 
+            #-----display training progress-----
             if self.verbose:
                 if self.early_stopping or Y_val is not None:
                     print('epoch %d/%d   train loss=%.6f     train score=%.6f     val loss=%.6f    val score=%.6f' 
@@ -461,15 +538,26 @@ class NeuralNetwork:
                 else:
                     print('epoch %d/%d   train error=%.6f' 
                         % (epoch+1, self.epochs, train_loss_not_reg))
-            
+            #-----------------------------------
+
             #-----stopping-----
             self._update_no_improvement_count(epoch, self.train_losses_reg, self.train_scores, self.val_scores)
 
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)
                 break # jump out the for loop
-
+            #------------------
+    
     def predict(self, X):
+        """
+        Make predictions for the given data.
+
+        Parameters:
+            - X (np.array): the data to make predictions for.
+
+        Returns:
+            - predictions (np.array): the predictions made by the network.
+        """
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
         if X.ndim != 2:
@@ -478,12 +566,26 @@ class NeuralNetwork:
             raise ValueError("X has a different number of features "
                 "from the one of the dataset the net has been trained on.")
         
-        Y = self._predict_outputs(X)
+        predictions = self._predict_outputs(X)
         if self.classification:
-            Y = self._outputs_to_labels(Y)
-        return Y
+            predictions = self._outputs_to_labels(predictions)
+        return predictions
 
     def score(self, X_test, Y_test, evaluation_metrics):
+        """
+        Evaluate the performance of the neural network on the given test data.
+
+        Parameters:
+            - X_test (np.array): the test data to evaluate the network on.
+            
+            - Y_test (np.array): the true target data for the test set.
+            
+            - evaluation_metrics (str): a list of the evaluation metrics to use.
+                Choices: 'mse', 'accuracy'
+
+        Returns:
+            - scores (float): the score of the network on the test data according to the chosen evaluation metrics.
+        """
         if self.first_fit:
             raise ValueError("fit has not been called yet.")
         if X_test.ndim != 2:
@@ -513,17 +615,25 @@ class NeuralNetwork:
             self.preds = self._outputs_to_labels(outputs)
         else: self.preds = outputs
         
-        metric_values = {}
+        scores = {}
         for evaluation_metric in evaluation_metrics:
             metric_value = self._evaluate(
                 Y_true=Y_test,
                 Y_pred=outputs,
                 metric=evaluation_metric 
             )
-            metric_values[evaluation_metric] = metric_value
-        return metric_values
+            scores[evaluation_metric] = metric_value
+        return scores
 
     def get_init_weights(self):
+        """
+        Get the initial weights and bias of the neural network.
+
+        Returns:
+            - init_weights (list of np.array): a list of the initial weights of each layer of the network.
+
+            - init_bias (list of np.array): a list of the initial bias of each layer of the network.
+        """
         init_weights = []
         init_bias = []
         for layer in self.layers:
@@ -532,10 +642,26 @@ class NeuralNetwork:
         return init_weights, init_bias
 
     def set_weights(self, weights, bias):
+        """
+        Set the weights of the neural network.
+
+        Parameters:
+            - weights (list of np.array): a list of the new weights of each layer of the network.
+            
+            - bias (list of np.array): a list of the new biases of each layer of the network.
+        """
         for l, weights_l, bias_l in zip(self.layers, weights, bias):
             l.set_weights(weights_l, bias_l)
 
     def get_current_weights(self):
+        """
+        Get the current weights of the neural network.
+
+        Returns:
+            - weights (list of np.array): a list of the current weights of each layer of the network.
+            
+            - bias (list of np.array): a list of the current biases of each layer of the network.
+        """
         weights = []
         bias = []
         for l in self.layers:

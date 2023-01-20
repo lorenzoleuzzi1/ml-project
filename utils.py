@@ -80,6 +80,8 @@ ACTIVATIONS_THRESHOLDS = {
     'softmax': 0.5
 }
 
+#---------------------
+
 #-----LOSSES AND METRICS-----
 # loss functions and their derivatives
 
@@ -129,6 +131,9 @@ EVALUATION_METRICS = {
     'accuracy': accuracy_score
 }
 
+# --------------------------
+
+# -----MISC-----
 def save_obj(obj, path):
     file = open(path, 'wb')
     pickle.dump(obj, file)
@@ -141,3 +146,4 @@ def read_csv_results(path):
         params_as_dictionary = json.loads(params_as_json_string)
         df.at[i,'params'] = params_as_dictionary
     return df
+# --------------

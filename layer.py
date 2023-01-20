@@ -4,7 +4,7 @@ from utils import ACTIVATIONS, ACTIVATIONS_DERIVATIVES
 
 class Layer():
     """
-    This class represents a feed-forward fully connected layer of a 
+    A class representing a feed-forward fully connected layer of a 
     neural network.
 
     It implements the methods needed to propagate input values to the units of
