@@ -75,7 +75,7 @@ def best_models_assessment(configs):
     scores = []
     print(f"Assessing {len(configs)} models")
 
-    # loop thru best configurations
+    # loop through best configurations
     for i, config in enumerate(configs):
         print(f"Running cup with the following configuration:\n{config}")
         X_train, y_train = load_dev_set_cup()
