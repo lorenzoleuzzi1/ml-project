@@ -10,29 +10,36 @@ import pickle
 import pandas as pd
 from ensemble import Ensemble
 
-def main(experiment_name):
-    if (experiment_name in AVAILABLE_EXPERIMENTS[:4]):
-        with open("jsons/monks.json") as json_monks:
-            monks_config = json.load(json_monks).get(experiment_name)
-            monks_config['name'] = experiment_name
+def main(script_name):
+    if (script_name in AVAILABLE_SCRIPTS[:4]):
+        # run monks
+        with open("jsons/monks_params.json") as json_monks:
+            monks_config = json.load(json_monks).get(script_name)
+            monks_config['name'] = script_name
             run_monks(monks_config)
     
-    elif (experiment_name == "cup-best_single"):
+    elif (script_name == "cup-best_single"):
+        # run the best single congifuration for the cup
         best_gs_config = read_csv_results("csvs/fine_gs.csv")['params'][0]
         run_cup(best_gs_config)
     
-    elif (experiment_name == "cup-custom"):
+    elif (script_name == "cup-custom"):
+        # run a custom configuration for the cup
         custom_config = json.load("jsons/cup_custom_config.json")
         run_cup(custom_config)
     
-    elif (experiment_name == "cup-best_models_assessment"):
+    elif (script_name == "cup-best_models_assessment"):
+        # produce scores and plots for the best 10 single configurations on the cup
         configs = read_csv_results("csvs/fine_gs.csv")['params'][:10]
-        best_models_assessment(configs)
+        scores = best_models_assessment(configs)
+        with open("jsons/best_models_assessment_scores.json", 'w') as f:
+            json.dump(scores, fp = f, indent = 4)
     
-    elif (experiment_name == "cup-ensemble_blind_pred"):
+    elif (script_name == "cup-ensemble_blind_pred"):
+        # make the cup blind predictions using the final ensemble model
         X_blind = load_blind_test_cup()
         with open('pkls/ens.pkl', 'rb') as pkl_file:
-            ens = pickle.load(pkl_file)
+            ens = pickle.load(pkl_file) # read the previously saved ensemble model
         preds = ens.predict(X_blind)
         df = pd.DataFrame(preds)
         df.index += 1
@@ -44,7 +51,8 @@ def main(experiment_name):
         df.to_csv(f, header=False)
         f.close()
 
-    elif (experiment_name == "cup-ensemble_assessment"):
+    elif (script_name == "cup-ensemble_assessment"):
+        # produce scores and plots for the ensemble model assessment on the cup
         params = read_csv_results("csvs/fine_gs.csv")['params'][:10]
         X_dev, y_dev = load_dev_set_cup()
         X_test, y_test = load_internal_test_cup()
@@ -62,49 +70,55 @@ def main(experiment_name):
         with open("jsons/ensemble_assessment_scores.json", 'w') as f:
             json.dump(scores, fp = f, indent = 4)
 
-    elif (experiment_name == "cup-ensemble_cv"):
+    elif (script_name == "cup-ensemble_cv"):
+        # perform cross validation on the cup ensemble model (10 best configurations)
         params = read_csv_results("csvs/fine_gs.csv")['params'][:10]
         X_dev, y_dev = load_dev_set_cup()
         ens = Ensemble(params, n_trials = 5)
         cv_results = ens.validate(X_dev, y_dev, k=5)
-        results_path = 'csvs/cv_ens_results.csv'
-        df = pd.DataFrame([cv_results])
-        df.to_csv(results_path)
+        with open("jsons/ensemble_cv_results.json", 'w') as f:
+            json.dump(cv_results, fp = f, indent = 4)
+        # results_path = 'jsons/ensemble_results.csv'
+        # df = pd.DataFrame([cv_results])
+        # df.to_csv(results_path)
 
-    elif (experiment_name == "cup-ensemble_final_fit"):
+    elif (script_name == "cup-ensemble_final_fit"):
+        # fit the ensemble with the whole cup training dataset
         params = read_csv_results("csvs/fine_gs.csv")['params'][:10]
         X_tr, y_tr = load_train_cup()
         ens = Ensemble(params, 5)    
         ens.fit(X_tr, y_tr)
-        save_obj(ens, "pkls/ens.pkl")
+        save_obj(ens, "pkls/ens.pkl") # save the ensemble model
 
-    elif (experiment_name == "cup-coarse_gs"):
+    elif (script_name == "cup-coarse_gs"):
+        # perform the coarse grid search for the cup
         X_dev_cup, y_dev_cup = load_dev_set_cup()
         with open("jsons/grid_searches.json") as json_gs:
             coarse_grid = ParameterGrid(json.load(json_gs).get("coarse"))
             grid_search_cv(grid=coarse_grid, X=X_dev_cup, y=y_dev_cup, k=5, results_path="csvs/coarse_gs.csv")
  
-    elif (experiment_name == "cup-fine_gs"):
+    elif (script_name == "cup-fine_gs"):
+        # perform the fine grid search for the cup
         X_dev_cup, y_dev_cup = load_dev_set_cup()
         with open("jsons/grid_searches.json") as json_gs:
             coarse_grid = ParameterGrid(json.load(json_gs).get("fine"))
             grid_search_cv(grid=coarse_grid, X=X_dev_cup, y=y_dev_cup, k=5, results_path="csvs/fine_gs.csv")
     
     else:
-        raise ValueError(f"Incorrect input. Experiment name must be one of {AVAILABLE_EXPERIMENTS}")
+        raise ValueError(f"Incorrect input. Script name must be one of {AVAILABLE_SCRIPTS}")
 
 if __name__ == "__main__":
-    AVAILABLE_EXPERIMENTS = [
+    AVAILABLE_SCRIPTS = [
         "monks-1", "monks-2", "monks-3", "monks-3reg", "cup-best_single", "cup-ensemble_pred",
         "cup-custom", "cup-coarse_gs", "cup-fine_gs", "cup-ensemble_assessment", "cup-ensemble_blind_pred",
         "cup-ensemble_cv", "cup-best_models_assessment", "cup-ensemble_final_fit"
         ]
     parser = argparse.ArgumentParser(description='Input an experiment name for ML project 22/23')
     parser.add_argument(
-        'experiment_name', type=str,
-        help=f'The name of the experiment. \ Must be one of: {AVAILABLE_EXPERIMENTS}') 
+        'script_name', type=str,
+        help=f'The name of the experiment. \ Must be one of: {AVAILABLE_SCRIPTS}') 
     args = parser.parse_args()
 
-    main(args.experiment_name)
+    main(args.script_name)
 
     

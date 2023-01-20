@@ -80,7 +80,6 @@ def best_models_assessment(configs):
         print(f"Running cup with the following configuration:\n{config}")
         X_train, y_train = load_dev_set_cup()
         net = NeuralNetwork(**config)
-        net.epochs = 10
 
         net.fit(X_train, y_train)
         score = net.score(X_test, y_test, ['mse', 'mee'])
