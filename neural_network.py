@@ -12,7 +12,7 @@ class NeuralNetwork:
     """
     A neural network class for classification or regression tasks.
 
-    Parameters:
+    Attributes:
         - activation_out (str): the activation function to use for the output layer. 
             Choices: 'identity', 'relu', 'leaky_relu', 'logistic', 'tanh', 'softplus', 'softmax'
         
@@ -230,8 +230,8 @@ class NeuralNetwork:
         
         return Y_train
 
-    # predict output for given input
     def _predict_outputs(self, X):
+        # predict output for given input
         Y = np.empty((X.shape[0], 1, self.n_outputs))
         # run network over all samples
         for i in range(X.shape[0]):
@@ -275,8 +275,8 @@ class NeuralNetwork:
 
         return EVALUATION_METRICS[metric](y_true=Y_true, y_pred=Y)
 
-    # add layer to network
     def _add(self, layer):
+        # add layer to network
         self.layers.append(layer)
 
     def _compose(self):
@@ -525,7 +525,7 @@ class NeuralNetwork:
             train_loss_not_reg /= n_samples
             train_loss /= n_samples
             train_score /= n_samples
-            
+
             self.train_losses.append(train_loss_not_reg)
             self.train_losses_reg.append(train_loss)
             self.train_scores.append(train_score)
@@ -546,8 +546,7 @@ class NeuralNetwork:
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)
                 break # jump out the for loop
-            #------------------
-    
+            #------------------  
     def predict(self, X):
         """
         Make predictions for the given data.

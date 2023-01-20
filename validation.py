@@ -129,7 +129,8 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
 def grid_search_cv(grid, X, y, k, results_path):
     """
     Perform a grid search cross-validation on a neural network.
-    The grid search explores a specified set of hyperparameters by training and evaluating the network for each combination of parameters.
+    The grid search explores a specified set of hyperparameters by training and evaluating the 
+    network for each combination of parameters.
     
     Parameters:
         - grid (dict): a dictionary containing the hyperparameters to explore and the possible values for each one.

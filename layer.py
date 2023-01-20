@@ -10,40 +10,38 @@ class Layer():
     It implements the methods needed to propagate input values to the units of
     the next layer and to backpropagate the errors coming from them.
 
-    Attributes
-    ----------
-    input: ndarray
-        Inputs values to the units of the layer
-    net: ndarray
-        Net input values to the units of the layer
-    output: ndarray
-        Outputs values of the units of the layer
-    fan_in: int
-        Number of inputs to each unit of the layer
-    fan_out: int
-        Number of outputs of each unit of the layer
-    activation: str
-        Activation function name
-    activation_fun: function
-        Activation function
-    activation_prime: function
-        Derivative of the activation function
-    weights: ndarray
-        Current weights values associated to the incoming links of the units
-    bias: ndarray
-        Current bias value associated to each unit
-    init_weights: ndarray
-        Initial weights values associated to the incoming links of the units
-    init_bias: ndarray
-        Initial bias value associated to each unit
-    deltas_weights: ndarray
-        Gradient of the error w.r.t the weights
-    deltas_bias: ndarray
-        Gradient of the error w.r.t the biases
-    velocity_w: ndarray
-        Weights velocity term to apply momentum
-    velocity_b: ndarray
-        Bias velocity term to apply momentum
+    Attributes:
+        - input (ndarray): inputs values to the units of the layer
+        
+        - net (ndarray): net input values to the units of the layer
+        
+        - output (ndarray): outputs values of the units of the layer
+        
+        - fan_in (int): number of inputs to each unit of the layer
+        
+        - fan_out (int): Number of outputs of each unit of the layer
+        
+        - activation (str): activation function name
+        
+        - activation_fun (function): activation function
+        
+        - activation_prime (function): derivative of the activation function
+        
+        - weights (ndarray): current weights values associated to the incoming links of the units
+        
+        - bias (ndarray): current bias value associated to each unit
+        
+        - init_weights (ndarray): initial weights values associated to the incoming links of the units
+        
+        - init_bias (ndarray): initial bias value associated to each unit
+        
+        - deltas_weights (ndarray): gradient of the error w.r.t the weights
+        
+        - deltas_bias (ndarray): gradient of the error w.r.t the biases
+        
+        - velocity_w (ndarray): weights velocity term to apply momentum
+        
+        - velocity_b (ndarray): bias velocity term to apply momentum
     """
 
     def __init__(self, fan_in, fan_out, activation, weights_dist, weights_bound):
@@ -64,12 +62,10 @@ class Layer():
         """
         Set layer's weights and biases.
 
-        Parameters
-        ----------
-        weights: ndarray
-            Weights values to set
-        bias: ndarray
-            Biases values to set
+        Parameters:
+            - weights (ndarray): weights values to set
+
+            - bias (ndarray): biases values to set
         """
 
         self.weights = weights
@@ -81,37 +77,34 @@ class Layer():
         """
         Initialize weights and biases.
 
-        Parameters
-        ----------
-        distribution: str
-            The distribution from which weights and biases are sampled.
-            If None 'Xavier' or 'He' initializations are used according
-            to the activation function of the layer.
-        bound: float
-            The bound of the interval from which weights and biases are sampled.
-            If distribution='uniform', weights and biases are uniformly 
-            distributed over the interval [bound, bound).
-            If distribution='normal' bound is the standard deviation of the
-            normal distribution from which weights and biases are sampled.
-            Only used when distribution is not None.
+        Parameters:
+            - distribution (str): the distribution from which weights and biases are sampled.
+                If None 'Xavier' or 'He' initializations are used according to the activation 
+                function of the layer.
+            
+            - bound (float): the bound of the interval from which weights and biases are sampled.
+                If distribution='uniform', weights and biases are uniformly distributed 
+                over the interval [bound, bound).
+                If distribution = 'normal' bound is the standard deviation of the
+                normal distribution from which weights and biases are sampled.
+                Only used when distribution is not None.
 
-        References
-        ----------
-        Glorot, Xavier, and Yoshua Bengio. "Understanding the difficulty of 
-        training deep feedforward neural networks." 
-        Proceedings of the thirteenth international conference on artificial 
-        intelligence and statistics. 
-        JMLR Workshop and Conference Proceedings, 2010.
+        References:
+            - Glorot, Xavier, and Yoshua Bengio. "Understanding the difficulty of 
+            training deep feedforward neural networks." 
+            Proceedings of the thirteenth international conference on artificial 
+            intelligence and statistics. 
+            JMLR Workshop and Conference Proceedings, 2010.
 
-        Bengio, Yoshua. "Practical recommendations for gradient-based training 
-        of deep architectures." 
-        Neural networks: Tricks of the trade.
-        Springer, Berlin, Heidelberg, 2012. 437-478.
+            - Bengio, Yoshua. "Practical recommendations for gradient-based training 
+            of deep architectures." 
+            Neural networks: Tricks of the trade.
+            Springer, Berlin, Heidelberg, 2012. 437-478.
 
-        He, Kaiming, et al. "Delving deep into rectifiers: Surpassing 
-        human-level performance on imagenet classification."
-        Proceedings of the IEEE international conference on computer vision.
-        2015.
+            - He, Kaiming, et al. "Delving deep into rectifiers: Surpassing 
+            human-level performance on imagenet classification."
+            Proceedings of the IEEE international conference on computer vision.
+            2015.
         """
 
         if distribution:
@@ -137,18 +130,16 @@ class Layer():
         """
         Update weights and biases with the accumulated deltas.
 
-        Parameters
-        ----------
-        learning_rate: float
-            Learning rate value
-        batch_size: int
-            Number of patterns in the batch
-        alpha: float
-            Momentum coefficient
-        lambd: float
-            L2 regularization coefficient
-        nesterov: bool
-            Wheter to apply Nesterov momentum
+        Parameters:
+            - learning_rate (float): learning rate value
+            
+            - batch_size (int): number of patterns in the batch
+            
+            - alpha (float): momentum coefficient
+            
+            - lambd (float): L2 regularization coefficient
+            
+            - nesterov (bool): wheter to apply Nesterov momentum
         """
 
         # normalize the accumulated deltas dividing by the batch size
@@ -181,15 +172,11 @@ class Layer():
         """
         Performs the forward pass.
 
-        Parameters
-        ----------
-        input_data: ndarray
-            Layer's inputs
+        Parameters:
+            - input_data (ndarray): layer's inputs
 
-        Returns
-        -------
-        output: ndarray
-            Layer's outputs
+        Returns:
+            - output (ndarray): layer's outputs
         """
 
         self.input = input_data
@@ -201,15 +188,11 @@ class Layer():
         """
         Performs the backward pass.
 
-        Parameters
-        ----------
-        delta_j: ndarray
-            Incoming error (from the units in the next layer j)
+        Parameters:
+            - delta_j (ndarray): incoming error (from the units in the next layer j)
 
-        Returns
-        -------
-        delta_i: ndarray
-            Outcoming error (from the units in the current layer i)
+        Returns:
+            - delta_i ((ndarray): Outcoming error (from the units in the current layer i)
         """
 
         act_prime = self.activation_prime(self.net)
