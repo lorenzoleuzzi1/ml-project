@@ -546,7 +546,7 @@ class NeuralNetwork:
             if self.no_improvement_count >= self.stopping_patience: # stopping criteria satisfied
                 self.set_weights(self.best_weights, self.best_bias)
                 break # jump out the for loop
-            #------------------  
+             
     def predict(self, X):
         """
         Make predictions for the given data.

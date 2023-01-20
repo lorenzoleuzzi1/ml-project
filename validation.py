@@ -22,7 +22,7 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
         - shuffle (bool): whether to shuffle the data before splitting it into folds. Default is True.
 
     Returns:
-        - results (list): a list of the result obtained in each iteration of the k-fold cross validation process.
+        - results (dict): a dict of the result obtained in the k-fold cross validation process.
     """
     if k <= 1:
         print('Number of folds k must be more than 1')

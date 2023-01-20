@@ -8,6 +8,17 @@ from validation import k_fold_cross_validation
 from utils import LOSSES, EVALUATION_METRICS
 
 class Ensemble:
+    """
+    Ensemble of Neural Networks
+
+    Attributes:
+        - models_params (list of dict): list of dictionaries, where each dictionary 
+            contains the parameters for instantiating a neural network.
+        
+        - n_trials (int): number of trials to run to obtain the ensemble's prediction.
+        
+        - models  (list): list of the neural network models in the ensemble
+    """
     def __init__(self, models_params, n_trials):
         self.models_params = models_params
         self.loss = self.models_params[0]['loss']
@@ -33,9 +44,19 @@ class Ensemble:
         self.models = []
     
     def fit(self, X_train, y_train, X_test = None, y_test = None):
-        """ Network's fit for each param's configuration in the model_params list
-            given to the ensamble object during initialization.
-            n_trials fits are made for each network.
+        """
+        Train the ensemble of neural networks for each param's configuration in the model_params list on 
+        the provided data
+        
+        Parameters:
+             - X_train (np.array): the training data.
+
+            - Y_train (np.array): the target data for the training set.
+
+            - X_test (np.array): the test data. Optional, if not provided, no validation score will be calculated.
+
+            - Y_test (np.array): the target data for the test set. Optional, if not provided, no validation score 
+                will be calculated.
         """
         self.fitted = True
         self.validation_flag = False
@@ -52,12 +73,14 @@ class Ensemble:
         val_scores = np.full(shape = (self.n_models, self.n_trials, self.max_epoch), fill_value = np.nan)
         self.best_epochs = np.full(shape = (self.n_models, self.n_trials), fill_value = np.nan)
 
+        # loop thru ensemble models
         for i in range(self.n_models):
             print(f"{i+1}/{self.n_models}")
             params =self.models_params[i]
             print(params)
             self.models.append([])
             
+            # loop thru the number of trials for each configuration
             for j in range(self.n_trials):
                 net = NeuralNetwork(**params)
                 net.fit(X_train, y_train, X_test, y_test)
@@ -126,8 +149,15 @@ class Ensemble:
         self.final_train_score = np.mean(self.best_train_scores_mean)
         self.finale_val_score = np.mean(self.best_val_scores_mean)
 
-    def predict(self, X_test):
-        """Returns ensemble's prediction on X_test
+    def predict(self, X):
+        """
+        Make the ensemble's predictions for the given data.
+        
+        Parameters:
+            - X (np.array): the data to make predictions for.
+
+        Returns:
+            - preds (np.array): ensemble's prediction for each sample in X
         """
         if not self.fitted:
             print('Ensemble has not been fitted yet')
@@ -135,7 +165,7 @@ class Ensemble:
         preds = []
         for i in range(self.n_models):
             for j in range(self.n_trials):
-                pred = self.models[i][j].predict(X_test)
+                pred = self.models[i][j].predict(X)
                 preds.append(pred)
 
         if self.classification:
@@ -146,8 +176,8 @@ class Ensemble:
                 
     
     def plot(self):
-        """Plots losses and scores curves of the ensemble.
-            All figures are saved in PDF format
+        """
+        Plots losses and scores curves of the ensemble. All figures are saved in PDF format.
         """
         if not self.fitted:
             print('Ensemble has not been fitted yet')
@@ -163,6 +193,7 @@ class Ensemble:
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
         plt.savefig('mean_final_losses.pdf', bbox_inches="tight")
+        # -------------------------
 
         # ------ mean and all models losses ------
         plt.figure()
@@ -185,6 +216,7 @@ class Ensemble:
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
         plt.savefig('mean_all_models_losses.pdf', bbox_inches="tight")
+        # ----------------------------------------
 
         # ------ plot for each model ------
         for i in range(0, self.n_models):
@@ -207,7 +239,8 @@ class Ensemble:
             plt.legend()
             plt.title(f'Model {i}')
             plt.savefig(f'model_{i}_losses.pdf', bbox_inches="tight")
-
+            # -----------------------------
+        # ----------------------------------------------------
 
         # ---------------------- SCORES ----------------------
         # ------ mean scores ------
@@ -219,6 +252,7 @@ class Ensemble:
         plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
         plt.legend()
         plt.savefig('mean_final_scores.pdf', bbox_inches="tight")
+        # -------------------------
 
         # ------ mean and all models scores ------
         plt.figure()         
@@ -241,6 +275,7 @@ class Ensemble:
         plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
         plt.legend()
         plt.savefig('mean_all_models_scores.pdf', bbox_inches="tight")
+        # ----------------------------------------
 
         # ------ plot for each model ------
         for i in range(0, self.n_models):
@@ -266,8 +301,18 @@ class Ensemble:
         
 
     def validate(self, X_train, y_train, k):
-        """ Model assessment through a k-fold cross validation for each model of the ensemble.
-            Returns a dictionary.
+        """ 
+        Model assessment through a k-fold cross validation for each model of the ensemble.
+        
+        Parameters: 
+            - X_train (np.array): the training data.
+        
+            - y_train (np.array): the target data for the training set.
+        
+            - k (int): the number of folds to use for cross validation.
+
+        Returns:
+            - results (dict): a dict of the result obtained in the k-fold cross validation process.
         """
         results = [] # list of dictionary returned from k-fold cross validation of each model
         
