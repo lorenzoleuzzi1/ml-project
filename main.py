@@ -61,12 +61,15 @@ def main(script_name):
         ens.fit(X_dev, y_dev, X_test, y_test)
         ens.plot()
         preds = ens.predict(X_test)
-        mse_score = LOSSES[ens.loss](y_test, preds)
-        mee_score = EVALUATION_METRICS[ens.evaluation_metric](y_test, preds)
-        scores = {ens.loss : mse_score, ens.evaluation_metric : mee_score}
+        test_mse_score = LOSSES[ens.loss](y_test, preds)
+        test_mee_score = EVALUATION_METRICS[ens.evaluation_metric](y_test, preds)
+        scores = {
+            f"training_{ens.loss}" : ens.final_train_loss, f"training_{ens.evaluation_metric}" : ens.final_train_score,
+            f"test_{ens.loss}" : test_mse_score, f"test_{ens.evaluation_metric}" : test_mee_score
+            }
         print(scores)
         
-        save_obj(preds, "pkls/internal_preds.pkl")
+        # save_obj(preds, "pkls/internal_preds.pkl")
         with open("jsons/ensemble_assessment_scores.json", 'w') as f:
             json.dump(scores, fp = f, indent = 4)
 
