@@ -73,14 +73,14 @@ class Ensemble:
         val_scores = np.full(shape = (self.n_models, self.n_trials, self.max_epoch), fill_value = np.nan)
         self.best_epochs = np.full(shape = (self.n_models, self.n_trials), fill_value = np.nan)
 
-        # loop thru ensemble models
+        # loop through ensemble models
         for i in range(self.n_models):
             print(f"{i+1}/{self.n_models}")
             params =self.models_params[i]
             print(params)
             self.models.append([])
             
-            # loop thru the number of trials for each configuration
+            # loop through the number of trials for each configuration
             for j in range(self.n_trials):
                 net = NeuralNetwork(**params)
                 net.fit(X_train, y_train, X_test, y_test)

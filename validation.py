@@ -37,7 +37,7 @@ def k_fold_cross_validation(network, X_train, y_train, k, shuffle=True):
     y_preds = []
     y_trues = []
 
-    # loop thru folds
+    # loop through folds
     for train_index, validation_index in kf.split(X_train, y_train):
         metrics = []
        
@@ -155,7 +155,7 @@ def grid_search_cv(grid, X, y, k, results_path):
     
     df_scores = pd.DataFrame(columns=[])
 
-    # loop thru each configuration in the grid search grid
+    # loop through each configuration in the grid search grid
     for i, config in enumerate(grid):
         print(f"{i+1}/{len(grid)}")
         # create a NeuralNetwork object with the configuration
