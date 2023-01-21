@@ -2,7 +2,7 @@ from neural_network import NeuralNetwork
 import matplotlib.pyplot as plt
 import pandas as pd
 import pickle as pkl
-import json
+import time
 
 def load_train_cup(): 
     CUP_TRAIN_CSV_PATH = './datasets/ML-CUP22-TR.csv'
@@ -62,9 +62,11 @@ def run_cup(config):
     X_test, y_test = load_internal_test_cup()
     net = NeuralNetwork(**config)
     net.verbose = True
-    
+
+    start = time.time()
     net.fit(X_train, y_train, X_test, y_test)
-    
+    print(f"Elapsed time: {time.time()-start}")
+
     scores = net.score(X_test, y_test, ["mse", "mee"])
     print(scores)
     plot_cup_curves(net, "cup")

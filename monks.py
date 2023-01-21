@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 import matplotlib.pyplot as plt
 from neural_network import NeuralNetwork
+import time
  
 def read_train_monks(monks_name, one_hot_encoding=True):
     MONKS_TRAIN_PATH = f"./datasets/{monks_name[:7]}.train"
@@ -58,8 +59,10 @@ def run_monks(config):
     X_train, y_train = read_train_monks(monks_name)
     X_test, y_test = read_test_monks(monks_name)
     net = NeuralNetwork(**config)
-    net.activation_out = 'tanh'
+
+    start = time.time()
     net.fit(X_train, y_train, X_test, y_test)
+    print(f"Elapsed time: {time.time()-start}")
     
     scores = net.score(X_test, y_test, ["accuracy", "mse", "mee"])
     print(scores)

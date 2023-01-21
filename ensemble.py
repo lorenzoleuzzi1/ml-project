@@ -17,7 +17,35 @@ class Ensemble:
         
         - n_trials (int): number of trials to run to obtain the ensemble's prediction.
         
-        - models  (list): list of the neural network models in the ensemble
+        - models  (list of NeuralNetwork): list of the neural network models in the ensemble.
+
+        - train_losses_trials_mean (list of float): a list of the mean of training losses for each epoch over the trials 
+        for the same model.
+
+        - val_losses_trials_mean (list of float): a list of the mean of training scores for each epoch over the trials
+        for the same model.
+
+        - train_scores_trials_mean (list of float): a list of the mean of validation losses for each epoch over the trials
+        for the same model.
+
+        - val_scores_trials_mean (list of float): a list of the mean of validation scores for each epoch over the trials
+        for the same model.
+
+        - train_losses__mean (list of float): a list of the mean of training losses for each epoch over the models.
+
+        - val_losses_mean (list of float): a list of the mean of training losses for each epoch over the models.
+
+        - train_scores_mean (list of float): a list of the mean of training losses for each epoch over the models.
+
+        - val_scores_mean (list of float): a list of the mean of training losses for each epoch over the models.
+
+        - final_train_loss (float): the mean of the best training losses.
+        
+        - final_val_loss (float): the mean of the best training scores.
+       
+        - final_train_score (float): the mean of the best validation losses.
+        
+        - final_val_score (float): the mean of the best validation scores.
     """
     def __init__(self, models_params, n_trials):
         self.models_params = models_params
