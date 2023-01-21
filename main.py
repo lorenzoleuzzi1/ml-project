@@ -81,9 +81,9 @@ def main(script_name):
         cv_results = ens.validate(X_dev, y_dev, k=5)
         with open("jsons/ensemble_cv_results.json", 'w') as f:
             json.dump(cv_results, fp = f, indent = 4)
-        # results_path = 'jsons/ensemble_results.csv'
-        # df = pd.DataFrame([cv_results])
-        # df.to_csv(results_path)
+        results_path = 'jsons/ensemble_cv_results.csv'
+        df = pd.DataFrame([cv_results])
+        df.to_csv(results_path)
 
     elif (script_name == "cup-ensemble_final_fit"):
         # fit the ensemble with the whole cup training dataset
