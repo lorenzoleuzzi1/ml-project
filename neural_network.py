@@ -69,6 +69,16 @@ class NeuralNetwork:
             Choices: 'normal', 'uniform'
         
         - weights_bound (float): the range for the distribution used to initialize the weights.
+
+        - train_losses (list of float): a list of training losses for each epoch
+        
+        - val_losses (list of float): a list of validation losses for each epoch
+        
+        - train_scores (list of float): a list of training scores for each epoch
+        
+        - val_scores (list of float): a list of validation scores for each epoch
+
+        - best_epoch (int): the number of the epoch with the best loss/score
     """
     def __init__(
         self, 

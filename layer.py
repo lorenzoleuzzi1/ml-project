@@ -11,37 +11,37 @@ class Layer():
     the next layer and to backpropagate the errors coming from them.
 
     Attributes:
-        - input (ndarray): inputs values to the units of the layer
+        - input (ndarray): inputs values to the units of the layer.
         
-        - net (ndarray): net input values to the units of the layer
+        - net (ndarray): net input values to the units of the layer.
         
-        - output (ndarray): outputs values of the units of the layer
+        - output (ndarray): outputs values of the units of the layer.
         
-        - fan_in (int): number of inputs to each unit of the layer
+        - fan_in (int): number of inputs to each unit of the layer.
         
-        - fan_out (int): Number of outputs of each unit of the layer
+        - fan_out (int): Number of outputs of each unit of the layer.
         
-        - activation (str): activation function name
+        - activation (str): activation function name.
         
-        - activation_fun (function): activation function
+        - activation_fun (function): activation function.
         
-        - activation_prime (function): derivative of the activation function
+        - activation_prime (function): derivative of the activation function.
         
-        - weights (ndarray): current weights values associated to the incoming links of the units
+        - weights (ndarray): current weights values associated to the incoming links of the units.
         
-        - bias (ndarray): current bias value associated to each unit
+        - bias (ndarray): current bias value associated to each unit.
         
-        - init_weights (ndarray): initial weights values associated to the incoming links of the units
+        - init_weights (ndarray): initial weights values associated to the incoming links of the units.
         
-        - init_bias (ndarray): initial bias value associated to each unit
+        - init_bias (ndarray): initial bias value associated to each unit.
         
-        - deltas_weights (ndarray): gradient of the error w.r.t the weights
+        - deltas_weights (ndarray): gradient of the error w.r.t the weights.
         
-        - deltas_bias (ndarray): gradient of the error w.r.t the biases
+        - deltas_bias (ndarray): gradient of the error w.r.t the biases.
         
-        - velocity_w (ndarray): weights velocity term to apply momentum
+        - velocity_w (ndarray): weights velocity term to apply momentum.
         
-        - velocity_b (ndarray): bias velocity term to apply momentum
+        - velocity_b (ndarray): bias velocity term to apply momentum.
     """
 
     def __init__(self, fan_in, fan_out, activation, weights_dist, weights_bound):
@@ -63,9 +63,9 @@ class Layer():
         Set layer's weights and biases.
 
         Parameters:
-            - weights (ndarray): weights values to set
+            - weights (ndarray): weights values to set.
 
-            - bias (ndarray): biases values to set
+            - bias (ndarray): biases values to set.
         """
 
         self.weights = weights
@@ -131,15 +131,15 @@ class Layer():
         Update weights and biases with the accumulated deltas.
 
         Parameters:
-            - learning_rate (float): learning rate value
+            - learning_rate (float): learning rate value.
             
-            - batch_size (int): number of patterns in the batch
+            - batch_size (int): number of patterns in the batch.
             
-            - alpha (float): momentum coefficient
+            - alpha (float): momentum coefficient.
             
-            - lambd (float): L2 regularization coefficient
+            - lambd (float): L2 regularization coefficient.
             
-            - nesterov (bool): wheter to apply Nesterov momentum
+            - nesterov (bool): wheter to apply Nesterov momentum.
         """
 
         # normalize the accumulated deltas dividing by the batch size
@@ -173,10 +173,10 @@ class Layer():
         Performs the forward pass.
 
         Parameters:
-            - input_data (ndarray): layer's inputs
+            - input_data (ndarray): layer's inputs.
 
         Returns:
-            - output (ndarray): layer's outputs
+            - output (ndarray): layer's outputs.
         """
 
         self.input = input_data
@@ -189,10 +189,10 @@ class Layer():
         Performs the backward pass.
 
         Parameters:
-            - delta_j (ndarray): incoming error (from the units in the next layer j)
+            - delta_j (ndarray): incoming error (from the units in the next layer j).
 
         Returns:
-            - delta_i ((ndarray): Outcoming error (from the units in the current layer i)
+            - delta_i ((ndarray): outcoming error (from the units in the current layer i).
         """
 
         act_prime = self.activation_prime(self.net)
