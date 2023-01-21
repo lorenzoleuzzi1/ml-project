@@ -108,8 +108,8 @@ ml-project
 ├── utils.py
 └── validation.py
 ```
-### Code implementation
-The three core classes that costitutes our code implementation are: `Layer`, `NeuralNetwork` and for the final model `Ensemble`. And they're defined as follows:
+### Code Implementation
+The three core classes that constitutes our code implementation are: `Layer`, `NeuralNetwork` and for the final model `Ensemble`. And they're defined as follows:
 
 `Layer`
 ```
