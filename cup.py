@@ -39,8 +39,8 @@ def load_internal_test_cup():
 
 def plot_cup_curves(net, name):
     plt.figure()
-    plt.plot(net.train_losses, label="Development", color="blue", linewidth=1.2)
-    plt.plot(net.val_losses, 'r--', label='Internal Test', linewidth=1.2)
+    plt.semilogy(net.train_losses, label="Development", color="blue", linewidth=1.2)
+    plt.semilogy(net.val_losses, 'r--', label='Internal Test', linewidth=1.2)
     plt.legend()
     plt.grid()
     plt.xlabel("Epochs")
@@ -48,8 +48,8 @@ def plot_cup_curves(net, name):
     plt.savefig(f"./plots/cup/{name}_loss.pdf", bbox_inches="tight")
 
     plt.figure()
-    plt.plot(net.train_scores, label="Development", color="blue", linewidth=1.2)
-    plt.plot(net.val_scores, 'r--', label="Internal Test", linewidth=1.2)
+    plt.semilogy(net.train_scores, label="Development", color="blue", linewidth=1.2)
+    plt.semilogy(net.val_scores, 'r--', label="Internal Test", linewidth=1.2)
     plt.legend()
     plt.grid()
     plt.xlabel("Epochs")

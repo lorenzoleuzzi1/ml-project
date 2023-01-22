@@ -43,7 +43,7 @@ def main(script_name):
         preds = ens.predict(X_blind)
         df = pd.DataFrame(preds)
         df.index += 1
-        f = open('TheEnsemblers_ML-CUP22-TS.csv', 'a')
+        f = open('Ensemblers_ML-CUP22-TS.csv', 'a')
         f.write('# Giulia Ghisolfi	Lorenzo Leuzzi	Irene Testa\n')
         f.write('# TheEnsemblers\n')
         f.write('# ML-CUP22\n')

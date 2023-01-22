@@ -220,7 +220,7 @@ class Ensemble:
         plt.xlabel('Epochs')
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
-        plt.savefig('mean_final_losses.pdf', bbox_inches="tight")
+        plt.savefig('plots/ensemble/mean_final_losses.pdf', bbox_inches="tight")
         # -------------------------
 
         # ------ mean and all models losses ------
@@ -243,7 +243,7 @@ class Ensemble:
         plt.xlabel('Epochs')
         plt.ylabel(f'Loss ({self.loss.upper()})')
         plt.legend()
-        plt.savefig('mean_all_models_losses.pdf', bbox_inches="tight")
+        plt.savefig('plots/ensemble/mean_all_models_losses.pdf', bbox_inches="tight")
         # ----------------------------------------
 
         # ------ plot for each model ------
@@ -266,7 +266,7 @@ class Ensemble:
             plt.ylabel(f'Loss ({self.loss.upper()})')
             plt.legend()
             plt.title(f'Model {i}')
-            plt.savefig(f'model_{i}_losses.pdf', bbox_inches="tight")
+            plt.savefig(f'plots/ensemble/model_{i}_losses.pdf', bbox_inches="tight")
             # -----------------------------
         # ----------------------------------------------------
 
@@ -279,7 +279,7 @@ class Ensemble:
         plt.xlabel('Epochs')
         plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
         plt.legend()
-        plt.savefig('mean_final_scores.pdf', bbox_inches="tight")
+        plt.savefig('plots/ensemble/mean_final_scores.pdf', bbox_inches="tight")
         # -------------------------
 
         # ------ mean and all models scores ------
@@ -302,7 +302,7 @@ class Ensemble:
         plt.xlabel('Epochs')
         plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
         plt.legend()
-        plt.savefig('mean_all_models_scores.pdf', bbox_inches="tight")
+        plt.savefig('plots/ensemble/mean_all_models_scores.pdf', bbox_inches="tight")
         # ----------------------------------------
 
         # ------ plot for each model ------
@@ -325,7 +325,7 @@ class Ensemble:
             plt.ylabel(f'Score ({self.evaluation_metric.upper()})')
             plt.legend()
             plt.title(f'Model {i}')
-            plt.savefig(f'model_{i}_scores.pdf', bbox_inches="tight")
+            plt.savefig(f'plots/ensemble/model_{i}_scores.pdf', bbox_inches="tight")
         
 
     def validate(self, X_train, y_train, k):

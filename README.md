@@ -1,5 +1,7 @@
 # Machine Learning (ML) project
-Final project for the Machine Learning course at University of Pisa, a.y. 2022/23. The project consists in implementing Neural Networks.
+Final project for the Machine Learning course at University of Pisa, a.y. 2022/23. 
+In this work we have implemented a feed-forward fully-connected Neural Network. We coded multiple variants of the Gradient Descent algorithm and tested them on the MONK's problems. To select the best model for the ML-CUP22 competition we performed a coarse-to-fine grained grid search over the hyper-parameters of the implemented Neural Network, using the k-fold cross validation technique. The final model we chose is an ensemble made by the 10 best hyper-parameters configurations.
+
 
 ### Installation and Usage ###
 `pip install -r requirements.txt`
@@ -23,7 +25,7 @@ The application allows to run different script using a basic command-line interf
 ```
 ml-project
 ├── README.md
-├── TheEnsemblers_ML-CUP22-TS.csv
+├── Ensemblers_ML-CUP22-TS.csv
 ├── csvs
 │   ├── coarse_gs.csv
 │   ├── coarse_gs_params_rank.csv
