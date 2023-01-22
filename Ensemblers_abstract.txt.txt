@@ -1,0 +1,5 @@
+In this work we have implemented a feed-forward fully-connected Neural Network. 
+We coded multiple variants of the Gradient Descent algorithm and tested them on the MONK's problems. 
+To select the best model for the ML-CUP22 competition we performed a coarse-to-fine grained grid search over 
+the hyper-parameters of the implemented Neural Network, using the k-fold cross validation technique. 
+The final model we chose is an ensemble made by the 10 best hyper-parameters configurations.
